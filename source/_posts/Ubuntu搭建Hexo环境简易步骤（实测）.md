@@ -24,7 +24,7 @@ Ubuntu14.04LTS
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;②tar.xz包：命令行：
         xz -d node-xxxx.tar.xz
           tar xvf node-xxxx.tar
-2. 设置node.js的环境变量：
+2. 设置node.js的环境变量：(为了全局使用node和npm等命令)
 <br/>
   1) sudo gedit /etc/profile
   <br/>2) 编辑profile文件，加入下列命令：
@@ -35,12 +35,22 @@ Ubuntu14.04LTS
           export NODE_PATH=$NODE_HOME/lib/node_modules
   3) 保存，退出
   <br/>4) 命令行执行：source /etc/profile<br/>
-3. 安装npm
-推荐这样：<br/>
+3. 安装npm（一般node.js会带有npm工具，先执行“npm -v”查看是否存在npm，没有时，再执行以下这步）
+
+    推荐这样：<br/>
         sudo apt-get install apmd
 <br/>也可以：<br/>
-sudo apt-get install curl<br/>
-curl http://npmjs.org/install.sh | sudo sh
+        sudo apt-get install curl<br/>
+        curl http://npmjs.org/install.sh | sudo sh
+    可选：给npm加个镜像（这里选择淘宝NPM镜像，[参考网址](https://npm.taobao.org/)）
+        npm install -g cnpm --registry=https://registry.npm.taobao.org
+
+4. 最后查看 node 和 npm 的版本，检查是否安装成功，否则重复以上步骤：
+        [cd 你的node安装目录下]{配好了系统环境变量后，这步可以忽略}
+        node -v
+        npm -v
+
+  结果输出版本号时，表示Node.js 和 npm的环境就搭好了！
 
 
 ### 安装Git
@@ -55,8 +65,10 @@ curl http://npmjs.org/install.sh | sudo sh
         mkdir blog
 2. cd到blog这个目录
         cd blog
-3. 在这个目录中安装复制生成 hexo 的配置信息
-        sudo npm install -g hexo  或者 npm install-g hexo
+3. 在这个目录中安装复制生成 hexo 的配置信息 （以下总有一条可以）
+      npm install hexo-cli -g 或者  sudo npm install -g hexo  或者 npm install -g hexo
+      > 注意：遇到 “npm ERROR！-13” 等错误信息，首先看看错误信息中是否存在“.npm/xxx/xxx  权限不足”的情况，如果有，则可以在用户主目录下找到 .npm 文件夹，将其删除，再执行 hexo的安装操作
+
 4. 初始化 hexo
         hexo init
 5. 生成静态页面
@@ -133,5 +145,6 @@ curl http://npmjs.org/install.sh | sudo sh
 
 ----
 ### 参考文章
+https://segmentfault.com/a/1190000002665530<br/>
 http://blog.fens.me/hexo-blog-github/<br/>
 http://www.jianshu.com/p/465830080ea9
