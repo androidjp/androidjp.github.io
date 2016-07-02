@@ -5,9 +5,9 @@
 # Site
 title: androidjp技术栈
 subtitle: androidjp技术栈
-description:
+description: 醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！
 author: Junpeng Wu
-language: zh-CN
+language: zh-Hans
 timezone:
 
 # URL
@@ -79,10 +79,4 @@ theme: next
 deploy:
   type: git
   repo: https://github.com/androidjp/androidjp.github.io.git
-  branch: writing
-
-
-
-
-
-
+  branch: master
