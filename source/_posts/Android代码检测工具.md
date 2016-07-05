@@ -10,16 +10,18 @@ tags:
 ---
 > 引言：努力提高代码质量是每一个开发人员必须具备的素质和自我要求。
 但是靠自己总会不小心遗漏一些细节，所以引入代码检测工具，应用到软件工程中，以此帮助大家养成良好的编程习惯，提升技能。
-
+  接下来，和大家一起分析Android相关的代码检测工具的用法。
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*IDE：Android Studio*<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*操作系统：Ubuntu*
+
 
 ### 代码检测工具分类
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;目前常用的Java代码检测工具有：AndroidLint、CheckStyle、FindBugs、PDM
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其中，AndroidLint 已经作为插件被集成到Android Studio中；CheckStyle 可以作为插件安装使用；FindBugs 和 PDM 对Android Studio的支持较差，没有可用的插件或插件存在一些问题，但可以利用Gradle生成代码检测报告。
 
+<!--more-->
 
 ### 代码检测工具的工作方式、功能
 

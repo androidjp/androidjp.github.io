@@ -33,8 +33,10 @@ Ubuntu14.04LTS
           export NODE_HOME=$HOME/Nodejs/node-v4.4.4-linux-x64
           export PATH=$NODE_HOME/bin:$PATH
           export NODE_PATH=$NODE_HOME/lib/node_modules
+
   3) 保存，退出
   <br/>4) 命令行执行：source /etc/profile<br/>
+<!--more-->
 3. 安装npm（一般node.js会带有npm工具，先执行“npm -v”查看是否存在npm，没有时，再执行以下这步）
 
     推荐这样：<br/>

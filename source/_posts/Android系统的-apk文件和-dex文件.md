@@ -17,9 +17,12 @@ apk文件本质上是jar或zip文件
 </p>
 
 2. apk文件目录结构
+
 <p>
 ![](http://i1.piimg.com/567571/f2e012e7f1fa25c5.png)
 </p>
+
+<!--more-->
 
     * META-INF -- Jar文件
     * res -- 资源文件
