@@ -7,22 +7,21 @@ tags:
 - Android
 - apk相关
 ---
+
+> 给大家简单介绍下 apk 和 dex 两种文件的概念以及他们的联系。
+
+<!--more-->
+
 ## .apk文件
 
 1. 概念
-<p>apk，全称Android Package，即Android安装包。<br/>
-通过apk文件直接传到Android模拟器或Android手机中执行即可安装。
-<br/>
+&emsp;&emsp;apk，全称Android Package，即Android安装包。
+（通过apk文件直接传到Android模拟器或Android手机中执行即可安装。）
 apk文件本质上是jar或zip文件
-</p>
 
 2. apk文件目录结构
 
-<p>
 ![](http://i1.piimg.com/567571/f2e012e7f1fa25c5.png)
-</p>
-
-<!--more-->
 
     * META-INF -- Jar文件
     * res -- 资源文件

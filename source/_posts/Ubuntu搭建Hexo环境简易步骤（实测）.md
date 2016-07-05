@@ -9,6 +9,12 @@ tags:
 - Ubuntu
 
 ---
+
+> 个人实测，以Ubuntu14.04LTS 为例，实现Hexo+github博客的搭建（**当中包含各种有用的小技巧哦！**）
+
+
+<!--more-->
+
 ## Ubuntu环境
 Ubuntu14.04LTS
 
@@ -36,7 +42,7 @@ Ubuntu14.04LTS
 
   3) 保存，退出
   <br/>4) 命令行执行：source /etc/profile<br/>
-<!--more-->
+
 3. 安装npm（一般node.js会带有npm工具，先执行“npm -v”查看是否存在npm，没有时，再执行以下这步）
 
     推荐这样：<br/>
