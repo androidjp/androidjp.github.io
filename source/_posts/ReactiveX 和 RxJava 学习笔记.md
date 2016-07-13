@@ -1,5 +1,5 @@
 ---
-title: Reactive 和 RxJava 学习笔记
+title: ReactiveX 和 RxJava 学习笔记
 date: 2016-07-12 17:43:00
 tags:
 - RxJava
