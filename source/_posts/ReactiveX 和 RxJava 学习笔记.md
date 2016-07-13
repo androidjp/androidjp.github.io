@@ -25,9 +25,9 @@ categories:
 ---
   可先通过图解总览大概：
   RxJava之观察者模式的基本运作过程，如下：
-  ![RxJava之观察者模式的基本运作过程]{http://i2.piimg.com/567571/e01494ea59380277.png}
+  ![RxJava之观察者模式的基本运作过程](http://i2.piimg.com/567571/e01494ea59380277.png)
   RxJava观察者模式顺序图，如下：
-  ![RxJava观察者模式顺序图]{http://i4.piimg.com/567571/1c2b91be67aab8a5.png}
+  ![RxJava观察者模式顺序图](http://i4.piimg.com/567571/1c2b91be67aab8a5.png)
 > 注意：`Subscribe<T>` 是实现 `Observable<T>` 和 `Subscription` 的一个抽象类，在调用`subscribe(params)`方法时，如果这个`params`类型为`Observer<T>`，则最终它会转成`Subscriber<T>`，同时，此方法会返回一个`Subscription`对象，用于调用`unsubscribe()`方法解绑。
 
 
@@ -334,7 +334,7 @@ Observable.just("this is your sign：")
     }
   ```
   最终得到结果为：
-  ![]{http://i1.piimg.com/567571/6f2f3e1300243da9.png}
+  ![](http://i1.piimg.com/567571/6f2f3e1300243da9.png)
 
 
 > 知识点：
