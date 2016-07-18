@@ -365,6 +365,7 @@ Observable.just("this is your sign：")
   * Repeat — 创建重复发射特定的数据或数据序列的Observable
   * Start — 创建发射一个函数的返回值的Observable
   * Timer — 创建在一个指定的延迟之后发射单个数据的Observable
+
 ### 2. 用于对Observable发射的数据进行变换的操作符：
   * Buffer — 缓存，可以简单的理解为缓存，它定期从Observable收集数据到一个集合，然后把这些数据集合打包发射，而不是一次发射一个
   * FlatMap — 扁平映射，将Observable发射的数据变换为Observables集合，然后将这些Observable发射的数据平坦化的放进一个单独的Observable，可以认为是一个将嵌套的数据结构展开的过程。
@@ -372,6 +373,7 @@ Observable.just("this is your sign：")
   * Map — 映射，通过对序列的每一项都应用一个函数变换Observable发射的数据，实质是对序列中的每一项执行一个函数，函数的参数就是这个数据项
   * Scan — 扫描，对Observable发射的每一项数据应用一个函数，然后按顺序依次发射这些值
   * Window — 窗口，定期将来自Observable的数据分拆成一些Observable窗口，然后发射这些窗口，而不是每次发射一项。类似于Buffer，但Buffer发射的是数据，Window发射的是Observable，每一个Observable发射原始Observable的数据的一个子集
+
 ### 3. 线程切换和控制相关操作符：
   * subscribeOn(Scheduler) — 指定事件的call方法以及以前的操作到一个线程中
   * observeOn(Scheduler) — 指定事件的call方法之后的操作（如：map(),onNext(),onCompleted(),onError()）到一个线程中【注意：不包括Subscriber.onStart()方法，该方法在默认它所在的线程中执行】

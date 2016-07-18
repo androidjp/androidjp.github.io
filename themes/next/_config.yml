@@ -3,7 +3,8 @@
 # ---------------------------------------------------------------
 
 # Put your favicon.ico into `hexo-site/source/` directory.
-favicon: /favicon.ico
+# http://i1.piimg.com/567571/3d6356e84dd5893a.png
+favicon: /bitbug_favicon.ico
 
 # Set default keywords (Use a comma to separate)
 keywords: "Hexo, NexT"
@@ -39,7 +40,7 @@ menu:
   # 标签页
   tags: /tags
   # 公益404
-  # commonweal: /404.html
+  commonweal: /404.html
 
 
 # Enable/Disable menu icons.
