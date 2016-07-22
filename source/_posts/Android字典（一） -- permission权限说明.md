@@ -8,6 +8,13 @@ tags:
 - Android
 - permission权限
 ---
+
+> 引言：整理的权限列表以及动态获取权限、权限申请结果监听。
+
+<!--more-->
+
+## 一、权限列表
+---
 * android.permission.**ACCESS_CHECKIN_PROPERTIES**
 允许读写访问"properties"表在checkin数据库中，改值可以修改上传
 * android.permission.**ACCESS_COARSE_LOCATION**
@@ -24,7 +31,6 @@ tags:
 允许程序使用SurfaceFlinger底层特性
 * android.permission.**ACCESS_WIFI_STATE**
 允许程序访问Wi-Fi网络状态信息
-<!--more-->
 * android.permission.**ADD_SYSTEM_SERVICE**
 允许程序发布系统级服务
 * android.permission.**BATTERY_STATS**
@@ -197,3 +203,29 @@ tags:
 允许程序写短信
 * android.permission.**WRITE_SYNC_SETTINGS**
 允许程序写入同步设置
+
+## 二、实用技巧
+---
+1. 动态获取某个权限（下面例子：动态获取*ACCESS_COARSE_LOCATION*权限）
+  ```
+//判断是否有权限
+if (ContextCompat.checkSelfPermission(this,
+        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//请求权限
+      ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+            MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+//判断是否需要 向用户解释，为什么要申请该权限
+    if(ActivityCompat.shouldShowRequestPermissionRationale(this,
+            Manifest.permission.READ_CONTACTS)) {
+        Toast.makeText(this, "shouldShowRequestPermissionRationale", Toast.LENGTH_SHORT).show();
+    }
+}
+  ```
+2. 申请权限结果监听方法
+  ```
+@Override
+public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]
+      grantResults) {
+  super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+}
+  ```
