@@ -1,6 +1,6 @@
 ---
 title: Android字典（一） -- permission权限说明
-date: 2016-07-20 09:05:00
+date: 2016-07-22 19:05:00
 categories:
 - Android
 - 字典
