@@ -182,7 +182,8 @@ RecListFragment collectionFragment;
   ```
   上面的结构大家应该都比较熟悉，那么，我测试后给大家列出几种情况下Activity和两个Fragment的生命周期方法执行情况：
   *  本Activity被startActivity()等方式启动：
-    ![](http://upload-images.jianshu.io/upload_images/2369895-54b2a04304e2f186.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+    ![](http://upload-images.jianshu.io/upload_images/2369895-0f3595eb8249ed44.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
   * 本Activity由于点击HOME、MENU等弹回桌面时：
      下图是Android N版本下点击MENU按键时的操作截图（类似平常我们长按HOME键弹出运行中程序）：
     ![](http://upload-images.jianshu.io/upload_images/2369895-c108a164f086f0f2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -200,6 +201,13 @@ RecListFragment collectionFragment;
   ![Fragment的生命周期](http://upload-images.jianshu.io/upload_images/2369895-3cf75cc2042a2e15.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
   ---
+11. 关于v4、v7、v13兼容包：
+  * **Android Support v4：**为了兼容Android1.6及更高版本而设计的。（eclipse新建工程时，都默认带有v4包）
+  * **Android Support v7：**为了兼容Android2.1及以上版本而设计的，但不包含更低，故如果不考虑1.6,我们可以采用再加上这个包，另外注意，v7是要依赖v4这个包的，即，两个得同时被包含。
+  * **Android Support v13：**为了Android 3.2及更高版本的，一般我们都不常用，平板开发中能用到。
+
+
 
 ### 感谢阅读～
+本篇文章将持续更新～
 喜欢的读者可以点个关注，本人将持续发布Android相关文章～
