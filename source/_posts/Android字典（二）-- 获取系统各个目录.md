@@ -8,16 +8,11 @@ tags:
 - Android系统目录
 ---
 
-## 一、Android系统的编译
----
- Android系统编译之后，生成三个镜像文件【都是用cpio打包，gzip压缩】
-* ramdisk.img 【文件系统：包含 /system, /bin 等目录。kernel启动时负责初始化】
-* system.img   【系统包 和 库文件 ， 挂载到 /system目录】
-* userdata.img【用户数据， 挂载到 /data目录】
+> 引言： 下面列出Android系统在编译打包后由镜像文件生成的Android系统各级主要目录，以及在App中获取各个目录的说明示例。
 
 <!--more-->
 
-## 二、Android系统目录结构
+## 一、Android系统目录结构
 ---
 * **/init  【系统启动文件】**
 * **/system**
@@ -71,7 +66,7 @@ tags:
 * ODEX
   *   从apk中提取出来的可运行文件，即原apk中classes.dex通过dex优化生成的一个单独存放的dex文件。启动应用时不需要再从apk包中提取dex，速度更快。还可以删除apk包中的dex减少体积。缺点是体积变大，而且升级某个给Odex的应用可能会出现问题。
 
-## 三、获取系统各个目录
+## 二、获取系统各个目录
 ---
 > 以包名为“com.androidjp.app”的应用示例实测得到以下结果，模拟器和真机结果一致。
 
