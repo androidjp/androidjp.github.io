@@ -168,7 +168,20 @@ if (!disallowIntercept && onInterceptTouchEvent(ev)) {
 * 子View不管可不可以点击（是否clickable），只要手势触摸到它的范围，就会激发其onTouchEvent事件
 * 当子View的enabled为false时，无论如何都不会执行onTouchListener.onTouch()方法、onClickListener.onClick()方法、onLongClickListener.onLongClick()方法等
 
-
+## 细节与注意点
+---
+1. 消费了Down事件的view称为‘目标View’，目标View可接收后续事件（此时，非目标view只要不去拦截它的后续事件，那非目标view不会接收后续事件）
+2. view或者viewGroup想要处理后续事件，就必须消费DOWN事件。当DOWN事件没有从父传到子的过程中没有被消耗过，那么他的后续MOVE事件和UP事件都将经过一个轮“V”字形传递过程后，回到Activity处，这时由Activity自己来接收和处理【也就是说，Activity自己觉得，我找不到一开始消耗DOWN事件的目标view，那我的后续事件肯定也找不到，所以我也不需要再往下分发MOVE和UP事件了，直接我自己来吧，处理得了就处理，处理不了就不管啦，dispatch到天上去】
+3. DOWN事件被子view消费了，但后续的MOVE事件被view的父亲viewgroup拦截，此时，ViewGroup将代替子view称为新一代目标view。【因为，有DOWN事件被消费过， 那么Activity就知道有个TargetView存在，那么，在外界有后续事件传进来时，Activity会将事件分发到下面来，让这个TargetView（Activity不知道它是谁，只知道它存在）去获取并消费它，此时，ViewGroup去拦截这些后续事件，那么，首先：①targetView是子View，是事件要去找的目标，但是，找不到（因为它被拦截了），②于是，它选择暂时让拦截了它的父ViewGroup充当起TargetView】
+4. UP事件与MOVE事件等都属于DOWN的后续事件，情况与总结三类似。
+5. 如果总结三的“拦截”不存在，那么，子View就会一直被当做TargetView，不管它处不处理后续事件，这些后续事件都不会给别人处理了（“V”过程，就算返回给上层ViewGroup（不包括Activity），这时，也是路过而已，上层不会去处理它的）
+6. 从<u>第二点</u>和<u>第五点</u>中得出的，只要子view没有消费touch事件，在分发调用返回时，最终会给回Activity本身，让Activity自己来处理，不管Activity有没有能力消费此事件。
+7. 子view调用 `getParent().requestDisallowInterceptTouchEvent(true)`方法请求父类禁止拦截事件，那么这个方法会递归地请求所有的父类都禁止拦截事件（也就是让上层都收手）。而如果在Down事件的时候只是请求父View禁止拦截但子view本身又不消费Down事件（相当于，我叫爸爸别去管这件事，而我自己又不想管这件事，最终，这件事和后续的事都不会再给爸爸和我管了，Activity一怒之下自己管了），虽然父View不再拦截了，但后续事件也接收不到了(这个拦不拦截没有多大的意义，因为没有消费down事件，所以并不是目标view了，事件也就传递不到它了)。
+8. 如果两个View不是包含关系，而是重叠关系，比如：viewA压在viewB上面， 那么，上层的ViewA先拿到事件，如果消费了，那么事件不会传给viewB，否则，事件返回给调用处，接着再传递给viewB。
+9.
+  * 父类的onTouchEvent方法要想执行，要么是等所有的子View都不消费Down事件，要么是父View把事件拦截。
+  * 如果子类消费了Down事件，而父View又想处理这个事件，则父View可以在dispatchTouchEvent方法处理touch事件
+  * 如果子View请求了禁止父View拦截，且父View还想要拦截的话，可在父View的dispatchTouchEvent方法中不调用super.dispatchTouchEvent则把事件拦截了
 
 ## 用法举例
 ---
