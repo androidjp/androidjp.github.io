@@ -8,6 +8,7 @@ tags:
 - Android
 - MVP架构
 ---
+> 下面是本人对 MVP 架构 的一些理解。 
 
 <!--more-->
 
