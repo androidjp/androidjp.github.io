@@ -182,8 +182,8 @@ toc:
 
 sidebar:
   # Sidebar Position, available value: left | right (only for Pisces | Gemini).
-  position: left
-  #position: right
+  # position: left
+  position: right
 
   # Sidebar Display, available value (only for Muse | Mist):
   #  - post    expand on posts automatically. Default.
@@ -350,8 +350,9 @@ font:
 
 # MathJax Support
 mathjax:
-  enable: false
-  per_page: false
+  enable: true
+  per_page: true
+  mhchem: true
   cdn: //cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML
 
 # Han Support docs: https://hanzi.pro/
@@ -708,6 +709,9 @@ canvas_nest: false
 # three_waves
 three_waves: false
 
+# Fireworks
+fireworks: true
+
 # canvas_lines
 canvas_lines: false
 
@@ -720,9 +724,9 @@ canvas_sphere: false
 # alpha: The transparency of the ribbon.
 # zIndex: The display level of the ribbon.
 canvas_ribbon:
-  enable: false
+  enable: true
   size: 300
-  alpha: 0.6
+  alpha: 0.2
   zIndex: -1
 
 # Script Vendors.
@@ -811,7 +815,7 @@ vendors:
   # https://github.com/revir/need-more-share2
   needMoreShare2:
 
-
+    
 # Assets
 css: css
 js: js
