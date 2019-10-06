@@ -6,6 +6,7 @@
 title: jpuneng技术栈
 subtitle: 技术时代，舍我其谁
 description: 醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！
+keywords: "Java, Mevn, Python, Go"
 author: Junpeng Wu
 language: zh-Hans
 timezone:
@@ -81,3 +82,10 @@ deploy:
   type: git
   repo: https://github.com/androidjp/androidjp.github.io.git
   branch: master
+
+# Search
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 10000
