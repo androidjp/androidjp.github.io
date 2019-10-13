@@ -6,16 +6,16 @@
 title: jpuneng技术栈
 subtitle: 技术时代，舍我其谁
 description: 醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！
-keywords: "Java, Mevn, Python, Go"
-author: Junpeng Wu
+keywords: "Java, Vue.js, Python, Go"
+author: Jasper Wu
 language: zh-Hans
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://androidjp.cn
+url: http://jpuneng.cn
 root: /
-permalink: :year/:month/:day/:title/
+permalink: :title/
 permalink_defaults:
 
 # Directory

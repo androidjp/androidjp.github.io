@@ -1,2 +1,2 @@
 # androidjp.github.io
-Blog from Junpeng Wu .Main about Android , Java and so on.
+Blog from Jasper Wu .Main about Android , Java and so on.
