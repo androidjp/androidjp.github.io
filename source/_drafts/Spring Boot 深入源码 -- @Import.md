@@ -10,7 +10,7 @@ tags:
 # @Import的作用
 允许通过它引入 `@Configuration` 注解的类 (java config)， 引入`ImportSelector`接口(这个比较重要， 因为要通过它去判定要引入哪些`@Configuration`) 和 `ImportBeanDefinitionRegistrar` 接口的实现，也包括 `@Component`注解的普通类。
 
-看看其源码注释：
+看看其源码以及注释（摘自 spring-context-5.1.8.RELEASE）：
 ```
 /**
  * Indicates one or more {@link Configuration @Configuration} classes to import.
@@ -42,12 +42,11 @@ tags:
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Import {
-
-    /**
-     * {@link Configuration}, {@link ImportSelector}, {@link ImportBeanDefinitionRegistrar}
-     * or regular component classes to import.
-     */
-    Class<?>[] value();
+	/**
+	 * {@link Configuration}, {@link ImportSelector}, {@link ImportBeanDefinitionRegistrar}
+	 * or regular component classes to import.
+	 */
+	Class<?>[] value();
 
 }
 ```
@@ -55,3 +54,5 @@ public @interface Import {
 在Spring 3.0 以前，创建Bean可通过xml配置文件和扫描特定包下的类 来达到类注入Spring IoC容器的效果。而在Spring 3.0 之后，提供了所谓了 Java Config 的方式，也就是可以通过java代码的形式去注入类，将IOC容器里Bean的元信息以java代码的方式进行描述。我们可以通过`@Configuration`与`@Bean`这两个注解配合使用来将原来配置在xml文件里的bean通过java代码的方式进行描述。
 
 # 从源码看@Import的处理原理
+通过上面贴出来的`@Import` 源码，可以了解到它是配合`Configuration`,`ImportSelector`以及`ImportBeanDefinitionRegistrar`来使用的。
+
