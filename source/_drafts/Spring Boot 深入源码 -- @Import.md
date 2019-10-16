@@ -170,3 +170,65 @@ public class Service02BeanDefinitionRegistrar implements ImportBeanDefinitionReg
 public class Service01 {}
 ```
 最终能够得到`service01` 和 `service00000002`。
+
+实际上，其作用是：在项目启动时，全局扫描`@Import`，将其中的类进行Bean注入，注入过程中发现是`ImportBeanDefinitionRegistrar`的实现类，则会给到xxx 执行，以注入满足我们自定义注入规则的类。
+
+
+下面再看看`ImportSelector`源码：
+```
+/**
+ * Interface to be implemented by types that determine which @{@link Configuration}
+ * class(es) should be imported based on a given selection criteria, usually one or
+ * more annotation attributes.
+ *
+ * <p>An {@link ImportSelector} may implement any of the following
+ * {@link org.springframework.beans.factory.Aware Aware} interfaces,
+ * and their respective methods will be called prior to {@link #selectImports}:
+ * <ul>
+ * <li>{@link org.springframework.context.EnvironmentAware EnvironmentAware}</li>
+ * <li>{@link org.springframework.beans.factory.BeanFactoryAware BeanFactoryAware}</li>
+ * <li>{@link org.springframework.beans.factory.BeanClassLoaderAware BeanClassLoaderAware}</li>
+ * <li>{@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware}</li>
+ * </ul>
+ *
+ * <p>{@code ImportSelector} implementations are usually processed in the same way
+ * as regular {@code @Import} annotations, however, it is also possible to defer
+ * selection of imports until all {@code @Configuration} classes have been processed
+ * (see {@link DeferredImportSelector} for details).
+ *
+ * @author Chris Beams
+ * @since 3.1
+ * @see DeferredImportSelector
+ * @see Import
+ * @see ImportBeanDefinitionRegistrar
+ * @see Configuration
+ */
+public interface ImportSelector {
+
+	/**
+	 * Select and return the names of which class(es) should be imported based on
+	 * the {@link AnnotationMetadata} of the importing @{@link Configuration} class.
+	 */
+	String[] selectImports(AnnotationMetadata importingClassMetadata);
+
+}
+```
+它的作用也是可以给我们自定义想要注入哪些bean 类型，配置起来更简单，如以下例子：
+```
+public class AAAImportSelector implements ImportSelector {
+    @Override
+    public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+        return new String[]{Service02.class.getName()};
+    }
+}
+```
+
+如果混用三者，其加载顺序为：
+1. 所有`@Import({xxx})`中的`ImportSelector`实现类；
+2. 所有`@Import({xxx})`中的`ImportBeanDefinitionRegistrar`实现类；
+3. `@Import({Service02.class})`中的 `Service02`类；
+4. 类内部的带有`@Bean`的方法；
+5. 对下一个`@Component/@Configuration`修饰的类循环第3、4步。
+
+# 跟着源码的步伐
+`refresh` --> `ConfigurationClassParser`
