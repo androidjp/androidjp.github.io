@@ -223,12 +223,16 @@ public class AAAImportSelector implements ImportSelector {
 }
 ```
 
-如果混用三者，其加载顺序为：
-1. 所有`@Import({xxx})`中的`ImportSelector`实现类；
-2. 所有`@Import({xxx})`中的`ImportBeanDefinitionRegistrar`实现类；
-3. `@Import({Service02.class})`中的 `Service02`类；
-4. 类内部的带有`@Bean`的方法；
-5. 对下一个`@Component/@Configuration`修饰的类循环第3、4步。
+如果混用三者，加以分析Spring Boot启动上下文，其加载顺序为：
+1. Application的 `main`方法中的 `SpringApplication.run(...)`；
+2. 所有`@Import({xxx})`中的`ImportSelector`实现类；
+3. 所有`@Import({xxx})`中的`ImportBeanDefinitionRegistrar`实现类；
+4. 所有 `ApplicationContextAware` 的实现类的 `setApplicationContext(...)`方法；
+5. 所有`@Import({xxx})`中的`ImportSelector`实现类中想要注入的类的无参构造器；
+6. 所有`@Import({Service02.class})`中的 `Service02`类的构造器；
+7. 类内部的带有`@Bean`的方法；
+8. 所有`@Import({xxx})`中的`ImportBeanDefinitionRegistrar`实现类中想要注入的类的无参构造器；
+9.  对下一个`@Component/@Configuration`修饰的类循环第5、6、7、8步。（注意：这里不是优先执行`@Configuration`后执行`@Component`, 而是按照类名称字典排序来顺序扫描的。）
 
 # 跟着源码的步伐
 `refresh` --> `ConfigurationClassParser`
