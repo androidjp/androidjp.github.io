@@ -40,15 +40,15 @@ categories:
   总的来说，只有在接受函数式接口的地方才可以使用Lambda表达式。
   ```mermaid
   graph LR
-  A["如Comparable和Runnable和Callable等函数式接口"]
-  B["自定义的只有一个方法的接口实现"]
-  E["jdk8自带的一些常用的函数式接口"]
-  E1["Predicate"]
-  E2["Function<T,R>"]
-  E3["Supplier"]
-  E4["Consumer"]
-  E5["BinaryOperatory"]
-  C["Lambda"]
+  A[如Comparable和Runnable和Callable等函数式接口]
+  B[自定义的只有一个方法的接口实现]
+  E[jdk8自带的一些常用的函数式接口]
+  E1[Predicate]
+  E2[Function T,R]
+  E3[Supplier]
+  E4[Consumer]
+  E5[BinaryOperatory]
+  C[Lambda]
   A --> C
   B --> C
   E1 --- E
@@ -57,25 +57,6 @@ categories:
   E4 --- E
   E5 --- E
   E --> C
-  ```
-  ```mermaid
-    graph TB
-    start(开始)-->inputA[输入用户名密码]
-    inputA-->opA{数据库查询子类}
-    opA-->conditionA{是否有此用户}
-    conditionA--yes-->conditionB{密码是否正确}
-    conditionA--no-->inputA
-    conditionB--yes-->opB[读入用户信息]
-    conditionB--no-->inputA
-    opB-->en(登录)
-  ```
-  ```mermaid
-  graph LR;
-  A --> B;
-  ```
-  ```mermaid
-  graph LR
-  A --> B
   ```
 * 一些Jdk8的lambda语法糖：
   ```
