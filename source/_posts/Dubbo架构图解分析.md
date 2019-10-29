@@ -60,7 +60,7 @@ categories:
 ## 升级性
 当服务集群规模进一步扩大，带动IT治理结构进一步升级，需要实现动态部署，进行流动计算，现有分布式服务架构不会带来阻力。下图是未来可能的一种架构：
 
-![](/images/dubbo-architecture-future.jpg)
+![](/images/dubbo/dubbo-architecture-future.jpg)
 
 节点角色说明：
 
