@@ -7,12 +7,12 @@ categories:
 tags:
 - JVM
 ---
-![](/images/jvm/1.png)
+![](../images/jvm/1.png)
 <!--more-->
 # 程序计数器
 作用：记录下一条jvm指令的执行地址
 
-![](/images/jvm/2.png)
+![](../images/jvm/2.png)
 
 首先，程序计数器会读取第一条待执行指令的地址。
 
@@ -27,7 +27,7 @@ tags:
 # 虚拟机栈
 Java Virtual Machine Stacks
 
-![](/images/jvm/3.png)
+![](../images/jvm/3.png)
 * 虚拟机栈：每个线程运行需要的内存空间。
 * 栈帧：
   * 是每一个栈由多个栈帧（Frame）组成；
@@ -35,7 +35,7 @@ Java Virtual Machine Stacks
 * 每个线程只能有一个活动栈帧，对应着正在执行的那个方法。
 * 每一个方法在被调用完毕后，其栈帧会出栈，从而释放掉其占用的内存。
 
-![](/images/jvm/4.png)
+![](../images/jvm/4.png)
 
 ## 相关问题
 1. 垃圾回收是否涉及栈内存？
@@ -174,7 +174,7 @@ Eden Space:
 ```
 jconsole
 ```
-![](/images/jvm/6.png)
+![](../images/jvm/6.png)
 
 ### 使用 jvisualvm
 命令
@@ -191,7 +191,7 @@ jvisualvm
 方法区在虚拟机启动时被创建，逻辑上，是堆的组成部分(当然，是不是堆里的一部分，是得看不同版本的JVM上的实现方式，比如：Oracle hotspot JVM，在JDK8以前，方法区的实现叫做“永久代”，这个永久代就是heap的一部分， 而到了JDK8，没有了“永久代”，取而代之的是“元空间”，这个“元空间”用的就不是堆的内存了，而是用的本地内存（操作系统内存）)。
 
 以下，是HotSpot JVM在1.6 和 1.8 的内存结构差别图：
-![](/images/jvm/7.png)
+![](../images/jvm/7.png)
 
 ## 方法区内存溢出
 > * 1.8 以前会导致永久代内存溢出
@@ -586,9 +586,9 @@ Demo1_9.nio              avgt    5  6083767360.800 ± 1461697630.892  ns/op
 ```
 事实证明，用Direct Memory的确会比单纯用Java内存做缓存要快一些。
 
-![](/images/jvm/8.png)
+![](../images/jvm/8.png)
 
-![](/images/jvm/9.png)
+![](../images/jvm/9.png)
 
 ## 直接内存溢出问题
 我们运行以下的代码，制造内存溢出的情况：
@@ -631,7 +631,7 @@ public class Demo1_26 {
 }
 ```
 当分配完毕，打开任务管理器，发现多了一个Java进程，并多了1G的内存占用：
-![](images/jvm/10.png)
+![](../images/jvm/10.png)
 之后，当回车，释放内存之后，这个1G的内存随之释放了。为什么呢？不是说系统内存的释放不受JVM的GC行为影响吗？
 
 
