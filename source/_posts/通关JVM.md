@@ -7,8 +7,12 @@ categories:
 tags:
 - JVM
 ---
+
+
 ![](../images/jvm/1.png)
 <!--more-->
+
+
 # 程序计数器
 作用：记录下一条jvm指令的执行地址
 
@@ -393,7 +397,7 @@ public static void main(String[] args) {
 }
 ```
 
-#### 为什么1.8之后，会将StringTable从永久代里头转移到堆内存中呢？
+### 为什么1.8之后，会将StringTable从永久代里头转移到堆内存中呢？
 因为 永久代内存中的对象，是只会在full GC时，才会被进行垃圾回收，而这个full GC的触发，又需要老年代的空间不足时，才会触发，所以触发时机晚。而这个StringTable又各种被频繁使用，所以应该是需要更频繁地垃圾回收的。所以挪到堆中，触发GC的时机更容易。
 
 
@@ -662,3 +666,111 @@ public class Demo1_27 {
     }
 }
 ```
+
+我们可以从`ByteBuffer`源码看起：
+1. 首先，`ByteBuffer`的 `allocateDirect()`方法会新建一个`DirectByteBuffer`
+    ```
+    public static ByteBuffer allocateDirect(int capacity) {
+        return new DirectByteBuffer(capacity);
+    }
+    ```
+2. 然后，进入看看DirectByteBuffer的构造器，即可发现，原来里头调用了`unsafe.allocateMemory`
+    ```
+    // package-private
+    DirectByteBuffer(int cap) {
+            super(-1, 0, cap, cap);
+            boolean pa = VM.isDirectMemoryPageAligned();
+            int ps = Bits.pageSize();
+            long size = Math.max(1L, (long)cap + (pa ? ps : 0));
+            Bits.reserveMemory(size, cap);
+
+            long base = 0;
+            try {
+                base = unsafe.allocateMemory(size);
+            } catch (OutOfMemoryError x) {
+                Bits.unreserveMemory(size, cap);
+                throw x;
+            }
+            unsafe.setMemory(base, size, (byte) 0);
+            if (pa && (base % ps != 0)) {
+                // Round up to page boundary
+                address = base + ps - (base & (ps - 1));
+            } else {
+                address = base;
+            }
+            cleaner = Cleaner.create(this, new Deallocator(base, size, cap));
+            att = null;
+    }
+    ```
+3. 好，我们注意看倒数第三行的`cleaner`，它是`Cleaner.create(....)`得到的，看看里头是什么：
+    ```
+    public class Cleaner extends PhantomReference<Object> {
+        ....
+        private Cleaner(Object var1, Runnable var2) {
+            super(var1, dummyQueue);
+            this.thunk = var2; // 设置好 回调函数
+        }
+
+        public static Cleaner create(Object var0, Runnable var1) {
+            return var1 == null ? null : add(new Cleaner(var0, var1));
+        }
+
+        public void clean() {
+            if (remove(this)) {
+                try {
+                    // 执行回调函数 的 run()
+                    this.thunk.run();
+                } catch (final Throwable var2) {
+                    AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                        public Void run() {
+                            if (System.err != null) {
+                                (new Error("Cleaner terminated abnormally", var2)).printStackTrace();
+                            }
+
+                            System.exit(1);
+                            return null;
+                        }
+                    });
+                }
+
+            }
+        }
+    }
+    ```
+    ```
+    private static class Deallocator implements Runnable {
+
+        private static Unsafe unsafe = Unsafe.getUnsafe();
+
+        private long address;
+        private long size;
+        private int capacity;
+
+        private Deallocator(long address, long size, int capacity) {
+            assert (address != 0);
+            this.address = address;
+            this.size = size;
+            this.capacity = capacity;
+        }
+
+        public void run() {
+            if (address == 0) {
+                // Paranoia
+                return;
+            }
+            unsafe.freeMemory(address);
+            address = 0;
+            Bits.unreserveMemory(size, capacity);
+        }
+
+    }
+    ```
+4. 看了以上源码，我们知道，首先，`Cleaner`是一个虚引用的子类，会在target对象被回收时，被调用其`clean()`方法；然后，在初始化`Cleaner`对象时，传入了一个回调 `Deallocator`类，是Runnable的是实现类，其`run()`方法就是去让`unsafe`对象释放系统内存。
+
+
+总结：`ByteBuffer`的实现类 内部使用`Cleaner`虚引用来检测 其自身，一旦 `ByteBuffer`被垃圾回收，那么就会由 `ReferenceHandler`线程通过 `Cleaner`的`clean`方法调用 `freeMemory`来释放直接内存。
+
+## 什么情况会释放不了直接内存？
+当我们使用了`-XX:+DisableExplicitGC` 禁止显式的GC调用，此时，如果我们使用了一个`ByteBuffer`对象， 然后，不用他了，让他变成`null`，此时，即使我们显式调用`System.gc();`这样的Full GC trigger命令，都是不会生效的，直接内存依然没被释放。
+
+那么，我们可以怎么做呢？ 直接反射得到`Unsafe`对象，调用其 `freeMemory()`即可。
