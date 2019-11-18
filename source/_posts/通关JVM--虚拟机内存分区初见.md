@@ -1,5 +1,5 @@
 ---
-title: 通关JVM
+title: 通关JVM--虚拟机内存分区初见
 date: 2019-11-03 18:26:00
 categories:
 - Java

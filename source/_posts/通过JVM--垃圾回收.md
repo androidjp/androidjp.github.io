@@ -326,6 +326,44 @@ Full GC 的STW时间更长（因为用的是标记+整理/清除 算法，而且
 ## GC相关JVM参数
 看另一篇笔记。
 
+## GC分析例子
+用以下vm参数去跑一个空的main方法：
+```
+-Xms20M -Xmx20M -Xmn10M -XX:+UseSerialGC -XX:+PrintGCDetails -verbose:gc
+```
+> 其中：
+> * `+UseSerialGC`: 串行，Young区 和 Old区都使用串行，使用复制算法回收，逻辑简单高效，无线程切换开销
+
+得到的打印结果是：
+```
+Heap
+ def new generation   total 9216K, used 2845K [0x00000000fec00000, 0x00000000ff600000, 0x00000000ff600000)
+  eden space 8192K,  34% used [0x00000000fec00000, 0x00000000feec75e0, 0x00000000ff400000)
+  from space 1024K,   0% used [0x00000000ff400000, 0x00000000ff400000, 0x00000000ff500000)
+  to   space 1024K,   0% used [0x00000000ff500000, 0x00000000ff500000, 0x00000000ff600000)
+ tenured generation   total 10240K, used 0K [0x00000000ff600000, 0x0000000100000000, 0x0000000100000000)
+   the space 10240K,   0% used [0x00000000ff600000, 0x00000000ff600000, 0x00000000ff600200, 0x0000000100000000)
+ Metaspace       used 3374K, capacity 4496K, committed 4864K, reserved 1056768K
+  class space    used 369K, capacity 388K, committed 512K, reserved 1048576K
+```
+其中：
+* `def new generation`：新生代，总大小 9216k（9MB），为什么呢？ 因为 Eden区和Survivor区默认比例是`8:1`，而Survivor to 区被认为是不能用的1MB，所以剩下的总大小就是9MB；
+* `tenured generation`：老年代。总大小10MB，还没有被使用到；
+* `Metaspace`：元空间
+
+好，那如果我们在main方法中初始化一些对象，看看整个过程：
+![](../images/jvm/21.png)
+
+有趣的是，如果我们一开始就给他一个大于等于8MB的对象，那么，它会发现Eden区就算GC也是放不下的，于是他直接选择将对象放到老年代，不触发GC。
+![](../images/jvm/22.png)
+如果再来一个大对象，那就OOM了：
+![](../images/jvm/23.png)
+
+那如果用一个线程去塞两个大对象会怎么样？
+![](../images/jvm/24.png)
+
 # 4. 垃圾回收器
+
+
 
 # 5. 垃圾回收调优
