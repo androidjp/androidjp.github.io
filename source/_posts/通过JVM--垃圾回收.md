@@ -441,5 +441,45 @@ GC线程对于CPU占用，没用并行这么高，但是，如果考虑到少了
 ## G1
 定义：Garbage First
 
+背景：
+* 2004 论文发布
+* 2009 JDK6u14 体验
+* 2012 JDK 7u4 官方支持
+* 2017 JDK 9 默认（取代了CMS回收器）
+
+适用场景：
+* 同时注重吞吐量(Throughput) 和 低延迟(Low Latency)，默认暂停目标是200ms，增大暂停目标，会提高吞吐量；
+* 超大堆内存，会将堆划分为多个大相等的Region；
+* 整体上是 ‘标记-整理’算法，两个区域之间是复制算法；
+
+相关参数：
+* `-XX:+UseG1GC`：启用G1GC（JDK8默认不启用）
+* `-XX:G1HeapRegionSize=size`：设置上述的`Region`的大小，必须是2的N次幂
+* `-XX:MaxGCPauseMillis=time`：最大暂停时间
+
+
+![](../images/jvm/28.png)
+![](../images/jvm/29.png)
+![](../images/jvm/30.png)
+![](../images/jvm/31.png)
+
+## Full GC
+* SerialGC
+  * 新生代内存不足发生的垃圾收集- minor gc
+  * 老年代内存不足发生的垃圾收集- full ge
+* ParallelGC
+  * 新生代内存不足发生的垃圾收集- minor gc
+  * 老年代内存不足发生的垃圾收集 full gc
+* CMS
+  * 新生代内存不足发生的垃圾收集· minor gc
+  * 老年代内存不足
+* G1
+  * 新生代内存不足发生的垃圾收集 minor gc
+  * 老年代内存不足
+
+CMS 和 G1收集器，它们在老年代内存不足时，需要分情况，不一定就是full GC：
+* 当垃圾收集的时间 小于 新垃圾产生的时间，那么，就不算是full GC；
+* 当垃圾收集的时间 大于 新垃圾产生的时间，那么，就会退用串行垃圾收集策略，此时占用时间和资源较多，就可以称为full GC。
+
 
 # 5. 垃圾回收调优
