@@ -522,6 +522,54 @@ de.codecentric:spring-boot-admin-starter-client:2.1.6
 大功告成！！
 
 
+# 七、集成Lombok
+如果我们直接去mvnrepository.com, 直接拿gradle 的Lombok的依赖方式放到我们的项目中：
+```
+subprojects {
+    // ...................
+    dependencies {
+        // .......................
+        providedCompile group: 'org.projectlombok', name: 'lombok', version: '1.18.2'
+    }
+    // ...................
+}
+```
+会报这样的错误：
+```
+FAILURE: Build failed with an exception.
+.....
+
+A problem occurred evaluating root project 'jp-cloud-gradle'.
+> Could not find method providedCompile() for arguments [{group=org.projectlombok, name=lombok, version=1.18.2}] on object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
+```
+然后，编译失败。
+
+这应该是由于enable Lombok的写法，对于我们这个Gradle版本搭建的project 来说有误。
+
+## 解决方案
+### 1. 官方推荐方式
+[官方文档](https://docs.gradle.org/4.7-rc-1/userguide/java_plugin.html#sec:java_compile_avoidance) | [stackoverflow: correct way](https://stackoverflow.com/questions/50519138/annotationprocessor-gradle-4-7-configuration-doesnt-run-lombok)
+```
+annotationProcessor 'org.projectlombok:lombok:1.18.2'
+compileOnly 'org.projectlombok:lombok:1.18.2'
+testAnnotationProcessor 'org.projectlombok:lombok:1.18.2'
+testCompileOnly 'org.projectlombok:lombok:1.18.2'
+```
+### 2. 使用Gradle Plugin的方式
+[Lombok官网推荐配法](https://projectlombok.org/setup/gradle)
+```
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compileOnly 'org.projectlombok:lombok:1.18.10'
+	annotationProcessor 'org.projectlombok:lombok:1.18.10'
+}
+```
+
+
+
 # 总结
 好，当你做完以上的这些步骤，基本的一个简单的Spring Cloud微服务项目的雏形就诞生了！
 
