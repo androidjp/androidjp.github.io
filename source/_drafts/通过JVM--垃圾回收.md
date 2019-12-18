@@ -619,7 +619,7 @@ java -XX:+PrintFlagsFinal -version | findstr "GC"
 * 查看FullGC前后的内存占用,考虑下面几个问题:
 * 数据是不是太多?
     ```
-    resultset= statement. execute Query" select’from大表 limit n"
+    resultset= statement. execute Query" select * from大表 limit n"
     ```
 * 数据表示是否太臃肿?
   * 对象图
@@ -629,3 +629,7 @@ java -XX:+PrintFlagsFinal -version | findstr "GC"
   * 第三方缓存实现更好：ehcache, redis；
 
 ## 5.4  新生代调优
+内存调优，最好先从新生代开始！
+* new对象的内存分配速度非常快，也非常廉价
+  * TLAB (threadLocal allocation buffer)：一个线程私有缓冲区，先在这个区域里分配内存空间来new一个对象，也就是用每个线程自己的Eden区来分配内存空间（JVM帮忙做的，目的就是对象创建过程是线程安全的），这样，即使多个线程同时new对象，也不互相干扰。
+* 新生代中，死亡对象的回收代价为零。
