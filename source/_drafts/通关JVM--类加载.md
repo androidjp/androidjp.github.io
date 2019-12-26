@@ -113,3 +113,54 @@ ClassFile {
 
 
 ![](../images/jvm/40.png)
+
+
+## 1.4 访问标识与继承信息
+
+好，我们可以看到，常量池所占位置，是一直到上图所示的 `29 56`，那么， 之后，就到了 access_flags，我们一起看看后面的两个字节：`00 21`，对比一下相关的解释表：
+![](../images/jvm/41.png)
+
+可以发现，`00 21` 表示 是一个public 的 类：
+![](../images/jvm/42.png)
+
+## 1.5 Field 信息
+![](../images/jvm/43.png)
+
+## 1.6 Method 信息 -- init（构造器）
+![](../images/jvm/44.png)
+
+## 1.7 Method 信息 -- main方法
+![](../images/jvm/45.png)
+
+
+## 1.8 附加属性
+![](../images/jvm/46.png)
+
+# 2. 字节码指令
+可以参考此官方文档查看指令集： https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html#jvms-6.5
+
+比如我们对照官方文档逐字解读`2a b7 00 01 b1`：
+```
+aload_0 = 42 (0x2a)        // 加载 slot 0 的局部变量，即 this，作为下面 invokespecial 构造方法调用的参数
+invokespecial = 183 (0xb7) // 预备调用构造方法，哪个方法呢？
+00 01 引用常量池#1 项， 即【Method java/lang/Object."<init>":()V】
+b1 表示返回
+```
+
+再解读一下 `public static void main(java.lang.String[]);` 主方法的字节码指令：
+```
+b2 00 02 12 03 b6 00 04 b1
+```
+1. b2 -> getstatic: 用于加载静态变量，哪个静态变量呢？
+2. 00 02 引用常量池中 #2 项，即【Field java/lang/System.out:Ljava/io/PrintStream;】
+3. 0x12 -> ldc 加载参数，哪个参数？
+4. 03 引用常量池中 #3 项，即【String hello world】
+5. b6 -> invokevirtual 预备调用成员方法，哪个方法呢？
+6. 00 04 引用常量池中 #4 项，即【Method java/io/PrintStream.println:(Ljava/lang/String;)V】
+7. b1 表示返回
+
+于是，就有了这样一个解释：
+```
+b2 00 02    12 03          b6  00 04       b1
+PrintStream "hello world"  .   println()   return
+```
