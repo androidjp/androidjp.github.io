@@ -164,3 +164,184 @@ b2 00 02 12 03 b6 00 04 b1
 b2 00 02    12 03          b6  00 04       b1
 PrintStream "hello world"  .   println()   return
 ```
+
+## 2.2 javap 工具
+Oracle提供了javap工具来反编译class文件
+
+作用：帮你读字节码文件，并解释给你看。
+
+```
+javap -v HelloWorld.class
+// -v 表示 输出class文件的字节码信息、常量池等详细信息
+```
+
+好，看回我们这个HelloWorld.java例子：
+```
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("hello world");
+    }
+}
+```
+以上这个很简单的代码，在经过了:
+1. `javac HelloWorld.java`
+2. `javap -v HelloWorld.class >> ./output.txt`
+
+之后 我们可以从这个output文件中得到：
+```
+Classfile /E:/Projects/IdeaProjects/spring-boot-starter-demo/src/main/java/com/example/springbootstarterdemo/com/example/springbootstarterdemo/HelloWorld.class
+  Last modified 2019-12-24; size 496 bytes
+  MD5 checksum 6f8be43a5db5ff80c7a2255c885f8315
+  Compiled from "HelloWorld.java"
+public class com.example.springbootstarterdemo.HelloWorld
+  minor version: 0
+  major version: 52
+  flags: ACC_PUBLIC, ACC_SUPER
+Constant pool:
+   #1 = Methodref          #6.#17         // java/lang/Object."<init>":()V
+   #2 = Fieldref           #18.#19        // java/lang/System.out:Ljava/io/PrintStream;
+   #3 = String             #20            // hello world
+   #4 = Methodref          #21.#22        // java/io/PrintStream.println:(Ljava/lang/String;)V
+   #5 = Class              #23            // com/example/springbootstarterdemo/HelloWorld
+   #6 = Class              #24            // java/lang/Object
+   #7 = Utf8               <init>
+   #8 = Utf8               ()V
+   #9 = Utf8               Code
+  #10 = Utf8               LineNumberTable
+  #11 = Utf8               main
+  #12 = Utf8               ([Ljava/lang/String;)V
+  #13 = Utf8               MethodParameters
+  #14 = Utf8               args
+  #15 = Utf8               SourceFile
+  #16 = Utf8               HelloWorld.java
+  #17 = NameAndType        #7:#8          // "<init>":()V
+  #18 = Class              #25            // java/lang/System
+  #19 = NameAndType        #26:#27        // out:Ljava/io/PrintStream;
+  #20 = Utf8               hello world
+  #21 = Class              #28            // java/io/PrintStream
+  #22 = NameAndType        #29:#30        // println:(Ljava/lang/String;)V
+  #23 = Utf8               com/example/springbootstarterdemo/HelloWorld
+  #24 = Utf8               java/lang/Object
+  #25 = Utf8               java/lang/System
+  #26 = Utf8               out
+  #27 = Utf8               Ljava/io/PrintStream;
+  #28 = Utf8               java/io/PrintStream
+  #29 = Utf8               println
+  #30 = Utf8               (Ljava/lang/String;)V
+{
+  public com.example.springbootstarterdemo.HelloWorld(); // init方法
+    descriptor: ()V
+    flags: ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1     // 操作数栈深度为1， 成员变量数为1，形参有1个
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+      LineNumberTable:
+        line 7: 0           // 源码中的第7行 对应了这里的第0行
+
+  public static void main(java.lang.String[]); // main() 方法
+    descriptor: ([Ljava/lang/String;)V  // 方法参数是一个String[]
+    flags: ACC_PUBLIC, ACC_STATIC       // 方法时 public static 的
+    Code:
+      stack=2, locals=1, args_size=1   // 方法栈有2层，。。。。
+         0: getstatic     #2                  // 获取静态对象 Field java/lang/System.out:Ljava/io/PrintStream;
+         3: ldc           #3                  // 获取字符串 String hello world
+         5: invokevirtual #4                  // 调用方法  Method java/io/PrintStream.println:(Ljava/lang/String;)V
+         8: return
+      LineNumberTable:
+        line 9: 0
+        line 10: 8
+    MethodParameters:
+      Name                           Flags
+      args
+}
+SourceFile: "HelloWorld.java"
+```
+
+## 2.3 图解运行流程
+给你一段code：
+```
+public class Jvm02 {
+    public static void main(String[] args) {
+        int a = 10;
+        int b = Short.MAX_VALUE + 1;
+        int c = a + b;
+        System.out.println(c);
+    }
+}
+```
+我们经过两步得到了解释后的字节码流程：
+```
+javac Jvm02.java
+javap -v Jvm02.class
+```
+
+那么， 在去执行.class文件的过程中，到底有哪些操作呢？
+
+
+### 1）常量池载入运行时常量池
+将.class文件中涉及到的常量，加载到运行时常量池这一个内存区域中（虽然运行时常量池属于方法区的组成部分）
+![](../images/jvm/47.png)
+
+像这个例子，像 `10`，实际上是加载在方法区中、跟随着方法存储的，但是，如果是`Short.MAX_VALUE + 1 = 32768`这个值，则会被定义为常量池所属，于是会被加载到运行时常量池当中。
+
+### 2）方法字节码载入方法区
+![](../images/jvm/48.png)
+
+### 3）main线程开始运行，分配栈帧内存
+![](../images/jvm/49.png)
+
+### 4）执行引擎开始执行字节码
+![](../images/jvm/50.png)
+**bipush 10**
+* 作用：将一个大小为 1 byte的数字，压入操作数栈中，所以这个数字大小区间是：[-128,127]
+* 操作数栈的宽度是4 byte，但是当前操作数只有 1 byte，所以，bipush等指令在压栈过程中会自动补齐 4 byte。
+* 类似指令有：
+  * sipush：将一个short压入操作数栈
+  * ldc：将一个int 压入操作数栈
+  * ldc2_w：将一个long 压入操作数栈（分两次压入，因为long 类型 8 byte）
+
+**这里小的数字都是和字节码指令存在一起的，超过了 short 范围的数字存入了常量池。**
+
+**istore 1**
+* 作用：将操作数栈顶数据弹出，存入局部变量表的slot 1 (存入1号槽)
+
+![](../images/jvm/51.png)
+最终得到：
+![](../images/jvm/52.png)
+
+**ldc #3**
+* 作用：加载常量池中 #3 数据，到 操作数栈
+* 注意：`Short.MAX_VALUE = 32767`，所以`Short.MAX_VALUE + 1 = 32768` 是在编译期间计算好的
+
+![](../images/jvm/53.png)
+
+**istore 2**
+![](../images/jvm/54.png)
+
+**iload 1 和 iload 2**
+![](../images/jvm/55.png)
+
+**iadd**
+![](../images/jvm/56.png)
+
+**getstatic #4**
+* 作用：到运行时常量池中，找到FieldRef成员变量，然后发现它实际引用指向的是 堆中的 System.out对象；找到之后，只是获取这个System.out 对象的引用而已，并不是将整个对象压入操作数栈。
+![](../images/jvm/57.png)
+
+**invokevirtual #5**
+![](../images/jvm/58.png)
+整个过程如下：
+1. 找到常量池 #5 项
+2. 定位到方法区 `java/io/PrintStream.println:(I)V`
+3. 生成新的栈帧（分配 locals、stack等）
+4. 传递参数，指向新栈帧中的字节码
+5. 执行完毕，弹出栈帧
+6. 清除 main 操作数栈内容
+
+![](../images/jvm/59.png)
+
+最终：
+1. 完成main方法调用，弹出 main 栈帧
+2. 程序结束
