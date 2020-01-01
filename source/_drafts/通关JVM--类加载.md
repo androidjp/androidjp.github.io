@@ -345,3 +345,348 @@ javap -v Jvm02.class
 最终：
 1. 完成main方法调用，弹出 main 栈帧
 2. 程序结束
+
+
+## 2.4 练习-- 分析 a++
+看到这么一个例子：
+```
+public static void main(String[] args) {
+    int a = 10;
+    int b = a++ + ++a + a--;
+    System.out.println(a);
+    System.out.println(b);
+}
+```
+反编译后得到这样的一个部分执行流程：
+```
+public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=3, args_size=1
+         0: bipush        10
+         2: istore_1
+         3: iload_1
+         4: iinc          1, 1
+         7: iinc          1, 1
+        10: iload_1
+        11: iadd
+        12: iload_1
+        13: iinc          1, -1
+        16: iadd
+        17: istore_2
+        18: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
+        21: iload_1
+        22: invokevirtual #3                  // Method java/io/PrintStream.println:(I)V
+        25: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
+        28: iload_2
+        29: invokevirtual #3                  // Method java/io/PrintStream.println:(I)V
+        32: return
+```
+首先搞清楚两点：
+* `iinc`：表示直接在局部变量slot 上进行运算；
+* `a++` 是先执行 `iload`，后执行 `iinc`；而`++a`则相反；
+* `iload`是将第i个slot区内存中的值，放入 操作数栈中；
+![](../images/jvm/60.png)
+可以自己捋一捋，整个过程，最终得到的值是： `a = 11; b = 34;`
+
+
+## 2.5 条件判断指令
+以下是条件判断相关指令和解释：
+![](../images/jvm/61.png)
+特别说明：
+* byte, short, char 都按照 int 来比较，因为 操作数栈都是 4 字节；
+* goto 用来进行跳转到指定行号的字节码；
+
+来看一个例子：
+```
+public static void main(String[] args) {
+    int a = -1;
+    int b = -2;
+    int c = 0;
+    int d = 3;
+    int e = 5;
+    int f = 6;
+}
+```
+反编译后得到的指令字节码：
+```
+Code:
+  stack=2, locals=8, args_size=1
+      0: iconst_m1              // 获取常量池中的 -1
+      1: istore_1               // 将其放入slot[1] 中
+      2: bipush        -2       // 将 -2 压入操作数栈
+      4: istore_2               // 将操作数栈中的 -2 放到 slot[2] 中
+      5: iconst_0               // 获取常量池中的 0
+      6: istore_3
+      7: iconst_3               // 获取常量池中的 3
+      8: istore        4
+    10: iconst_5                // 获取常量池中的 5
+    11: istore        5
+    13: bipush        6         // 将 6 压入操作数栈
+    15: istore        6
+    16: return
+```
+**注意**：-1~5 的数字，会用 `iconst_N`来表示，表示直接从常量池中拿到。而其他的值，则通过`bipush`压入slot区。
+
+
+好，上面只是小插曲，我们看下面这个条件语句的例子：
+```
+public static void main(String[] args) {
+    int a = 0;
+    if (a == 0) {
+        a = 10;
+    } else if (a == 2) {
+       a = 15;
+    }
+     else {
+        a = 20;
+    }
+}
+```
+反编译得到：
+```
+Code:
+  stack=1, locals=2, args_size=1
+      0: iconst_0              // 获取常量池中的 0
+      1: istore_1              // 将其放入slot[1] 中
+      2: iload_1               // 将slot[1] 中 的 值 拿出，放入操作数栈中
+      3: ifne          12      // 比较值是否 != 0，如果值 !=0， 则跳转到 12行
+      6: bipush        10
+      8: istore_1
+      9: goto          26
+    12: iload_1                // 将slot[1]的值压入操作数栈
+    13: iconst_2               // 获取常量池中的 2 压入操作数栈
+    14: if_icmpne     23       // 比较两者是否不等，是，则跳转，否则 ，继续往下走
+    17: bipush        15
+    19: istore_1
+    20: goto          26      // 直接跳转到 15行，return
+    23: bipush        20
+    25: istore_1
+    26: return
+```
+
+## 2.6 循环语句分析
+### (1) while
+```
+public static void main(String[] args) {
+    int a = 0;
+    while (a < 10) {
+        a++;
+    }
+}
+```
+反编译得到指令字节码：
+```
+ Code:
+  stack=2, locals=2, args_size=1
+      0: iconst_0             // 获取常量池中的 0
+      1: istore_1             // 放入 slot[1] 中
+      2: iload_1              // 加载 slot[1] 到 操作数栈中
+      3: bipush        10     // 将 10 放入操作数栈中
+      5: if_icmpge     14     // 如果 slot[1]值 >= 10，则直接return
+      8: iinc          1, 1   // 否则，slot[1]值直接进行加1
+    11: goto          2       // 然后，继续回到指令 #2
+    14: return
+```
+
+### (2) do-while
+```
+public static void main(String[] args) {
+    int a = 0;
+    do {
+        a++;
+    } while (a < 10);
+}
+```
+反编译得到指令字节码：
+```
+Code:
+  stack=2, locals=2, args_size=1
+      0: iconst_0             // 获取常量池中的 0
+      1: istore_1             // 放入 slot[1] 中
+      2: iinc          1, 1   // 让slot[1] 自增 1
+      5: iload_1              // 加载 slot[1] 到 操作数栈中
+      6: bipush        10     // 将 10 放入操作数栈中
+      8: if_icmplt     2      // 如果 slot[1]值 < 10，回到 #2 继续执行
+    11: return
+```
+
+### (3) for
+```
+public static void main(String[] args) {
+    int a = 0;
+    for(int i = 0; i < 10; i++) {
+      a++;
+    }
+}
+```
+其实反编译后的字节码是几乎一致的。
+```
+ Code:
+  stack=2, locals=3, args_size=1
+      0: iconst_0
+      1: istore_1
+      2: iconst_0
+      3: istore_2
+      4: iload_2
+      5: bipush        10
+      7: if_icmpge     19
+    10: iinc          1, 1
+    13: iinc          2, 1
+    16: goto          4
+    19: return
+```
+
+## 2.7 练习-- 为什么 x 最终 = 0
+```
+public static void main(String[] args) {
+    int i = 0;
+    int x = 0;
+    while (i < 10) {
+        x = x++;
+        i++;
+    }
+    System.out.println(x);
+}
+```
+为什么这个最终结果是：`0` 呢？
+
+原因：在每一轮for循环里，实际上执行的是这样一个过程：
+```
+iload_1      // 将 x=0 加载到 操作数栈
+iinc x,1     // slot['x'] + 1 = 1
+istore 1     // slot['x'] = 操作数栈中的 x = 0
+```
+
+## 2.8 构造方法
+### (1) `<cinit>()V`：静态代码块与静态变量赋值的整合方法
+```
+public class Demo3_8_1 {
+    static int i = 10;
+    static {
+        i = 20;
+    }
+    static {
+        i = 30;
+    }
+}
+```
+编译器会按从上到下 的顺序， 收集所有 static 代码块 和 静态成员赋值 的 代码，合并成一个特殊的方法 `<cinit>()V`:
+```
+  static {};
+    descriptor: ()V
+    flags: ACC_STATIC
+    Code:
+      stack=1, locals=0, args_size=0
+         0: bipush        10
+         2: putstatic     #2                  // Field i:I --- 去常量池里找到一个叫做 'i' 的变量，并将这个 10 放入 常量池中
+         5: bipush        20
+         7: putstatic     #2                  // Field i:I --- 去常量池里找到一个叫做 'i' 的变量，并将这个 20 放入 常量池中
+        10: bipush        30
+        12: putstatic     #2                  // Field i:I --- 去常量池里找到一个叫做 'i' 的变量，并将这个 30 放入 常量池中
+        15: return
+```
+`<cinit>()V` 会在类加载的初始化阶段被调用。
+
+那么， 我们调换一下代码顺序：
+```
+public class Demo3_8_1 {
+    static {
+        i = 20;
+    }
+    static {
+        i = 30;
+    }
+    static int i = 10;
+}
+```
+反编译后，得到的结果的确符合我们预期：
+```
+Code:
+      stack=1, locals=0, args_size=0
+         0: bipush        20
+         2: putstatic     #2                  // Field i:I  --- 加载 20
+         5: bipush        30
+         7: putstatic     #2                  // Field i:I  --- 加载 30
+        10: bipush        10
+        12: putstatic     #2                  // Field i:I  --- 加载 10
+        15: return
+```
+
+### (2) `<init>()V`：类实例初始化时的实例代码块与实例成员初始化的整合方法
+
+```
+public class Demo3_8_2 {
+    private String a = "s1";
+    {
+        b = 20;
+    }
+
+    private int b = 10;
+
+    {
+        a = "s2";
+    }
+
+    public Demo3_8_2() {
+    }
+
+    public Demo3_8_2(String a, int b) {
+        this.a = a;
+        this.b = b;
+    }
+}
+```
+编译后的指令字节码：
+```
+ public com.example.springbootstarterdemo.Demo3_8_2();
+    descriptor: ()V
+    flags: ACC_PUBLIC
+    Code:
+      stack=2, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: aload_0
+         5: ldc           #2                  // String s1                   将 "s1"
+         7: putfield      #3                  // Field a:Ljava/lang/String;  赋值给 this.a
+        10: aload_0
+        11: bipush        20                                                 将 20
+        13: putfield      #4                  // Field b:I                   赋值给 this.b
+        16: aload_0
+        17: bipush        10
+        19: putfield      #4                  // Field b:I
+        22: aload_0
+        23: ldc           #5                  // String s2
+        25: putfield      #3                  // Field a:Ljava/lang/String;
+        28: return
+
+  public com.example.springbootstarterdemo.Demo3_8_2(java.lang.String, int);
+    descriptor: (Ljava/lang/String;I)V
+    flags: ACC_PUBLIC
+    Code:
+      stack=2, locals=3, args_size=3
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: aload_0
+         5: ldc           #2                  // String s1
+         7: putfield      #3                  // Field a:Ljava/lang/String;
+        10: aload_0
+        11: bipush        20
+        13: putfield      #4                  // Field b:I
+        16: aload_0
+        17: bipush        10
+        19: putfield      #4                  // Field b:I
+        22: aload_0
+        23: ldc           #5                  // String s2
+        25: putfield      #3                  // Field a:Ljava/lang/String;
+        28: aload_0
+        29: aload_1                           //  获取第一个String入参
+        30: putfield      #3                  // Field a:Ljava/lang/String;
+        33: aload_0
+        34: iload_2                           //  获取第二个int入参
+        35: putfield      #4                  // Field b:I
+        38: return
+
+```
+可以看到，实际上，无论是无参构造器，还是有参构造器，都会在编译时和成员代码块整合到一起，生成不同入参的构造方法 `<init>()V`，并且，构造器中的logic，一定在成员代码块的后面才执行。
