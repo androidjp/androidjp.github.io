@@ -690,3 +690,126 @@ public class Demo3_8_2 {
 
 ```
 可以看到，实际上，无论是无参构造器，还是有参构造器，都会在编译时和成员代码块整合到一起，生成不同入参的构造方法 `<init>()V`，并且，构造器中的logic，一定在成员代码块的后面才执行。
+
+
+## 2.9 方法调用
+```
+public class Demo3_9 {
+    public Demo3_9() {}
+
+    private void test1() {}
+    private final void test2() {}
+    public void test3() {}
+    public static void test4() {}
+
+    public static void main(String[] args) {
+        Demo3_9 d = new Demo3_9();
+        d.test1();
+        d.test2();
+        d.test3();
+        d.test4();
+        Demo3_9.test4();
+    }
+}
+```
+编译后得到指令：
+```
+0: new           #2                  // class com/example/springbootstarterdemo/Demo3_9
+    3: dup
+    4: invokespecial #3                  // Method "<init>":()V
+    7: astore_1
+    8: aload_1
+    9: invokespecial #4                  // Method test1:()V
+    12: aload_1
+    13: invokespecial #5                  // Method test2:()V
+    16: aload_1
+    17: invokevirtual #6                  // Method test3:()V
+    20: aload_1                           // 这里，准备要调用静态方法，先load到操作数栈
+    21: pop                               // 然后发现其实这个实例并没有什么用，就又出栈了
+    22: invokestatic  #7                  // Method test4:()V
+    25: invokestatic  #7                  // Method test4:()V
+    28: return
+```
+可以看到：
+* 构造方法、private 方法（无论有没有带final），都是使用的`invokespecial`指令；
+* public方法（无论有没有带final），使用`invokevirtual`，因为public方法在编译期间无法确定自己调用的是父类方法还是自己的方法， 所以，这个指令表示动态绑定调用方法的地址；
+* 而对于静态方法，无论是直接类引用，还是实例来调用，都是用的`invokestatic`指令；
+* 第一行指令`new`，做了两步：
+  * 第一步：在堆中给这个新的`Demo3_9`对象分配内存；
+  * 第二步：分配成功后，会将这个对象的引用放入操作数栈；
+* 第二行指令`dup`，作用是：将这个在操作数栈中的对象引用，复制一份，也同样压入操作数栈，为了后面去`invokespecial`调用构造器，而多复制一份引用出来；当调用`<init>` 完毕，就会出栈，然后才会将原来的那个引用 store 到 这个 slot['d'] 当中；
+
+
+## 2.10 多态的原理
+以上所说的`invokevirtual`，就是Java中说到的 多态的原理。
+```
+public class Demo3_10 {
+    public static void test(Animal animal) {
+        animal.eat();
+        System.out.println(animal);
+    }
+
+    public static void main(String[] args) throws IOException {
+        test(new Cat());
+        test(new Dog());
+        System.in.read(); // 目的：此时运行 jps 获取进程ID
+    }
+}
+abstract class Animal {
+    public abstract void eat();
+
+    @Override
+    public String toString() {
+        return "I am "+ this.getClass().getSimpleName();
+    }
+}
+
+class Cat extends  Animal {
+    @Override
+    public void eat() {
+        System.out.println("eat fish!!");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void eat() {
+        System.out.println("eat bone!!");
+    }
+}
+
+```
+这里使用HSDB 工具，就可以实时查看到指令的执行情况了。
+```
+jps //获取java进程ID
+cd 到 java 安装目录
+java -cp ./lib/sa-jdi.jar sun.jvm.hotspot.HSDB
+```
+注意：需要在运行时加两个运行参数：
+```
+-XX:-UseCompressedOops -XX:-UseCompressedClassPointers
+```
+作用： 禁止指针压缩（在64位JVM为了节省内存空间，会采用指针压缩技术，不过可读性不高）
+
+好，然后，我们打开HSDB工具，可以查看某个想要查看的对象：
+![](../images/jvm/62.png)
+有点类似于SQL，这么查询：
+```
+select  d from com.example.springbootstarterdemo.Dog d
+```
+得到一个内存地址：
+![](../images/jvm/63.png)
+
+下面，我们查看一下这个对象类型的实际内存地址：
+
+打开console窗口，输入：
+```
+mem <刚刚那个对象地址> 2
+// 后面的 2 表示要查看 2 个 字 的内存信息
+```
+![](../images/jvm/64.png)
+好，可以看到，第一行是真的得到值为`..........0001`，的确表示的 markCode 为 1，然后，第二行得到的地址，则是这个对象的类型所在的内存地址。
+
+我们将这个地址copy出来，然后，使用tools 中的 `Instecptor`窗口，paste这个地址，查看一下：
+![](../images/jvm/65.png)
+终于得到了对象的完整类型表示。
