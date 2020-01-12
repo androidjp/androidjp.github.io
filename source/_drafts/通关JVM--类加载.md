@@ -840,3 +840,321 @@ mem <刚刚那个对象地址> 2
 lass结构中的vtable，在类加载过程中的链接阶段，就已经根据方法的重写规则生成好了。
 
 ## 2.11 异常处理
+```
+public class Demo3_11_1 {
+    public static void main(String[] args) {
+        int i= 0;
+        try {
+            i = 10;
+        } catch (Exception e) {
+            i = 20;
+        }
+    }
+}
+```
+编译后得到指令：
+```
+  public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=1, locals=3, args_size=1
+         0: iconst_0
+         1: istore_1
+         2: bipush        10
+         4: istore_1
+         5: goto          12
+         8: astore_2
+         9: bipush        20
+        11: istore_1
+        12: return
+      Exception table:
+         from    to  target type
+             2     5     8   Class java/lang/Exception
+```
+我们可以看到，其中正常的指令流程没有问题，那，我们可以看到方法中另一个属性： `Exception table`（异常表）
+```
+Exception table:
+    from    to  target type
+        2     5     8   Class java/lang/Exception
+```
+表示它是监听 第2~4行的指令，注意：`[2,5)行`，含头不含尾。如果这几行出了异常，就先对比一下这个异常是否和我们定义的`java/lang/Exception`类型一致，如果一致，则去到 第8行 执行。
+
+其中， 第8行的字节码指令 `astoree_2` 是将异常对象引用 存入 局部变量表的 slot[2] 位置
+
+### 如果是 多个 catch 分开写
+```
+public static void main(String[] args) {
+    int i  = 0;
+    try {
+        i  = 10;
+    } catch (ArithmeticException e) {
+        i  =30;
+    } catch (NullPointerException e) {
+        i  = 40;
+    } catch (Exception e) {
+        i = 50;
+    }
+}
+```
+得到的 exception table如下：
+```
+Exception table:
+    from    to  target type
+        2     5     8   Class java/lang/ArithmeticException
+        2     5    15   Class java/lang/NullPointerException
+        2     5    22   Class java/lang/Exception
+```
+会发现 slot[2] 被共用了，因为同一时刻，假如有异常，那么一定只会落入一个catch当中。
+
+
+### multi-catch 情况
+如果是JDK 7 以上，我们可以将多个异常并排写：
+```
+public class Demo3_11_3 {
+    public static void main(String[] args) {
+        try {
+            Method test = Demo3_11_3.class.getMethod("test");
+            test.invoke(null);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void test() {
+        System.out.println("ok");
+    }
+}
+```
+编译后得到：
+```
+public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=2, args_size=1
+         0: ldc           #2                  // class com/example/springbootstarterdemo/Demo3_11_3
+         2: ldc           #3                  // String test
+         4: iconst_0
+         5: anewarray     #4                  // class java/lang/Class
+         8: invokevirtual #5                  // Method java/lang/Class.getMethod:(Ljava/lang/String;[Ljava/lang
+/Class;)Ljava/lang/reflect/Method;
+        11: astore_1
+        12: aload_1
+        13: aconst_null
+        14: iconst_0
+        15: anewarray     #6                  // class java/lang/Object
+        18: invokevirtual #7                  // Method java/lang/reflect/Method.invoke:(Ljava/lang/Object;[Ljav
+a/lang/Object;)Ljava/lang/Object;
+        21: pop
+        22: goto          30
+        25: astore_1
+        26: aload_1
+        27: invokevirtual #11                 // Method java/lang/ReflectiveOperationException.printStackTrace:(
+)V
+        30: return
+      Exception table:
+         from    to  target type
+             0    22    25   Class java/lang/NoSuchMethodException
+             0    22    25   Class java/lang/IllegalAccessException
+             0    22    25   Class java/lang/reflect/InvocationTargetException
+```
+其实还是一样，只是三种类型的异常捕获后都是执行同一段逻辑：第25行，将对应的异常对象引用存入 slot[1]，再`aload`将其load到操作数栈中，最后调用打印堆栈的方法。
+
+### finally
+```
+public class Demo3_11_4 {
+    public static void main(String[] args) {
+        int i  =0;
+        try {
+            i = 10;
+        } catch (Exception e) {
+            i = 20;
+        } finally {
+            i  = 30;
+        }
+    }
+}
+```
+编译后：
+```
+public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=1, locals=4, args_size=1
+         0: iconst_0
+         1: istore_1           // 0 -> i
+         2: bipush        10   // try ----------------------
+         4: istore_1           // 10 -> i                   |
+         5: bipush        30   // finally                   |
+         7: istore_1           // 30 -> i                   |
+         8: goto          27   // return -------------------
+        11: astore_2           // catch Exception -> e -----
+        12: bipush        20   //                           |
+        14: istore_1           // 20 -> i                   |
+        15: bipush        30   // finally                   |
+        17: istore_1           // 30 -> i                   |
+        18: goto          27   // return -------------------
+        21: astore_3           // catch any -> slot[3] -----
+        22: bipush        30   // finally                   |
+        24: istore_1           // 30 -> i                   |
+        25: aload_3            // <- slot[3]                |
+        26: athrow             // throw --------------------
+        27: return
+      Exception table:
+         from    to  target type
+             2     5    11   Class java/lang/Exception
+             2     5    21   any
+            11    15    21   any
+```
+
+## 2.12 练习 -- finally
+```
+public class Demo3_12_2 {
+    public static void main(String[] args) {
+        int result = test();
+        System.out.println(result);
+    }
+
+    private static int test() {
+        try {
+            return 10;
+        } finally {
+            return 20;
+        }
+    }
+}
+```
+编译后：
+```
+ public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=2, args_size=1
+         0: invokestatic  #2                  // Method test:()I
+         3: istore_1                          // 结果 -> slot[1]
+         4: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;
+         7: iload_1                           // <- slot[1]
+         8: invokevirtual #4                  // Method java/io/PrintStream.println:(I)V
+        11: return
+
+public static int test();
+    descriptor: ()I
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=1, locals=2, args_size=0
+         0: bipush        10                 // 10 入栈
+         2: istore_0                         // 10 出栈，10 --> slot[0]
+         3: bipush        20                 // finally: 20 入栈
+         5: ireturn                          // 返回栈顶 int(20)
+         6: astore_1                         // catch any --> slot[1]
+         7: bipush        20                 // finally: 20 入栈
+         9: ireturn                          // 返回栈顶 int(20)
+      Exception table:
+         from    to  target type
+             0     3     6   any
+```
+注意：
+
+在这个例子当中，看到`Exception table`中只有 monitor 第`[0,3)`行的代码有没有抛异常，但是，明明指令中有考虑到 `catch any`的情况，但是并没有考虑说之后把这个`any` athrow 出来 ，而是直接return了。 
+
+这也就告诉我们： **如果finally 中出现了 return，则会吞掉异常**。
+
+
+还有一个问题: 为什么 要做上面指令中的第2行指令呢？ 明明没有用到，为什么要将 `10 --> slot[0]` 呢？
+
+### finally 对返回值没有影响
+```
+public static void main(String[] args) {
+    int result = test();
+    System.out.println(result);
+}
+
+public static int test() {
+    int i = 10;
+    try {
+        return i;
+    } finally {
+        i = 20;
+    }
+}
+```
+答案是：10
+
+看看编译：
+```
+public static int test();
+    descriptor: ()I
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=1, locals=3, args_size=0
+         0: bipush        10     // <- 10 放入栈顶
+         2: istore_0             // 10 -> i
+         3: iload_0              // <- i(10)
+         4: istore_1             // 关键：10 -> slot[1]，暂存在 slot[1]，目的是固定返回值
+         5: bipush        20     // <- 20 放入栈顶
+         7: istore_0             // 20 -> i
+         8: iload_1              // <- slot[1]，载入暂存的值
+         9: ireturn              // 返回栈顶的 int(10)
+        10: astore_2
+        11: bipush        20
+        13: istore_0
+        14: aload_2
+        15: athrow               // 关键2
+      Exception table:
+         from    to  target type
+             3     5    10   any
+```
+这里两个关键点：
+1. 会暂存 原来 i = 10 的值，最终返回这个 10，任凭 finally 逻辑执行；
+2. 由于finally 没有return 语句，所以最终执行如果主逻辑有异常，最终会 throw 异常引用出来。
+
+
+## 2.13 synchronized
+从字节码角度解释，为什么synchronized为什么能够正确加锁解锁。
+```
+public class Demo3_13 {
+    public static void main(String[] args) {
+        Object lock = new Object();
+        synchronized (lock) {
+            System.out.println("ok");
+        }
+    }
+}
+```
+编译后：
+```
+public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=4, args_size=1
+         0: new           #2                  // new一个对象， class java/lang/Object
+         3: dup                               // 对象引用复制一份在操作数栈
+         4: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         7: astore_1                          // lock 引用 -> slot[1]
+         8: aload_1                           // <- lock (synchornized开始)
+         9: dup                               // lock引用 再做一个复制，最终会有两份
+        10: astore_2                          // lock 引用 -> slot[2]
+        11: monitorenter                      // monitorenter(lock 引用)
+        12: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;
+        15: ldc           #4                  // String ok
+        17: invokevirtual #5                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+        20: aload_2                           // <- slot[2] (lock引用)
+        21: monitorexit                       // monitorexit(lock 引用)
+        22: goto          30                  // 没异常，直接可以返回了
+        25: astore_3                          // 有异常：catch any --> slot[3]
+        26: aload_2                           // <- slot[2] (lock引用)
+        27: monitorexit                       // monitorexit(lock 引用)
+        28: aload_3                           // <- slot[3] (异常e)
+        29: athrow                            // 抛出异常
+        30: return
+      Exception table:
+         from    to  target type
+            12    22    25   any
+            25    28    25   any
+
+```
+
+# 3.  编译期处理
