@@ -358,3 +358,54 @@ git clone <git url> "C:\a\b"
 6. `git push origin --tags`：可以推送全部未推送过的本地标签；
 7. `git tag -d <tagname>`：可以删除一个本地标签；
 8. `git push origin :refs/tags/<tagname>`：可以删除一个远程标签。
+
+
+# 解决每次拉取、提交代码时都需要输入用户名和密码
+1.在~/.gitconfig目录下多出一个文件，用来记录你的密码和帐号
+```
+git config --global credential.helper store
+```
+2. 再最后输入一次正确的用户名和密码，就可以成功的记录下来
+
+# git 使用 push 提交到远程仓库出现 The requested URL returned error: 403 错误
+## 问题描述
+电脑已经注册过一个 github 帐号，一直在本机使用，配置过 SSH。
+
+新建另一个 github 帐号，本地建立好项目之后，使用命令：$ git push -u origin master 时出现以下错误：
+```
+remote: Permission to userName/repositorieName.git denied to clxering.
+fatal: unable to access 'https://github.com/userName/repositorieName.git/': The requested URL returned error: 403
+```
+
+## 问题原因
+问题主要出在原注册账号上，系统保存了账号的信息。在使用新帐号时，信息不一致，所以报错。
+
+## 解决方案
+1. 打开cmd，输入命令：`rundll32.exe keymgr.dll,KRShowKeyMgr`，出现系统存储的用户名和密码窗口；
+2. 将 github 相关的条目删除；
+3. 重新执行命令：`$ git push -u origin master`，提示输入账户名及密码即可。
+
+# 查看git信息存储位置
+```
+git help -a | grep credential
+```
+查看自己系统支持的crendential, cache 代表内存中的缓存，store 代表磁盘。
+
+# 查看cache、store等git配置信息
+```
+git config credential.helper
+```
+命令可以看到 cache、store、osxkeychain(钥匙串)中是否还有git的配置信息
+
+# 配置全局用户名和邮箱
+一般配置方法：
+```
+git config --global (--replace-all) user.name "你的用户名"
+git config --global (--replace-all) user.email "你的邮箱"
+```
+如果上述步骤没有效果，我们就需要清除缓存(`.gitconfig`)
+```
+git config --local --unset credential.helper
+git config --global --unset credential.helper
+git config --system --unset credential.helper
+```
