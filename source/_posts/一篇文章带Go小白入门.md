@@ -81,6 +81,7 @@ IDE：JetBrains GoLand 2019.2.3
     ```
     go version
     ```
+	
 ## Linux步骤 (MacOS参考他们俩就好了)
 1. 下载tar.gz包
 2. 解压（前提：保证你有root权限）
