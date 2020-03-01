@@ -19,6 +19,8 @@ tags:
 &emsp;&emsp;类**从.java文件到实际加载到内存中**，实际上是这样的一个**过程**：
 &emsp;&emsp;.java文件 -> 通过你的JDK环境相关指令编译 -> .class文件 -> JVM初始化之后，如果有类的执行、调用等相关操作，JVM就会将.class文件加载到内存中，并开始下面的一系列处理：（链接->初始化）
 
+![](/images/class_load_process/1.png)
+
 ### 一、关于ClassLoader
 ---
 &emsp;&emsp;首先我们要搞清楚一点，ClassLoader是Java用于加载类的一个机制。等到程序运行时，JVM先初始化，在JVM初始化的过程中，JVM生成几个ClassLoader，JVM调用指定的ClassLoader去加载.class文件等各类路径、文件的类。
@@ -39,7 +41,7 @@ tags:
     * BootstrapLoader（启动类加载器）是最顶级的类加载器了，其父加载器为null
 
 3. 各类ClassLoader的关系图解（帮助理解）
-  ![各个ClassLoader的作用以及他们之间的关系.png](http://upload-images.jianshu.io/upload_images/2369895-df477e2af4bbf623.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+  ![各个ClassLoader的作用以及他们之间的关系.png](/images/class_load_process/2.png)
   > 注意：图解中可得，执行代码` c.getClassLoader().getParent().getParent()`为`null`，由于get不到BootstrapLoader，因为BootstrapLoader是C层次实现的。
 
 ### 二、类的加载方式
@@ -83,8 +85,10 @@ public static Class<?> forName(String className, boolean shouldInitialize,
 ### 三、详细分析整个类的加载流程
 ---
 &emsp;下面分析一下类的几种加载方式、ClassLoader对类加载的背后，是怎么个原理：
+
 #### 1. 类从编译、被使用，到卸载的全过程：
 <u>编译 -> 加载 -> 链接（验证+准备+解析）->初始化（使用前的准备）->使用-> 卸载</u>
+
 #### 2. 类的初始化之前
 加载（除了自定义加载）和链接的过程是完全由jvm负责的，包括：加载 -> 验证 -> 准备 -> 解析
 > 这里的“自定义加载”可以理解为：自定义类加载器去实现自定义路径中类的加载，可以[参考这篇文章](http://blog.csdn.net/huangbiao86/article/details/6910152)。由于默认各个路径的类文件加载过程在JVM初始化的过程中就默认设定好了，也就是一般步骤下的加载过程，已经在JVM初始化过程中规定的AppClassLoader等加载器中规定了步骤，所以，按一般的加载步骤，就是按JVM规定的顺序，JVM肯定先负责了类的加载和链接处理，然后再进行类初始化。
@@ -160,7 +164,7 @@ class Super{
 &emsp;类加载中每个部分详细的原理说明，可以查看[这篇文章](http://my.oschina.net/volador/blog/87194)。以下的图解为本人总结，算比较全地对每个步骤的原理过程一目了然：
 
 
-![Java类加载过程.png](http://upload-images.jianshu.io/upload_images/2369895-b51a39bf5ad07d04.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Java类加载过程.png](/images/class_load_process/3.png)
 > 说明： 图解左下角说的`<clinit>()`方法，概念上是一个方法块，这个<clinit>(){……}方法块在初始化过程中执行，可以用下面代码理解：
 ```
 class Parent{
@@ -225,7 +229,7 @@ class Sub extends Super{
 }
   ```
 得到结果为：
-![](http://upload-images.jianshu.io/upload_images/2369895-aa2a7c61bcc2c67f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](/images/class_load_process/4.png)
 说明：
   1. 静态代码块和静态变量的赋值 是** 先于 **main方法的调用执行的。
   2. 静态代码块和静态变量的赋值是按顺序执行的。
