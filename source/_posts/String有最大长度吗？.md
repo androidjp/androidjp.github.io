@@ -124,32 +124,28 @@ categories:
 * `length()`返回的是int类型；
 * 构造器传入的`count`也是int类型；
 
-，都可以断定，String的长度不会超过`int`的最大值，换言之，`char value[]` 中最多可以保存`Integer.MAX_VALUE`个,即2147483647字符。
+，都可以断定，String的长度不会超过`int`的最大值，换言之，`char value[]` 中最多可以保存`Integer.MAX_VALUE`个，即2147483647字符。
 
 但事情是不是这样的呢？
 
-我们需要分编译期和运行期来看
+我们需要分编译期和运行期来看：
 
 ## 编译期
 编译期，也就是从源码角度表面上看，我取一个`Integer.MAX_VALUE`长度的字符串，理论上没问题，因为我没有突破你 int 的最大长度。
 
-(jdk1.8.0_73) 但是，实验证明，String s = "";中，最多可以有65534个字符。如果超过这个个数。就会在编译期报错。
+但是，实验证明，`String s = "";`中，最多可以有65534个字符。如果超过这个个数。就会在编译期报错。
 ```
 public static void main(String[] args) {
-
-    String s = "a...a";// 共65534个a
+    // 共65534个a，正常编译
+    String s = "a...a";
     System.out.println(s.length());
 
-    String s1 = "a...a";// 共65535个a
+    // 共65535个a，编译报错：错误: 常量字符串过长
+    String s1 = "a...a";
     System.out.println(s1.length());
 }
 ```
-以上代码，会在String s1 = "a...a";// 共65535个a处编译失败：
-```
-✗ javac StringLenghDemo.java
-StringLenghDemo.java:11: 错误: 常量字符串过长
-```
- 
+
 **明明说好的长度限制是2147483647，为什么65535个字符就无法编译了呢？**
 
 当我们使用字符串字面量直接定义String的时候，是会把字符串在常量池中存储一份的。那么上面提到的65534其实是常量池的限制。
