@@ -31,6 +31,8 @@ JVM的垃圾回收器，采用的就是这个“可达性分析”来探索所�
 
 ### 哪些对象可以作为GC Root？
 
+![](../images/jvm/12_1.png)
+
 这里有个内存分析工具：MAT [官网](http://www.eclipse.org/mat/)
 
 下面看个代码例子：
