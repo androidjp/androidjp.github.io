@@ -187,6 +187,27 @@ public class HelloWorld {
 1. `javac HelloWorld.java`
 2. `javap -v HelloWorld.class >> ./output.txt`
 
+> 如果想要看到 LocalVariableTable “局部变量表”，则可以尝试以下命令：
+> ```
+> javac -g HelloWorld.java // -g 生成所有调试信息
+> javap -c -l HelloWorld.class 或 javap -v HelloWorld.class
+> ```
+> 关于 `javac -g`
+> ```
+> -g                         生成所有调试信息
+> -g:none                    不生成任何调试信息
+> -g:{lines,vars,source}     只生成某些调试信息
+> ```
+> 其中：
+> * source 源文件调试信息
+> * lines 行号调试信息
+> * vars 本地变量调试信息
+> 
+> 如果不使用-g来编译,只保留源文件和行号信息.个人理解相当于-g:source,lines
+>
+> 如果只使用-g来编译.个人理解相当于-g:source,lines,vars
+
+
 之后 我们可以从这个output文件中得到：
 ```
 Classfile /E:/Projects/IdeaProjects/spring-boot-starter-demo/src/main/java/com/example/springbootstarterdemo/com/example/springbootstarterdemo/HelloWorld.class
@@ -1138,15 +1159,15 @@ public static void main(java.lang.String[]);
          9: dup                               // lock引用 再做一个复制，最终会有两份
         10: astore_2                          // lock 引用 -> slot[2]
         11: monitorenter                      // monitorenter(lock 引用)
-        12: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;
-        15: ldc           #4                  // String ok
+        12: getstatic     #3                  // <- System.out
+        15: ldc           #4                  // <- "ok"
         17: invokevirtual #5                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
         20: aload_2                           // <- slot[2] (lock引用)
-        21: monitorexit                       // monitorexit(lock 引用)
+        21: monitorexit                       // monitorexit(lock引用)
         22: goto          30                  // 没异常，直接可以返回了
         25: astore_3                          // 有异常：catch any --> slot[3]
         26: aload_2                           // <- slot[2] (lock引用)
-        27: monitorexit                       // monitorexit(lock 引用)
+        27: monitorexit                       // monitorexit(lock引用)
         28: aload_3                           // <- slot[3] (异常e)
         29: athrow                            // 抛出异常
         30: return
@@ -1154,7 +1175,70 @@ public static void main(java.lang.String[]);
          from    to  target type
             12    22    25   any
             25    28    25   any
-
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      31     0  args   [Ljava/lang/String;  // slot[0]
+            8      23     1  lock   Ljava/lang/Object;   // slot[1]
 ```
+> 注意：方法级别的 `synchronized` **不会**在字节码指令中体现出来。
 
 # 3.  编译期处理
+所谓的“语法糖”： 其实是 java编译器把 *.java源码编译为 *.class字节码的过程中，自动生成和转换的一些代码，主要为了减轻程序员负担，算是 java compiler 给我们的福利，**不用白不用**。
+
+## 3.1 默认构造器
+```
+public class Candy1 {
+}
+```
+编译成 class后的代码：
+```
+public class Candy1 {
+    // 其实这个无参构造器，是编译器帮助我们加上的
+    public Candy1() {
+        super(); // 即调用父类 Object 的无参构造器，也就是 java/lang/Object."<init>":()V
+    }
+}
+```
+
+## 3.2 自动拆装箱
+此特性是 JDK 5 开始加入的：
+```
+public class Candy2 {
+    public static void main(String[] args) {
+        Integer x = 1;
+        int y = x;
+    }
+}
+```
+JDK 5 之前，这段代码是无法编译通过的，必须换成显式调用`Integer.valueOf(1);`
+```
+public class Candy2 {
+    public static void main(String[] args) {
+        Integer x = Integer.valueOf(1);
+        int y = x.intValue();
+    }
+}
+```
+JDK 5 之后，编译器都不想你这么麻烦了，前面那段代码直接帮你转好。
+
+## 3.3 泛型集合取值
+泛型也是 JDK 5 开始加入的特性，但 java 在编译 泛型代码后 会执行 “泛型擦除” ，也就是编译为相当正常的字节码，不会存在真的模棱两可的泛型，实际的类型都当做 Object类型 来处理：
+```
+public class Candy3 {
+    public static void main(String[] args) {
+        List<Integer> list = new ArrayList<>();
+        list.add(10);  // 实际上调用：list.add(Object e) -----> 这里需要装箱
+        Integer x = list.get(0); // 实际上调用：Object obj = List.get(int index); ---> Object 强转 Integer
+    }
+}
+```
+所以，在取值时，编译器真正生成的字节码中，额外做一个类型转换的操作：
+```
+// 需要将 Object 转为 Integer
+Integer x = (Integer)list.get(0);
+```
+如果前面的 x 变量 改为 int 基本类型，则最终生成的字节码是：
+```
+// 1. 将object转为 Integer 2. 执行拆箱操作
+int x = ((Integer)list.get(0)).intValue();
+```
