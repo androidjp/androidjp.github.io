@@ -1512,7 +1512,244 @@ enum Sex {
     MALE, FEMALE
 }
 ```
-编译后得到：
+转换后代码：
 ```
+public final class Sex extends Enum<Sex> {
+    public static final Sex MALE;
+    public static final Sex FEMALE;
+    private static final Sex[] $VALUES;
+
+    static {
+        MALE = new Sex("MALE", 0);
+        FEMALE = new Sex("FEMALE", 1);
+        $VALUES = new Sex[]{MALE, FEMALE};
+    }
+
+    private Sex(String name, int ordinal) {
+        super(name, ordinal);
+    }
+
+    public static Sex[] values() {
+        return $VALUES.clone();
+    }
+
+    public static Sex valueOf(String name) {
+        return Enum.valueOf(Sex.class, name);
+    }
+}
+```
+可得知很多信息：
+1. Sex 类 是 final 类，无法被继承；
+2. MALE 和 FEMMALE 在类初始化时就会初始化，然后不可改变；
+3. 在初始化时，会给MALE和 FEMALE 赋上 ordinal 值；
+
+## 3.9 try-with-resources
+JDK 7 新增，对需要关闭的资源处理的特殊语法：
+```
+try (资源变量 = 创建资源对象) {
+
+} catch() {
+
+}
+```
+其中资源对象需要实现 `AutoCloseable` 接口，如：`InputStream`,`OutputStream`,`Connection`,`Statement`,`ResultSet`等接口，使用了 `try-with-resources` **可以不用写 finally 语句块，编译器会帮忙生成关闭资源代码**，如：
+```
+public static void main(String[] args) {
+    try(InputStream is = new FileInputStream("xxx.txt")) {
+        System.out.println(is);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+```
+转换为：
+```
+public static void main(String[] args) {
+    try {
+        InputStream is = new FileInputStream("xxx.txt");
+        Throwable t = null;
+        try {
+            System.out.println(is);
+        } catch(Throwable e1) {
+            // t 是我们代码出现的异常
+            t = e1;
+            throw e1;
+        } finally {
+            // 判断资源不为空
+            if (is != null) {
+                // 如果我们代码有异常
+                if (t != null) {
+                    try {
+                        is.close();
+                    } catch (Throwable e2) {
+                        // 如果 close 出现异常，作为被压制异常添加 (为了防止异常信息的丢失，把关闭资源的异常，添加到外层即将抛出的异常当中)
+                        t.addSuppressed(e2); // JDK 7 新增的方法
+                    }
+                } else {
+                    // 如果我们代码没有异常，close 出现的异常就是最后 catch 块中的 e
+                    is.close();
+                }
+            }
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+```
+这里有两点注意点：
+1. 在资源关闭出问题时，发生的异常为内部异常，为了不丢失这个内部异常信息，于是有了这个`addSuppressed()`方法，将内部异常添加到外部即将抛出的异常中；
+2. `addSuppressed(Throwable e)`方法是 JDK7 新增的方法，为了防止异常信息丢失；
+
+以下是一个例子，我们故意在关闭资源时抛异常：
+```
+public class ErrDemo {
+
+    public static void main(String[] args) {
+        try(MyResource resource = new MyResource()) {
+            int i = 1/0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static class MyResource implements AutoCloseable {
+        @Override
+        public void close() throws Exception {
+            throw new Exception("close error!!");
+        }
+    }
+}
+```
+输出：
+```
+java.lang.ArithmeticException: / by zero
+	at com.example.springbootstarterdemo.ErrDemo.main(ErrDemo.java:11)
+	Suppressed: java.lang.Exception: close error!!
+		at com.example.springbootstarterdemo.ErrDemo$MyResource.close(ErrDemo.java:20)
+		at com.example.springbootstarterdemo.ErrDemo.main(ErrDemo.java:12)
+```
+可以发现，的确，内部异常并没有丢失。
+
+## 3.10 方法重写时的桥接方法
+方法重写时，返回值分两种：
+* 父子类的返回值完全一致；
+* 子类返回值可以是父类返回值的子类（见下面例子）
 
 ```
+class A {
+    public Number m() {
+        return 1;
+    }
+}
+
+class B extends A {
+    @Override
+    public Integer m() { // Integer 是 Number 子类
+        return 2;
+    }
+}
+```
+那么，对于子类，编译器会这么处理：
+```
+class B extends A {
+    public Integer m() {
+        return 2;
+    }
+
+    // 此方法才是真正重写了父类 public Number m() 方法
+    public synthetic bridge Number m() {
+        // 调用了 public Integer m();
+        return m();
+    }
+}
+```
+这里头就蕴含了一个概念： **桥接方法**
+
+* 可以看到，以上例子转换出来的 **桥接方法**，其参数、方法名和返回值都是和父类一致的，的确是方法重写，然后内部实际调用了另一个方法；
+* 这个 桥接方法，对于我们来说是不可见的，只有jvm 可见，我们可以通过反射来验证：
+```
+for (Method m: B.class.getDeclaredMethods()) {
+    System.out.println(m);
+}
+// 最终输出的确是两个方法：
+// public java.lang.Integer test.candy.B.m()
+// public java.lang.Number test.candy.B.m()
+```
+
+## 3.11 匿名内部类
+对于匿名内部类，编译器会额外生成一些类，看例子：
+```
+public class Candy11 {
+    public static void main(String[] args) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("ok");
+            }
+        };
+    }
+}
+```
+转换后：
+```
+// Candy11$1.class [额外生成的类]
+final class Candy11$1 implements Runnable {
+    Candy11$1() {
+    }
+
+    public void run() {
+        System.out.println("ok");
+    }
+}
+
+// Candy11.class
+public class Candy11 {
+    public Candy11() {
+    }
+
+    public static void main(String[] args) {
+        Runnable var10000 = new Candy11$1();
+    }
+}
+```
+
+那如果，引用局部变量的匿名内部类，会怎么样？
+```
+public class Candy11 {
+    public static void test(String x) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("ok" + x);
+            }
+        };
+    }
+}
+```
+转换后：
+```
+// Candy11$1.class [额外生成的类]
+final class Candy11$1 implements Runnable {
+    int val$x;
+    Candy11$1(int x) {
+        this.val$x = x;
+    }
+
+    public void run() {
+        System.out.println("ok" + this.val$x);
+    }
+}
+
+// Candy11.class
+public class Candy11 {
+    public Candy11() {
+    }
+
+    public static void test(final int x) {
+        Runnable var10000 = new Candy11$1(x);
+    }
+}
+```
+这个例子不同点在于，由于匿名内部类引用了外部的某个变量，那么，编译器就会给他生成有参构造器。
+
+这个例子也说明了另一个重点： `x`是`final`，表示 `x`不能被再次赋值，原因也就一目了然了，如果`x`值发生改变，那么就和类里面的值不一致了，因为类里面的属性值无法跟着一起更新。
