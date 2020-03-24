@@ -1242,3 +1242,277 @@ Integer x = (Integer)list.get(0);
 // 1. 将object转为 Integer 2. 执行拆箱操作
 int x = ((Integer)list.get(0)).intValue();
 ```
+
+所以，像以上的泛型数组的 case，最终泛型都将视为 Object，再进行相关类型的强转 以及 拆装箱，这些麻烦事在JDK 1.5 后就不需要我们做了。
+
+我们看看上面这段code的反编译后得到的字节码指令：
+```
+public static void main(java.lang.String[]);
+descriptor: ([Ljava/lang/String;)V
+flags: ACC_PUBLIC, ACC_STATIC
+Code:
+    stack=2, locals=3, args_size=1
+        0: new           #2                  // class java/util/ArrayList
+        3: dup
+        4: invokespecial #3                  // Method java/util/ArrayList."<init>":()V
+        7: astore_1
+        8: aload_1
+        9: bipush        10
+        11: invokestatic  #4                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        14: invokeinterface #5,  2            // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+        19: pop
+        20: aload_1
+        21: iconst_0
+        22: invokeinterface #6,  2            // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+        27: checkcast     #7                  // class java/lang/Integer
+        30: astore_2
+        31: return
+    LineNumberTable:
+    line 12: 0
+    line 13: 8
+    line 14: 20
+    line 15: 31
+    LocalVariableTable:
+    Start  Length  Slot  Name   Signature
+        0      32     0  args   [Ljava/lang/String;
+        8      24     1  list   Ljava/util/List;
+        31       1     2     x   Ljava/lang/Integer;
+    LocalVariableTypeTable:
+    Start  Length  Slot  Name   Signature
+        8      24     1  list   Ljava/util/List<Ljava/lang/Integer;>;
+```
+我们看到上面这个`LocalVariableTypeTable`，这个 “局部变量类型Table”中，是会记录泛型信息的。
+
+
+而并不是源码中所有的泛型，都会被擦除：
+* 在方法里面的泛型局部变量，泛型会被擦除，最终变成Object，并且即便用反射也无法找回泛型信息；
+* 只有 方法入参 以及 方法返回值上的 泛型信息，能够利用反射得到；
+
+下面我们尝试通过 反射，去拿到方法参数和返回值上的泛型信息：
+```
+public class Candy3 {
+    public Set<Integer> test(List<String> list, Map<Integer, Object> map) {
+        return null;
+    }
+
+    public static void main(String[] args) throws NoSuchMethodException {
+        Method test = Candy3.class.getMethod("test", List.class, Map.class);
+        Type[] types = test.getGenericParameterTypes();
+        for (Type type : types) {
+            if (type instanceof ParameterizedType) { // 是否是泛型类型
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                System.out.println("原始类型: " + parameterizedType.getRawType());// 得到原始类型
+                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();// 得到泛型类型
+                for (int i = 0; i < actualTypeArguments.length; i++) {
+                    System.out.println(String.format("泛型参数[%d]: %s", i, actualTypeArguments[i]));
+                }
+            }
+        }
+        Type returnType = test.getGenericReturnType();
+        if (returnType instanceof ParameterizedType) {
+            ParameterizedType parameterizedReturnType = (ParameterizedType) returnType;
+            System.out.println("返回值类型：" + parameterizedReturnType.getRawType());
+            Type[] actualTypeArguments = parameterizedReturnType.getActualTypeArguments();// 得到泛型类型
+            for (int i = 0; i < actualTypeArguments.length; i++) {
+                System.out.println(String.format("泛型参数[%d]: %s", i, actualTypeArguments[i]));
+            }
+        }
+    }
+}
+```
+得到结果：
+```
+原始类型: interface java.util.List
+泛型参数[0]: class java.lang.String
+原始类型: interface java.util.Map
+泛型参数[0]: class java.lang.Integer
+泛型参数[1]: class java.lang.Object
+返回值类型：interface java.util.Set
+泛型参数[0]: class java.lang.Integer
+```
+> 注意：能够通过反射拿到的，只有 方法的参数和返回值 的泛型类型
+
+
+## 3.4 可变参数
+JDK 5 加入的新特性，可变参数。
+
+那我们可以看看可变参数在编译成字节码之后，会变成什么：
+```
+public class Candy3 {
+    public static void test(String... str) {
+        String[] strings = str;
+        System.out.println(strings.length);
+    }
+
+    public static void main(String[] args) throws NoSuchMethodException {
+        test("Hello", "world");
+    }
+}
+```
+字节码指令：
+
+![](../images/jvm/69.png)
+
+所以可以看到，实际上，编译后，`String...` 是被转成了`String[]`。
+
+
+## 3.5 foreach 循环
+JDK 5以后可用。
+
+### 1. 数组的循环
+```
+public class Candy3 {
+    public static void test(String... str) {
+        int[] arr = new int[]{1,2,3};
+        for (int item : arr) {
+            System.out.println(item);
+        }
+    }
+}
+```
+变成 for i ：
+```
+public static void test(String... str) {
+    int[] arr = new int[]{1, 2, 3}; // slot[1]
+    int[] var2 = arr;               // slot[2]
+    int var3 = arr.length; // slot[3] 这里很机智，先拿出了一个变量存 数组长度
+
+    for(int var4 = 0; var4 < var3; ++var4) { // slot[4] i
+        int item = var2[var4];  // slot[5] 存着遍历的每一个item
+        System.out.println(item);
+    }
+}
+```
+
+### 2. 集合的循环
+```
+public static void test(String... str) {
+    List<Integer> list = new ArrayList<>();
+    for (Integer item : list) {
+        System.out.println(item);
+    }
+}
+```
+变成了迭代器：
+```
+public static void test(String... str) {  // slot[0] str
+    List<Integer> list = new ArrayList(); // slot[1] list
+    Iterator var2 = list.iterator();      // slot[2] 迭代器对象
+
+    while(var2.hasNext()) {
+        Integer item = (Integer)var2.next(); // 每一个集合元素
+        System.out.println(item);
+    }
+}
+```
+只有是实现了`Iterable`接口的类型，才能支持这种 foreach语法糖 转 迭代器方式。
+
+## 3.6 switch 字符串
+JDK 7开始，switch支持字符串。
+
+```
+public static void choose(String str) {
+    switch (str) {
+        case "AM":
+            System.out.println("am");
+            break;
+        case "PM":
+            System.out.println("pm");
+            break;
+        default:
+            break;
+    }
+}
+```
+编译转换为：
+```
+public static void choose(String str) {
+    byte var2 = -1;
+    switch(str.hashCode()) {
+    case 2092:
+        if (str.equals("AM")) {
+            var2 = 0;
+        }
+        break;
+    case 2557:
+        if (str.equals("PM")) {
+            var2 = 1;
+        }
+    }
+
+    switch(var2) {
+    case 0:
+        System.out.println("am");
+        break;
+    case 1:
+        System.out.println("pm");
+    }
+}
+```
+看得出来，它其实不是真的说字符串可以做switch，而是利用了`hashCode()`，所以背后还是`int`基本类型的switch，并配合 `Object.equals()`，去选择到底走哪一条渠道，然后，再配合一个临时变量`var2:byte`，最终走对应分支的代码块。
+
+先比较`hashCode()`为了尽可能减少比较次数，因为绝大多数字符串的`hashCode`值是唯一的。而用`equals()`是为了防止`hashCode`冲突，如：`BM`和`C.`，他们的hashCode是一样的。
+
+所以，这个变量不能为null，否则，`equals()`凉凉。
+
+
+然后，我们再看看 switch-enum 的情况：
+```
+public class Candy3 {
+    enum Sex {
+        MALE, FEMALE
+    }
+
+    public static void choose(Sex sex) {
+        switch (sex) {
+            case MALE:
+                System.out.println("he");
+                break;
+            case FEMALE:
+                System.out.println("she");
+                break;
+            default:
+                break;
+        }
+    }
+}
+```
+转换之后会变得复杂：
+```
+public class Candy3 {
+    static class $MAP {
+        static int[] map = new int[2];
+        static {
+            map[Sex.MALE.ordinal()] = 1;
+            map[Sex.FEMALE.ordinal()] = 2;
+        }
+    }
+
+    public static void foo(Sex sex) {
+        int x = $MAP[sex.ordinal()];
+        switch (x) {
+            case 1:
+                //..........
+                break;
+            case 2:
+                //..........
+                break;
+        }
+    }
+}
+```
+好，分析一下：
+1. 首先，编译器会悄悄构建一个int数组，去构建索引，这个数组只有JVM可见；
+2. 实际的switch部分，变成了存 int基本类型的switch。
+
+## 3.8 枚举类
+JDK 7 新增。
+```
+enum Sex {
+    MALE, FEMALE
+}
+```
+编译后得到：
+```
+
+```
