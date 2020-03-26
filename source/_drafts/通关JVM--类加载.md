@@ -1,3 +1,13 @@
+---
+title: 通关JVM--类加载
+date: 2020-03-26 15:26:00
+categories:
+- Java
+- JVM
+tags:
+- JVM
+---
+
 # 1. 类文件结构
 
 我们尝试编译这个`HelloWorld.java`文件：
