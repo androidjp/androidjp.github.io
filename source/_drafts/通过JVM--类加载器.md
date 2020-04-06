@@ -270,4 +270,77 @@ public static <S> ServiceLoader<S> load(Class<S> service) {
 线程上下文类加载器 是 当前线程使用的类加载器，默认就是 应用程序类加载器，它内部就是由 Class.forName 调用了线程上下文类加载器 完成类加载，具体代码在 ServiceLoader 内部类 LazyIterator中。破坏双亲委派机制。
 
 
+## 5.5 自定义类加载器
+### 什么时候需要呢？
+1. 想加载非 classpath 随意路径中的类文件；
+2. 都通过接口来使用实现，希望解耦时，常用于框架设计；
+3. 这些类希望予以隔离，不同应用的同名类都可以加载，不冲突，常用于 tomcat 容器；
+
+### 步骤
+1. 继承 ClassLoader 父类；
+2. 要遵从 双亲委派机制，重写 `findClass`方法（注意，是`findClass`，不是`loadClass`）；
+3. 读取类文件的字节码（byte数组）；
+4. 调用父类的 `defineClass` 方法来加载类；
+5. 使用者调用该类加载器的 `loadClass` 方法；
+
+
+### 例子
+1. 首先，我们定义一个类，**没有包名**的类，然后，将其编译后，将.class文件放到 `D://myclasspath/`目录下；
+```java
+public class MyPrinter {
+    public void print(String word) {
+        System.out.println(String.format("I am printer!!! I want to print: %s", word));
+    }
+}
+```
+![](../images/jvm/78.png)
+2. 接着，我们定义一个自定义的 `ClassLoader`子类，并重写其`findClass`方法，让他去我们的自定义目录下去找类：
+```java
+/**
+ * 自定义 ClassLoader
+ */
+class MyClassLoader extends ClassLoader {
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        String path = "D:\\myclasspath\\" + name + ".class";
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            Files.copy(Paths.get(path), bos);
+            byte[] bytes = bos.toByteArray();
+            return defineClass(name, bytes, 0, bytes.length);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+```
+3. 然后，我们尝试在main方法中加载`MyPrinter`类：
+```java
+public class Load7 {
+    public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        MyClassLoader classLoader = new MyClassLoader();
+        Class<?> myPrinter = classLoader.loadClass("MyPrinter");
+        Class<?> myPrinter1 = classLoader.loadClass("MyPrinter");
+        // 同一个类加载器，重复加载同一个类时，会指向同一个类信息地址
+        System.out.println(myPrinter == myPrinter1);
+        MyClassLoader classLoader2 = new MyClassLoader();
+        Class<?> myPrinter2 = classLoader2.loadClass("MyPrinter");
+        // 而不同的类加载器，重复加载同一个类名时，其实类名一样，但却不会指向同一个类信息地址
+        System.out.println(classLoader == classLoader2);
+        // 因为判断两个类完全一致的条件：类名、包名、加载器 都一样
+
+        // 实例化，并调用方法
+        Object printer = myPrinter.newInstance();
+        Method printMethod = printer.getClass().getMethod("print", String.class);
+        printMethod.invoke(printer, "hello");
+    }
+}
+```
+得到打印结果：
+```
+true
+false
+I am printer!!! I want to print: hello
+```
 
