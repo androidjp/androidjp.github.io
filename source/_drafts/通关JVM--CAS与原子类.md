@@ -111,3 +111,12 @@ class DataContainer {
 ```
 以上就是自己动手实现的一个基于CAS的原子类。其他和 JDK5引入的juc包中的`AtomicInteger`等类的内部实现原理一致。
 
+## 乐观锁与悲观锁
+* CAS 是基于 乐观锁的思想：最乐观的估计，不怕别人来修改共享变量，没修改就好，就算修改了，大不了我再重试呗。
+* synchronized 是基于悲观锁的思想：最悲观的估计，得防着其他线程修改共享变量，我上了锁你们都别想改，等到我改完了解开了锁，你们才有机会。不过读倒是可以读。
+
+
+## 原子操作类
+juc（`java.util.concurrent`）中提供了原子操作类，可以提供线程安全的操作，如：`AtomicInteger`,`AtomicBoolean`等，底层都是采用CAS技术+volatile实现。
+
+
