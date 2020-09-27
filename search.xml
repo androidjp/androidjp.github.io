@@ -26,7 +26,7 @@
 <li>数据抽象原则【在权限细分层面，不要直接用”用户表可读”这样的具体字眼，而是抽象得更加易懂】</li>
 <li>数据抽象是借助于抽象许可权这样的概念实现的，如在账目管理活动中，可以使用信用、借方等抽象许可权，而不是使用操作系统提供的读、写、执行等具体的许可权。但RBAC并不强迫实现这些原则，安全管理员可以允许配置RBAC模型使它不支持这些原则。因此，RBAC支持数据抽象的程度与RBAC模型的实现细节有关。</li>
 </ul>
-<h2 id="RBAC是一个种族"><a href="#RBAC是一个种族" class="headerlink" title="RBAC是一个种族"></a>RBAC是一个种族</h2><p>RBAC96是一个模型族，其中包括RBAC0~RBAC3四个概念性模型。<br><img src="https://secure-static.wolai.com/static/qPonKu3wL1SS5w6W9r6Spi/image.png" alt=""></p>
+<h2 id="RBAC是一个种族"><a href="#RBAC是一个种族" class="headerlink" title="RBAC是一个种族"></a>RBAC是一个种族</h2><p>RBAC96是一个模型族，其中包括RBAC0~RBAC3四个概念性模型。<br><img src="/images/20200927/5.png" alt=""></p>
 <ol>
 <li>基本模型RBAC0定义了完全支持RBAC概念的任何系统的最低需求。</li>
 <li>RBAC1和RBAC2两者都包含RBAC0，但各自都增加了独立的特点，它们被称为高级模型。<ol>
@@ -43,13 +43,13 @@
 <li>许可（Permission）</li>
 <li>会话（Session）</li>
 </ol>
-<p><img src="images/20200927/0.png" alt=""></p>
+<p><img src="/images/20200927/0.png" alt=""></p>
 <p>每个角色至少具备一个权限，每个用户至少扮演一个角色；</p>
 <p>可以对两个完全不同的角色分配完全相同的访问权限；</p>
 <p>会话由用户控制，一个用户可以创建会话并激活多个用户角色，从而获取相应的访问权限，用户可以在会话中更改激活角色，并且用户可以主动结束一个会话；</p>
 <p>用户和角色是<strong>多对多</strong>关系，我和你都可以同时是酒店服务员；</p>
 <p>角色和许可（权限）是<strong>多对多</strong>关系，一个权利可以授予多个角色，一个角色也可拥有N个权利；</p>
-<h2 id="RBAC1"><a href="#RBAC1" class="headerlink" title="RBAC1"></a>RBAC1</h2><p>相比RBAC0，多了什么：角色间的继承关系（角色分层模型，角色之间有了上下级的区别）。<br><img src="images/20200927/1.png" alt=""></p>
+<h2 id="RBAC1"><a href="#RBAC1" class="headerlink" title="RBAC1"></a>RBAC1</h2><p>相比RBAC0，多了什么：角色间的继承关系（角色分层模型，角色之间有了上下级的区别）。<br><img src="/images/20200927/1.png" alt=""></p>
 <h2 id="RBAC2"><a href="#RBAC2" class="headerlink" title="RBAC2"></a>RBAC2</h2><p>相比RBAC0，多了什么：角色的访问控制，添加了职责分离关系。</p>
 <p>职责分离包括：</p>
 <ul>
@@ -61,12 +61,12 @@
 <li>动态职责分离（DSD）</li>
 <li>DSD用于 <strong>会话</strong>和<strong>角色</strong>之间的约束，动态决定怎么计划角色，如：一个用户拥有5个角色，只激活2个；</li>
 </ul>
-<p><img src="images/20200927/2.png" alt=""></p>
+<p><img src="/images/20200927/2.png" alt=""></p>
 <h2 id="RBAC3"><a href="#RBAC3" class="headerlink" title="RBAC3"></a>RBAC3</h2><p>1 + 2 = 3</p>
-<p><img src="images/20200927/3.png" alt=""></p>
+<p><img src="/images/20200927/3.png" alt=""></p>
 <h1 id="vs-ACL"><a href="#vs-ACL" class="headerlink" title="vs ACL"></a>vs ACL</h1><p>ACL，访问控制列表，核心在于：用户直接和权限挂钩。</p>
 <p>于是乎，相较于RBAC，ACL在授权时复杂度较高，如果加入用户组，也会导致系统不好理解，在判断用户是否拥有某个权限时较为困难。</p>
-<h1 id="一个较为完善的基于RBAC的ERD图"><a href="#一个较为完善的基于RBAC的ERD图" class="headerlink" title="一个较为完善的基于RBAC的ERD图"></a>一个较为完善的基于RBAC的ERD图</h1><p><img src="images/20200927/4.png" alt=""></p>
+<h1 id="一个较为完善的基于RBAC的ERD图"><a href="#一个较为完善的基于RBAC的ERD图" class="headerlink" title="一个较为完善的基于RBAC的ERD图"></a>一个较为完善的基于RBAC的ERD图</h1><p><img src="/images/20200927/4.png" alt=""></p>
 <ul>
 <li>以上所有的表，都可以加上created_date, updated_date 等较为common的列；</li>
 <li>当然，除了以上的这些数据库表，还可以设计“操作日志表”，用于存储（操作人、操作时间、操作内容）；</li>
