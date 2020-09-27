@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="看过笔者之前的文章 《Spring Boot 深入源码 – @Import》，大家会看到，一个例子中，我用@Configuration和@Component 好像效果没有什么区别呀~ @Import照样生效，@Bean方法也能生效呀。 那请问它们两者到底有什么区别呢？原理又是什么呢？ 本文尝试带你解读一番。">
+<meta name="keywords" content="Spring Boot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot 深入源码 -- @Component 与 @Configuration">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Spring%20Boot%20%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%20--%20@Component%20%E4%B8%8E%20@Configuration&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="看过笔者之前的文章 《Spring Boot 深入源码 – @Import》，大家会看到，一个例子中，我用@Configuration和@Component 好像效果没有什么区别呀~ @Import照样生效，@Bean方法也能生效呀。 那请问它们两者到底有什么区别呢？原理又是什么呢？ 本文尝试带你解读一番。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.264Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://jpuneng.cn/Spring%20Boot%20%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%20--%20@Component%20%E4%B8%8E%20@Configuration/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Spring Boot 深入源码 -- @Component 与 @Configuration | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Spring%20Boot%20%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%20--%20@Component%20%E4%B8%8E%20@Configuration/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring Boot 深入源码 -- @Component 与 @Configuration
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-22 08:56:05" itemprop="dateCreated datePublished" datetime="2019-10-22T08:56:05+08:00">2019-10-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring/" itemprop="url" rel="index">
+                    <span itemprop="name">Spring</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>看过笔者之前的文章 <a href="http://jpuneng.cn/Spring%20Boot%20%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%20--%20@Import/">《Spring Boot 深入源码 – @Import》</a>，大家会看到，一个例子中，我用<code>@Configuration</code>和<code>@Component</code> 好像效果没有什么区别呀~ <code>@Import</code>照样生效，<code>@Bean</code>方法也能生效呀。 那请问它们两者到底有什么区别呢？原理又是什么呢？ 本文尝试带你解读一番。</p>
+</blockquote><a id="more"></a>
+<h1 id="看看他们的源码注释"><a href="#看看他们的源码注释" class="headerlink" title="看看他们的源码注释"></a>看看他们的源码注释</h1><h2 id="Component"><a href="#Component" class="headerlink" title="@Component"></a>@Component</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@Target(ElementType.TYPE)</span><br><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">@Documented</span><br><span class="line">@Indexed</span><br><span class="line">public @interface Component &#123;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * The value may indicate a suggestion for a logical component name,</span><br><span class="line">	 * to be turned into a Spring bean in case of an autodetected component.</span><br><span class="line">	 * @return the suggested component name, if any (or empty String otherwise)</span><br><span class="line">	 */</span><br><span class="line">	String value() default &quot;&quot;;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Configuration"><a href="#Configuration" class="headerlink" title="@Configuration"></a>@Configuration</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line"> * ....................</span><br><span class="line"> * &lt;h2&gt;Constraints when authoring &#123;@code @Configuration&#125; classes&lt;/h2&gt;</span><br><span class="line"> *</span><br><span class="line"> * &lt;ul&gt;</span><br><span class="line"> * &lt;li&gt;Configuration classes must be provided as classes (i.e. not as instances returned</span><br><span class="line"> * from factory methods), allowing for runtime enhancements through a generated subclass.</span><br><span class="line"> * &lt;li&gt;Configuration classes must be non-final.</span><br><span class="line"> * &lt;li&gt;Configuration classes must be non-local (i.e. may not be declared within a method).</span><br><span class="line"> * &lt;li&gt;Any nested configuration classes must be declared as &#123;@code static&#125;.</span><br><span class="line"> * &lt;li&gt;&#123;@code @Bean&#125; methods may not in turn create further configuration classes</span><br><span class="line"> * (any such instances will be treated as regular beans, with their configuration</span><br><span class="line"> * annotations remaining undetected).</span><br><span class="line"> * &lt;/ul&gt;</span><br><span class="line"> *</span><br><span class="line"> * @author Rod Johnson</span><br><span class="line"> * @author Chris Beams</span><br><span class="line"> * @since 3.0</span><br><span class="line"> * @see Bean</span><br><span class="line"> * @see Profile</span><br><span class="line"> * @see Import</span><br><span class="line"> * @see ImportResource</span><br><span class="line"> * @see ComponentScan</span><br><span class="line"> * @see Lazy</span><br><span class="line"> * @see PropertySource</span><br><span class="line"> * @see AnnotationConfigApplicationContext</span><br><span class="line"> * @see ConfigurationClassPostProcessor</span><br><span class="line"> * @see org.springframework.core.env.Environment</span><br><span class="line"> * @see org.springframework.test.context.ContextConfiguration</span><br><span class="line"> */</span><br><span class="line">@Target(ElementType.TYPE)</span><br><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">@Documented</span><br><span class="line">@Component</span><br><span class="line">public @interface Configuration &#123;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * Explicitly specify the name of the Spring bean definition associated with the</span><br><span class="line">	 * &#123;@code @Configuration&#125; class. If left unspecified (the common case), a bean</span><br><span class="line">	 * name will be automatically generated.</span><br><span class="line">	 * &lt;p&gt;The custom name applies only if the &#123;@code @Configuration&#125; class is picked</span><br><span class="line">	 * up via component scanning or supplied directly to an</span><br><span class="line">	 * &#123;@link AnnotationConfigApplicationContext&#125;. If the &#123;@code @Configuration&#125; class</span><br><span class="line">	 * is registered as a traditional XML bean definition, the name/id of the bean</span><br><span class="line">	 * element will take precedence.</span><br><span class="line">	 * @return the explicit component name, if any (or empty String otherwise)</span><br><span class="line">	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator</span><br><span class="line">	 */</span><br><span class="line">	@AliasFor(annotation = Component.class)</span><br><span class="line">	String value() default &quot;&quot;;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从源码来看，<code>Configuration</code>本质还是<code>@Component</code>，所以，<code>&lt;context:component-scan/&gt;</code> 或 <code>@ComponentScan</code> 都能处理<code>@Configuration</code>注解的类。</p>
+<h1 id="Configuration-与-Component-的区别"><a href="#Configuration-与-Component-的区别" class="headerlink" title="@Configuration 与 @Component 的区别"></a>@Configuration 与 @Component 的区别</h1><p>一句话概括：<code>@Configuration</code> 中所有带 <code>@Bean</code> 注解的方法都会被<strong>动态代理</strong>，因此调用该方法返回的都是同一个实例。</p>
+<ul>
+<li><code>@Component</code>可以注解在任何类上，但是<code>@Configuration</code>使用有条件。</li>
+<li><code>@Configuration</code>中所有带<code>@Bean</code>注解的方法都会被动态代理，因此调用该方法返回的都是同一个实例。</li>
+<li><code>@Configuration</code>本质上还是<code>@Component</code>，所以，<code>&lt;context:component-scan/&gt;</code>或者<code>@ComponentScan</code>都能处理<code>@Configuration</code>注解类。</li>
+<li><code>@Configuration</code>标记的类必须符合一下要求：<ul>
+<li>配置类必须以类的形式提供（不能是工厂方法返回的实例），允许通过生成子类在运行时增强（cglib 动态代理）。</li>
+<li>配置类不能是 final 类（没法动态代理）。</li>
+<li>配置注解通常为了通过 <code>@Bean</code> 注解生成 Spring 容器管理的类</li>
+<li>配置类必须是非本地的（即不能在方法中声明，不能是 private）。</li>
+<li>任何嵌套配置类都必须声明为static。</li>
+<li><code>@Bean</code> 方法可能不会反过来创建进一步的配置类（也就是返回的 bean 如果带有 <code>@Configuration</code>，也不会被特殊处理，只会作为普通的 bean）。</li>
+</ul>
+</li>
+</ul>
+<h1 id="加载过程"><a href="#加载过程" class="headerlink" title="加载过程"></a>加载过程</h1><p>Spring 容器在启动时，会加载默认的一些 <code>PostProcessor</code>，其中就有 <code>ConfigurationClassPostProcessor</code>，这个后置处理程序专门处理带有 @Configuration 注解的类，这个程序会在 bean 定义加载完成后，在 bean 初始化前进行处理。主要处理的过程就是使用 cglib 动态代理增强类，而且是对其中带有 @Bean 注解的方法进行处理。</p>
+<blockquote>
+<p>这个加载过程，其实走的代码流程 和 我们之前分析 <code>@Import</code>时走的流程是十分相似的，同样会调用 <code>ConfigurationClassPostProcessor</code> 类，只是对于<code>@Component</code>和<code>@Configuration</code>调用的方法不同。</p>
+</blockquote>
+<p>注释如下：<br>Prepare the Configuration classes for servicing bean requests at runtime by replacing them with CGLIB-enhanced subclasses.</p>
+<blockquote>
+<p>通过用 CGLIB 增强的子类替换 Bean 请求，为运行时的 Bean 请求提供服务准备配置类。 </p>
+</blockquote>
+<p>在 <code>ConfigurationClassPostProcessor</code> 中的 <code>postProcessBeanFactory</code> 方法主要流程如下：</p>
+<ol>
+<li>传入<code>ConfigurableListableBeanFactory</code>对象，并获取其factoryId。</li>
+<li>判断这个factoryId是否已经被处理过，如果已被处理，则抛异常。</li>
+<li>如果 BeanDefinitionRegistryPostProcessor hook apparently not supported，则 Simply call processConfigurationClasses lazily at this point then，调用<code>processConfigBeanDefinitions</code>方法，其实和<code>@Component</code>注解跑的逻辑一样，去开始注入bean。</li>
+<li><strong>调用 <code>enhanceConfigurationClasses</code> 方法</strong>：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">   /**</span><br><span class="line"> * Post-processes a BeanFactory in search of Configuration class BeanDefinitions;</span><br><span class="line"> * any candidates are then enhanced by a &#123;@link ConfigurationClassEnhancer&#125;.</span><br><span class="line"> * Candidate status is determined by BeanDefinition attribute metadata.</span><br><span class="line"> * @see ConfigurationClassEnhancer</span><br><span class="line"> */</span><br><span class="line">public void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) &#123;</span><br><span class="line">	Map&lt;String, AbstractBeanDefinition&gt; configBeanDefs = new LinkedHashMap&lt;&gt;();</span><br><span class="line">	for (String beanName : beanFactory.getBeanDefinitionNames()) &#123;</span><br><span class="line">		BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);</span><br><span class="line">		if (ConfigurationClassUtils.isFullConfigurationClass(beanDef)) &#123;</span><br><span class="line">			// ...........</span><br><span class="line">			configBeanDefs.put(beanName, (AbstractBeanDefinition) beanDef);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	if (configBeanDefs.isEmpty()) &#123;</span><br><span class="line">		// nothing to enhance -&gt; return immediately</span><br><span class="line">		return;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();</span><br><span class="line">	for (Map.Entry&lt;String, AbstractBeanDefinition&gt; entry : configBeanDefs.entrySet()) &#123;</span><br><span class="line">		AbstractBeanDefinition beanDef = entry.getValue();</span><br><span class="line">		// If a @Configuration class gets proxied, always proxy the target class</span><br><span class="line">		beanDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);</span><br><span class="line">		try &#123;</span><br><span class="line">			// Set enhanced subclass of the user-specified bean class</span><br><span class="line">			Class&lt;?&gt; configClass = beanDef.resolveBeanClass(this.beanClassLoader);</span><br><span class="line">			if (configClass != null) &#123;</span><br><span class="line">				Class&lt;?&gt; enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);</span><br><span class="line">				if (configClass != enhancedClass) &#123;</span><br><span class="line">					// ..............</span><br><span class="line">					beanDef.setBeanClass(enhancedClass);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		catch (Throwable ex) &#123;</span><br><span class="line">			throw new IllegalStateException(&quot;Cannot load configuration class: &quot; + beanDef.getBeanClassName(), ex);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>第一个for循环：查找所有带有 <code>@Configuration</code> 注解的bean 定义；</li>
+<li>第二个for循环：通过 <code>Class&lt;?&gt; enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);</code> 方法 对类进行增强；</li>
+<li>使用增强后的类 替换原有的 <code>beanClass</code>：<code>beanDef.setBeanClass(enhancedClass);</code>；</li>
+<li>之后，所有带有<code>@Configuration</code>注解的 bean 都已经变成增强的类。</li>
+</ul>
+</li>
+</ol>
+<p>我们进一步看这个<code>enhance()</code> 方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Loads the specified class and generates a CGLIB subclass of it equipped with</span><br><span class="line"> * container-aware callbacks capable of respecting scoping and other bean semantics.</span><br><span class="line"> * @return the enhanced subclass</span><br><span class="line"> */</span><br><span class="line">public Class&lt;?&gt; enhance(Class&lt;?&gt; configClass, @Nullable ClassLoader classLoader) &#123;</span><br><span class="line">    if (EnhancedConfiguration.class.isAssignableFrom(configClass)) &#123;</span><br><span class="line">        if (logger.isDebugEnabled()) &#123;</span><br><span class="line">            logger.debug(String.format(&quot;Ignoring request to enhance %s as it has &quot; +</span><br><span class="line">                    &quot;already been enhanced. This usually indicates that more than one &quot; +</span><br><span class="line">                    &quot;ConfigurationClassPostProcessor has been registered (e.g. via &quot; +</span><br><span class="line">                    &quot;&lt;context:annotation-config&gt;). This is harmless, but you may &quot; +</span><br><span class="line">                    &quot;want check your configuration and remove one CCPP if possible&quot;,</span><br><span class="line">                    configClass.getName()));</span><br><span class="line">        &#125;</span><br><span class="line">        return configClass;</span><br><span class="line">    &#125;</span><br><span class="line">    Class&lt;?&gt; enhancedClass = createClass(newEnhancer(configClass, classLoader));</span><br><span class="line">    if (logger.isTraceEnabled()) &#123;</span><br><span class="line">        logger.trace(String.format(&quot;Successfully enhanced %s; enhanced class name is: %s&quot;,</span><br><span class="line">                configClass.getName(), enhancedClass.getName()));</span><br><span class="line">    &#125;</span><br><span class="line">    return enhancedClass;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>内部调用了<code>newEnhancer()</code>方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Creates a new CGLIB &#123;@link Enhancer&#125; instance.</span><br><span class="line"> * 创建一个新的 CGLIB 实例（Enhancer 对象）</span><br><span class="line"> */</span><br><span class="line">private Enhancer newEnhancer(Class&lt;?&gt; configSuperClass, @Nullable ClassLoader classLoader) &#123;</span><br><span class="line">    Enhancer enhancer = new Enhancer();</span><br><span class="line">    enhancer.setSuperclass(configSuperClass);</span><br><span class="line">    enhancer.setInterfaces(new Class&lt;?&gt;[] &#123;EnhancedConfiguration.class&#125;);</span><br><span class="line">    enhancer.setUseFactory(false);</span><br><span class="line">    enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);</span><br><span class="line">    enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));</span><br><span class="line">    enhancer.setCallbackFilter(CALLBACK_FILTER);</span><br><span class="line">    enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());</span><br><span class="line">    return enhancer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面方法我们看到， 这个<code>enhancer.setCallbackFilter(CALLBACK_FILTER);</code> 实际上是将一个CallbackFilter接口实现类设置给到这个增强类。</p>
+<p>通过 cglib 代理的类在调用方法时，会通过 <code>CallbackFilter</code> 调用，这里的 <code>CALLBACK_FILTER</code> 如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// The callbacks to use. Note that these callbacks must be stateless.</span><br><span class="line">private static final Callback[] CALLBACKS = new Callback[] &#123;</span><br><span class="line">        new BeanMethodInterceptor(),</span><br><span class="line">        new BeanFactoryAwareMethodInterceptor(),</span><br><span class="line">        NoOp.INSTANCE</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">private static final ConditionalCallbackFilter CALLBACK_FILTER = new ConditionalCallbackFilter(CALLBACKS);</span><br></pre></td></tr></table></figure>
+<p>其实是一个<code>ConditionalCallbackFilter</code>类对象，它的构造器传入了对象，分别是：</p>
+<ul>
+<li><code>new BeanMethodInterceptor()</code><ul>
+<li><code>ConfigurationClassEnhancer</code>的一个静态内部类</li>
+</ul>
+</li>
+<li><code>new BeanFactoryAwareMethodInterceptor()</code><ul>
+<li><code>ConfigurationClassEnhancer</code>的一个静态内部类</li>
+</ul>
+</li>
+<li><code>NoOp.INSTANCE</code></li>
+</ul>
+<p>其中，<code>BeanMethodInterceptor</code> 匹配方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public boolean isMatch(Method candidateMethod) &#123;</span><br><span class="line">    // 方法有 @Bean 注解，则返回true</span><br><span class="line">    return BeanAnnotationHelper.isBeanAnnotated(candidateMethod);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//BeanAnnotationHelper</span><br><span class="line">public static boolean isBeanAnnotated(Method method) &#123;</span><br><span class="line">    // 方法有没有 @Bean 注解</span><br><span class="line">    return AnnotatedElementUtils.hasAnnotation(method, Bean.class);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另一个 <code>BeanFactoryAwareMethodInterceptor</code> 匹配的方法则：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public boolean isMatch(Method candidateMethod) &#123;</span><br><span class="line">    return (candidateMethod.getName().equals(&quot;setBeanFactory&quot;) &amp;&amp;</span><br><span class="line">            candidateMethod.getParameterTypes().length == 1 &amp;&amp;</span><br><span class="line">            BeanFactory.class == candidateMethod.getParameterTypes()[0] &amp;&amp;</span><br><span class="line">            BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass())); // 当前类需要实现 `BeanFactoryAware`接口</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当前类还需要实现 <code>BeanFactoryAware</code> 接口，上面的 <code>isMatch</code> 就是匹配的这个接口的方法。</p>
+<h1 id="Bean-注解方法执行策略"><a href="#Bean-注解方法执行策略" class="headerlink" title="@Bean 注解方法执行策略"></a>@Bean 注解方法执行策略</h1><p>先看看一个简单例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@Configuration</span><br><span class="line">public class MyBeanConfig &#123;</span><br><span class="line"></span><br><span class="line">    @Bean</span><br><span class="line">    public Country country()&#123;</span><br><span class="line">        return new Country();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Bean</span><br><span class="line">    public UserInfo userInfo()&#123;</span><br><span class="line">        return new UserInfo(country());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>相信大多数人第一次看到上面 userInfo() 中调用 country() 时，会认为这里的 Country 和上面 @Bean 方法返回的 Country 可能不是同一个对象，因此可能会通过下面的方式来替代这种方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 或者 @Resource</span><br><span class="line">@Autowired</span><br><span class="line">private Country country;</span><br></pre></td></tr></table></figure>
+<p>实际上不需要这么做（后面会给出需要这样做的场景），直接调用 <code>country()</code> 方法返回的是同一个实例。</p>
+</blockquote>
+<p>下面看调用 <code>country()</code> 和 <code>userInfo()</code> 方法时的逻辑。</p>
+<p>现在我们已经知道 <code>@Configuration</code> 注解的类是如何被处理的了，现在关注上面的 <code>BeanMethodInterceptor</code>，看看带有 <code>@Bean</code> 注解的方法执行的逻辑。下面分解来看 <code>BeanMethodInterceptor.intercept</code> 方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Enhance a &#123;@link Bean @Bean&#125; method to check the supplied BeanFactory for the</span><br><span class="line"> * existence of this bean object.</span><br><span class="line"> * @throws Throwable as a catch-all for any exception that may be thrown when invoking the</span><br><span class="line"> * super implementation of the proxied method i.e., the actual &#123;@code @Bean&#125; method</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">@Nullable</span><br><span class="line">public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,</span><br><span class="line">            MethodProxy cglibMethodProxy) throws Throwable &#123;</span><br><span class="line">    // 1. 首先通过反射从增强的 Configuration 注解类中获取 beanFactory</span><br><span class="line">    ConfigurableBeanFactory beanFactory = getBeanFactory(enhancedConfigInstance);</span><br><span class="line">    </span><br><span class="line">    // 2. 通过方法获取 beanName，默认是方法名，可通过 @Bean 注解指定</span><br><span class="line">    String beanName = BeanAnnotationHelper.determineBeanNameFor(beanMethod);</span><br><span class="line"></span><br><span class="line">    // 3. 确定这个bean 是否指定了代理的范围（默认下面的if 条件为 false，不会执行）</span><br><span class="line">    // Determine whether this bean is a scoped-proxy</span><br><span class="line">    if (BeanAnnotationHelper.isScopedProxy(beanMethod)) &#123;</span><br><span class="line">        String scopedBeanName = ScopedProxyCreator.getTargetBeanName(beanName);</span><br><span class="line">        if (beanFactory.isCurrentlyInCreation(scopedBeanName)) &#123;</span><br><span class="line">            beanName = scopedBeanName;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 省略部分 Factorybean 相关代码 ...........</span><br><span class="line"></span><br><span class="line">    // 判断当前执行的方法是否为正在执行的 @Bean 方法</span><br><span class="line">    // 因为存在在 userInfo() 方法中调用 country() 方法</span><br><span class="line">    // 如果 country() 也有 @Bean 注解，那么这个返回值就是 false.</span><br><span class="line">    if (isCurrentlyInvokedFactoryMethod(beanMethod)) &#123;</span><br><span class="line">        // 判断返回值类型，如果是 BeanFactoryPostProcessor 就写警告日志</span><br><span class="line">        if (logger.isInfoEnabled() &amp;&amp;</span><br><span class="line">                BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) &#123;</span><br><span class="line">            logger.info(String.format(&quot;@Bean method %s.%s is non-static and returns an object &quot; +</span><br><span class="line">                            &quot;assignable to Spring&apos;s BeanFactoryPostProcessor interface. This will &quot; +</span><br><span class="line">                            &quot;result in a failure to process annotations such as @Autowired, &quot; +</span><br><span class="line">                            &quot;@Resource and @PostConstruct within the method&apos;s declaring &quot; +</span><br><span class="line">                            &quot;@Configuration class. Add the &apos;static&apos; modifier to this method to avoid &quot; +</span><br><span class="line">                            &quot;these container lifecycle issues; see @Bean javadoc for complete details.&quot;,</span><br><span class="line">                    beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));</span><br><span class="line">        &#125;</span><br><span class="line">        // 直接调用原方法创建 bean</span><br><span class="line">        return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);</span><br><span class="line">    &#125;</span><br><span class="line">    // 如果不满足上面 if，也就是在 userInfo() 中调用的 country() 方法</span><br><span class="line">    return resolveBeanReference(beanMethod, beanMethodArgs, beanFactory, beanName);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>关于 <code>isCurrentlyInvokedFactoryMethod</code> 方法</strong>:</p>
+<p>可以参考 <code>SimpleInstantiationStrategy</code> 中的 <code>instantiate</code> 方法，这里先设置的调用方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">currentInvokedFactoryMethod.set(factoryMethod);</span><br><span class="line">return factoryMethod.invoke(factoryBean, args); // 反射</span><br></pre></td></tr></table></figure>
+<p>而通过方法内部直接调用 country() 方法时，不走上面的逻辑，直接进的代理方法，也就是当前的 intercept方法，因此当前的工厂方法和执行的方法就不相同了。</p>
+</blockquote>
+<p><code>obtainBeanInstanceFromFactory</code> 方法比较简单，就是通过 <code>beanFactory.getBean</code> 获取 <code>Country</code>，如果已经创建了就会直接返回，如果没有执行过，就会通过 <code>invokeSuper</code> 首次执行。</p>
+<p>因此我们在 <code>@Configuration</code> 注解定义的 bean 方法中可以直接调用方法，不需要 <code>@Autowired</code> 注入后使用。</p>
+<h1 id="回头看看-Component"><a href="#回头看看-Component" class="headerlink" title="回头看看 @Component"></a>回头看看 @Component</h1><p><code>@Component</code> 注解并没有通过 cglib 来代理 <code>@Bean</code>方法的调用，因此像下面这样配置时，就是两个不同的 <code>country</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@Component</span><br><span class="line">public class MyBeanConfig &#123;</span><br><span class="line"></span><br><span class="line">    @Bean</span><br><span class="line">    public Country country()&#123;</span><br><span class="line">        return new Country();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Bean</span><br><span class="line">    public UserInfo userInfo()&#123;</span><br><span class="line">        return new UserInfo(country());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有些特殊情况下，我们不希望 <code>MyBeanConfig</code> 被代理（代理后会变成 <code>WebMvcConfig$$EnhancerBySpringCGLIB$$8bef3235293</code>）时，就得用 <code>@Component</code>，这种情况下，上面的写法就需要改成下面这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">@Component</span><br><span class="line">public class MyBeanConfig &#123;</span><br><span class="line"></span><br><span class="line">    @Autowired</span><br><span class="line">    private Country country;</span><br><span class="line"></span><br><span class="line">    @Bean</span><br><span class="line">    public Country country()&#123;</span><br><span class="line">        return new Country();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Bean</span><br><span class="line">    public UserInfo userInfo()&#123;</span><br><span class="line">        return new UserInfo(country);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>就能保证使用的是同一个 <code>country</code> 实例。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>通过源码分析，我们知道了一些关于<code>@Configuration</code>的知识点：</p>
+<ol>
+<li>为什么<code>@Configuration</code>不能是 final？ <blockquote>
+<p>因为源码告诉我们，<code>@Configuration</code> bean需要被动态代理，进行运行时增强，而动态代理无法搞定final 类（所以我们在写unit test 的时候，想要mock 一些 final的类和成员属性，基本是无从下手的，比如，你想mock一个<code>String</code>对象，是不给的）</p>
+</blockquote>
+</li>
+<li><code>@Configuration</code>和<code>@Component</code>都会为其下的<code>@Bean</code>方法 解析注入对象。 <blockquote>
+<p>对的，源码告诉我们，因为<code>@Configuration</code>属于<code>@Component</code>，那么，就一定会走<code>ConfigurationClassPostProcessor.processConfigBeanDefinitions()</code>方法，去构建并验证其结构，最终都会调用<code>ConfigurationClassParser.parse</code>方法。</p>
+<p><code>processConfigBeanDefinitions</code>方法做了以下关键两个步骤：</p>
+<ol>
+<li><code>checkConfigurationClassCandidate()</code>：查看一个BeanDefinition是不是可以被parser解析，逻辑是如果有<code>@Configuration</code>的那么是full，如果是有<code>@Component</code>，<code>@ComponentScan</code>，<code>@Import</code>， <code>@ImportResource</code>四个注解，或者方法里面有<code>@Bean</code>注解，那么也可以被解析，属于lite。</li>
+<li><code>ConfigurationClassParser.parse()</code>：用于分析<code>@Configuration</code>注解的配置类，产生一组<code>ConfigurationClass</code>对象。它的分析过程会接受一组种子配置类(调用者已知的配置类，通常很可能只有一个)，从这些种子配置类开始分析所有关联的配置类，分析过程主要是递归分析配置类的注解@Import，配置类内部嵌套类，找出其中所有的配置类，然后返回这组配置类。这个工具类自身的逻辑并不注册bean定义，它的主要任务是发现<code>@Configuration</code>注解的所有配置类并将这些配置类交给调用者(调用者会通过其他方式注册其中的bean定义)，而对于非<code>@Configuration</code>注解的其他bean定义，比如<code>@Component</code>注解的bean定义，该工具类使用另外一个工具<code>ComponentScanAnnotationParser</code>扫描和注册它们。</li>
+</ol>
+</blockquote>
+</li>
+<li>为什么<code>@Configuration</code> 中的<code>@Bean</code>方法使用另一个bean对象时，可以直接调用另一个带有<code>@Bean</code>的方法来获取同一个bean， 而<code>@Component</code>却不行呢？<blockquote>
+<p>源码告诉我们，因为<code>@Configuration</code>修饰的bean，在扫描验证过程结束后，会多一步 增强过程，会将自身的<code>@Bean</code>方法调用处理过程给到代理类是执行，从而控制调用方法时是否依然创建新的对象。</p>
+</blockquote>
+</li>
+</ol>
+<h1 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h1><ul>
+<li><a href="https://blog.csdn.net/isea533/article/details/78072133" target="_blank" rel="noopener">https://blog.csdn.net/isea533/article/details/78072133</a></li>
+<li><a href="http://makaidong.com/chuliang/970048_20893468.html" target="_blank" rel="noopener">http://makaidong.com/chuliang/970048_20893468.html</a></li>
+<li><a href="https://blog.csdn.net/andy_zhang2007/article/details/78549773" target="_blank" rel="noopener">https://blog.csdn.net/andy_zhang2007/article/details/78549773</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/Spring%20Boot%20%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%20--%20@Import/" rel="next" title="Spring Boot 深入源码 -- @Import">
+                  <i class="fa fa-chevron-left"></i> Spring Boot 深入源码 -- @Import
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/JDK-8/" rel="prev" title="JDK 8">
+                  JDK 8 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#看看他们的源码注释"><span class="nav-number">1.</span> <span class="nav-text">看看他们的源码注释</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Component"><span class="nav-number">1.1.</span> <span class="nav-text">@Component</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Configuration"><span class="nav-number">1.2.</span> <span class="nav-text">@Configuration</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Configuration-与-Component-的区别"><span class="nav-number">2.</span> <span class="nav-text">@Configuration 与 @Component 的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#加载过程"><span class="nav-number">3.</span> <span class="nav-text">加载过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Bean-注解方法执行策略"><span class="nav-number">4.</span> <span class="nav-text">@Bean 注解方法执行策略</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#回头看看-Component"><span class="nav-number">5.</span> <span class="nav-text">回头看看 @Component</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文章"><span class="nav-number">7.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

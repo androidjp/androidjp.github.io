@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="通过全类名找类，估计大家都尝试过，但，通过 simple类名去找类，估计少用，这不，有个业务场景，尝试通过这个方式去解决，并进而踩坑的过程分享。">
+<meta name="keywords" content="spring">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot 通过类名找到类的踩坑之路">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Spring%20Boot%20%E9%80%9A%E8%BF%87%E7%B1%BB%E5%90%8D%E6%89%BE%E5%88%B0%E7%B1%BB%E7%9A%84%E8%B8%A9%E5%9D%91%E4%B9%8B%E8%B7%AF&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="通过全类名找类，估计大家都尝试过，但，通过 simple类名去找类，估计少用，这不，有个业务场景，尝试通过这个方式去解决，并进而踩坑的过程分享。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;20200805&#x2F;1.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;20200805&#x2F;2.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;20200805&#x2F;3.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;20200805&#x2F;4.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;20200805&#x2F;5.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;20200805&#x2F;6.png">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.265Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;20200805&#x2F;1.png">
+
+<link rel="canonical" href="http://jpuneng.cn/Spring%20Boot%20%E9%80%9A%E8%BF%87%E7%B1%BB%E5%90%8D%E6%89%BE%E5%88%B0%E7%B1%BB%E7%9A%84%E8%B8%A9%E5%9D%91%E4%B9%8B%E8%B7%AF/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Spring Boot 通过类名找到类的踩坑之路 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Spring%20Boot%20%E9%80%9A%E8%BF%87%E7%B1%BB%E5%90%8D%E6%89%BE%E5%88%B0%E7%B1%BB%E7%9A%84%E8%B8%A9%E5%9D%91%E4%B9%8B%E8%B7%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring Boot 通过类名找到类的踩坑之路
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-05 16:07:48" itemprop="dateCreated datePublished" datetime="2020-08-05T16:07:48+08:00">2020-08-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>通过全类名找类，估计大家都尝试过，但，通过 simple类名去找类，估计少用，这不，有个业务场景，尝试通过这个方式去解决，并进而踩坑的过程分享。</p>
+</blockquote>
+<a id="more"></a>
+
+<h1 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h1><p>我通过MQ 传给你一个message，message上面有一堆的header，每个header都是一个json，我还传了一个headerType 列表，用于告诉 consumer，每个header到底是什么类型的，String？Integer？CustomObj？ 换言之，就是多了一份类型描述文档：</p>
+<p>Message Header:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"breadcrumbId"</span>: <span class="string">"ID-76265358ec77-1594171418720-0-187147"</span>,</span><br><span class="line">    <span class="attr">"CamelJmsDeliveryMode"</span>: <span class="string">"2"</span>,</span><br><span class="line">    <span class="attr">"CARRIED_DATA_LIST"</span>: <span class="string">"&#123;\"EVENT_ACTION\":\"java.lang.String\",\"EVENT_NUMBER_RELATIONSHIP\":\"com.example.entity.NumberRelationship\",\"EVENT_DATE_TIME\":\"java.time.LocalDateTime\"&#125;"</span>,</span><br><span class="line">    <span class="attr">"EVENT_ACTION"</span>: <span class="string">"NEW"</span>,</span><br><span class="line">    <span class="attr">"EVENT_DATE_TIME"</span>: <span class="string">"\"2020-07-24T10:37:27\""</span>,</span><br><span class="line">    <span class="attr">"EVENT_NUMBER_RELATIONSHIP"</span>: <span class="string">"&#123;\"orderNumber\":\"Order001\",\"traceNumber\":\"TraceId01\",\"customerId\":\"user001\"&#125;"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>好，那consumer方要拿到这份json，然后，为了方便做一些处理，consumer方会尝试根据 这份message header里头的  <code>CARRIED_DATA_LIST</code> 这份类型清单，然后，根据这个类型去做一个 JSON to Java Object 的映射，然后方便我们以Java Object 的方式去进行后续的logic处理。</p>
+<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>于是，我们有了一个<code>OwnClassUtil.java</code>，在类加载过程中就扫描并加载好所有里里外外的类名：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OwnClassUtil</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; ownClassList;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ownClassList = getAllClassName();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Class <span class="title">findDeclaredClassName</span><span class="params">(String className)</span> <span class="keyword">throws</span> ClassNotFoundException </span>&#123;</span><br><span class="line">        Class clazz = findClassByCompleteName(className);</span><br><span class="line">        <span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> clazz;</span><br><span class="line">        &#125;</span><br><span class="line">        String[] splits = className.split(<span class="string">"\\."</span>);</span><br><span class="line">        String simpleClassName = splits[splits.length - <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">return</span> findClassBySimpleClassName(simpleClassName);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Class <span class="title">findClassByCompleteName</span><span class="params">(String className)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> Class.forName(className);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Class <span class="title">findClassBySimpleClassName</span><span class="params">(String simpleClassName)</span> <span class="keyword">throws</span> ClassNotFoundException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">"String"</span>.equals(simpleClassName)) &#123;</span><br><span class="line">            <span class="keyword">return</span> String.class;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (ownClassList.contains(simpleClassName)) &#123;</span><br><span class="line">            <span class="keyword">return</span> Class.forName(simpleClassName);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (String className : ownClassList) &#123;</span><br><span class="line">            String[] strings = className.split(<span class="string">"\\."</span>);</span><br><span class="line">            <span class="keyword">if</span> (strings.length == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (strings[strings.length - <span class="number">1</span>].equals(simpleClassName)) &#123;</span><br><span class="line">                <span class="keyword">return</span> Class.forName(className);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> ClassNotFoundException(<span class="string">"can not find class "</span> + simpleClassName);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">getAllClassName</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        List&lt;String&gt; names = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        names.addAll(getClassName(<span class="string">"com.example.myapp"</span>));</span><br><span class="line">        names.addAll(getClassName(<span class="string">"com.example.common"</span>));</span><br><span class="line">        <span class="keyword">return</span> names;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">getClassName</span><span class="params">(String packageName)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> getClassName(packageName, <span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">getClassName</span><span class="params">(String packageName, <span class="keyword">boolean</span> childPackage)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        List&lt;String&gt; fileNames = <span class="keyword">null</span>;</span><br><span class="line">        ClassLoader loader = Thread.currentThread().getContextClassLoader();</span><br><span class="line">        String packagePath = packageName.replace(<span class="string">"."</span>, <span class="string">"/"</span>);</span><br><span class="line">        Enumeration&lt;URL&gt; resources = loader.getResources(packagePath);</span><br><span class="line">        URL url = loader.getResource(packagePath);</span><br><span class="line">        <span class="keyword">while</span> (resources.hasMoreElements()) &#123;</span><br><span class="line">            url = resources.nextElement();</span><br><span class="line">            <span class="keyword">if</span> (!url.toString().contains(<span class="string">"test-classes"</span>)) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (url != <span class="keyword">null</span>) &#123;</span><br><span class="line">            String type = url.getProtocol();</span><br><span class="line">            <span class="keyword">if</span> (<span class="string">"file"</span>.equals(type)) &#123;</span><br><span class="line">                fileNames = getClassNameByFile(url.getPath(), <span class="keyword">null</span>, childPackage);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">"jar"</span>.equals(type)) &#123;</span><br><span class="line">                fileNames = getClassNameByJar(url.getPath(), childPackage);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            fileNames = getClassNameByJars(((URLClassLoader) loader).getURLs(), packagePath, childPackage);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> fileNames;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">getClassNameByFile</span><span class="params">(String filePath, List&lt;String&gt; className, <span class="keyword">boolean</span> childPackage)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; myClassName = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        File file = <span class="keyword">new</span> File(filePath);</span><br><span class="line">        File[] childFiles = file.listFiles();</span><br><span class="line">        <span class="keyword">for</span> (File childFile : childFiles) &#123;</span><br><span class="line">            <span class="keyword">if</span> (childFile.isDirectory()) &#123;</span><br><span class="line">                <span class="keyword">if</span> (childPackage) &#123;</span><br><span class="line">                    myClassName.addAll(getClassNameByFile(childFile.getPath(), myClassName, childPackage));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                String childFilePath = childFile.getPath();</span><br><span class="line">                <span class="keyword">if</span> (childFilePath.endsWith(<span class="string">".class"</span>)) &#123;</span><br><span class="line">                    childFilePath = childFilePath.substring(childFilePath.indexOf(<span class="string">"classes"</span>) + <span class="number">8</span>,</span><br><span class="line">                            childFilePath.lastIndexOf(<span class="string">"."</span>));</span><br><span class="line">                    childFilePath = childFilePath.replace(<span class="string">"\\"</span>, <span class="string">"."</span>);</span><br><span class="line">                    childFilePath = childFilePath.replace(<span class="string">"/"</span>, <span class="string">"."</span>);</span><br><span class="line">                    myClassName.add(childFilePath);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> myClassName;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">getClassNameByJar</span><span class="params">(String jarPath, <span class="keyword">boolean</span> childPackage)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; myClassName = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        String[] jarInfo = jarPath.split(<span class="string">"!"</span>);</span><br><span class="line">        String jarFilePath = jarInfo[<span class="number">0</span>].substring(jarInfo[<span class="number">0</span>].indexOf(<span class="string">"/"</span>));</span><br><span class="line">        String packagePath = jarInfo[<span class="number">1</span>].substring(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            JarFile jarFile = <span class="keyword">new</span> JarFile(jarFilePath);</span><br><span class="line">            Enumeration&lt;JarEntry&gt; entrys = jarFile.entries();</span><br><span class="line">            <span class="keyword">while</span> (entrys.hasMoreElements()) &#123;</span><br><span class="line">                JarEntry jarEntry = entrys.nextElement();</span><br><span class="line">                String entryName = jarEntry.getName();</span><br><span class="line">                <span class="keyword">if</span> (entryName.endsWith(<span class="string">".class"</span>)) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (childPackage) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (entryName.startsWith(packagePath)) &#123;</span><br><span class="line">                            entryName = entryName.replace(<span class="string">"/"</span>, <span class="string">"."</span>).substring(<span class="number">0</span>, entryName.lastIndexOf(<span class="string">"."</span>));</span><br><span class="line">                            myClassName.add(entryName);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="keyword">int</span> index = entryName.lastIndexOf(<span class="string">"/"</span>);</span><br><span class="line">                        String myPackagePath;</span><br><span class="line">                        <span class="keyword">if</span> (index != -<span class="number">1</span>) &#123;</span><br><span class="line">                            myPackagePath = entryName.substring(<span class="number">0</span>, index);</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            myPackagePath = entryName;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">if</span> (myPackagePath.equals(packagePath)) &#123;</span><br><span class="line">                            entryName = entryName.replace(<span class="string">"/"</span>, <span class="string">"."</span>).substring(<span class="number">0</span>, entryName.lastIndexOf(<span class="string">"."</span>));</span><br><span class="line">                            myClassName.add(entryName);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> myClassName;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">getClassNameByJars</span><span class="params">(URL[] urls, String packagePath, <span class="keyword">boolean</span> childPackage)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; myClassName = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">if</span> (urls != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; urls.length; i++) &#123;</span><br><span class="line">                URL url = urls[i];</span><br><span class="line">                String urlPath = url.getPath();</span><br><span class="line">                <span class="keyword">if</span> (urlPath.endsWith(<span class="string">"classes/"</span>)) &#123;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                String jarPath = urlPath + <span class="string">"!/"</span> + packagePath;</span><br><span class="line">                myClassName.addAll(getClassNameByJar(jarPath, childPackage));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> myClassName;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样一来，就能够实现 当传入的 类型清单 里告诉我，这个 <code>EVENT_NUMBER_RELATIONSHIP</code> header 实际是 一个 <code>com.example.entity.NumberRelationship</code> 类型时，我能够match上我这边app的同名类，如 <code>com.backend.po.NumberRelationship</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String type = typeListMap.get(<span class="string">"EVENT_NUMBER_RELATIONSHIP"</span>); <span class="comment">// com.example.entity.NumberRelationship</span></span><br><span class="line">String stringValue = headerMap.get(<span class="string">"EVENT_NUMBER_RELATIONSHIP"</span>); <span class="comment">// "&#123;\"orderNumber\":\"Order001\",\"traceNumber\":\"TraceId01\",\"customerId\":\"user001\"&#125;"</span></span><br><span class="line">Class&lt;?&gt; clazz = OwnClassUtil.findDeclaredClassName(type);</span><br><span class="line">JsonUtils.jsonToObject(jsonValue, clazz); <span class="comment">//  com.backend.po.NumberRelationship 实例对象</span></span><br></pre></td></tr></table></figure>
+<p>其中，JsonUtils是用的 alibaba FastJson：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">jsonToObject</span><span class="params">(String json, Class&lt;T&gt; clazz)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (StringUtils.hasText(json)) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> JSONObject.parseObject(json, clazz);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JSONException e) &#123;</span><br><span class="line">            <span class="keyword">return</span> JSONObject.parseObject(<span class="string">"\""</span> + json + <span class="string">"\""</span>, clazz);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="抽common-lib-之后"><a href="#抽common-lib-之后" class="headerlink" title="抽common lib 之后"></a>抽common lib 之后</h1><p>好，当业务logic多了之后，我们将一些common的 po类放入 common lib，供其他 app 引用。</p>
+<p>然后，我们准备在本地 run 或者 debug 一个 引用了 common lib 的 app，我们称其为”<strong>my-app</strong>“，<br><img src="/images/20200805/1.png" alt=""></p>
+<p>此时 <code>OwnClassUtil.java</code> 发挥正常，其中的代码片段：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ClassLoader loader = Thread.currentThread().getContextClassLoader(); </span><br><span class="line">String packagePath = packageName.replace(<span class="string">"."</span>, <span class="string">"/"</span>); </span><br><span class="line">Enumeration&lt;URL&gt; resources = loader.getResources(packagePath); </span><br><span class="line">URL url = loader.getResource(packagePath);</span><br><span class="line"><span class="comment">//........</span></span><br></pre></td></tr></table></figure>
+<p>ContextClassLoader 能够正常 加载到 本app package 和 common-lib package 两边的 class：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">com.example.myapp.entity.Student</span><br><span class="line">com.example.myapp.entity.Teacher</span><br><span class="line">com.example.myapp.entity.Address</span><br><span class="line">com.example.common.lib.po.NumberRelationship</span><br><span class="line">com.example.common.lib.po.Customer</span><br><span class="line">com.example.common.lib.po.Order</span><br></pre></td></tr></table></figure>
+
+<p>所有的  “JSON to Java Object” 的logic 都完好运行。</p>
+<h1 id="打jar包之后"><a href="#打jar包之后" class="headerlink" title="打jar包之后"></a>打jar包之后</h1><p>好，现在要将这个 <strong>my-app</strong> <code>mvn clean package</code> 一下了，因为它用的插件是：<code>spring-boot-maven-plugin</code>，所以打出来的包 就是 可以直接 通过 <code>java -jar</code> 命令启动的。</p>
+<p>但是，我们发现，通过 <code>java -jar my-app.jar</code> 运行起来后，虽然spring boot 项目能正常运行，但是却发现， 我们的 <code>OwnClassUtil</code> 类并没有扫描到 common-lib 中的 类，换句话说，此时，线程上下文类加载器 ContextClassLoader 只扫描到了 当前项目的包<code>com.example.myapp</code>下的类，其他第三方库中的类并没有被扫描到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">com.example.myapp.entity.Student</span><br><span class="line">com.example.myapp.entity.Teacher</span><br><span class="line">com.example.myapp.entity.Address</span><br></pre></td></tr></table></figure>
+
+<h1 id="扫描不到类的解决方案"><a href="#扫描不到类的解决方案" class="headerlink" title="扫描不到类的解决方案"></a>扫描不到类的解决方案</h1><h2 id="方案一：ExtClassLoader帮忙扫多一个自定义目录"><a href="#方案一：ExtClassLoader帮忙扫多一个自定义目录" class="headerlink" title="方案一：ExtClassLoader帮忙扫多一个自定义目录"></a>方案一：ExtClassLoader帮忙扫多一个自定义目录</h2><h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>我们知道，在整个JVM类加载过程中，遵循双亲委派机制的、我们最熟悉的三个ClassLoader：</p>
+<ul>
+<li>BootstrapClassLoader：【我爷爷】<ul>
+<li>JVM级别的，由C++撰写，jvm中某c++写的dll类</li>
+<li>负责加载java基础类，主要是 %JRE_HOME/lib/ 目录下的rt.jar、resources.jar、charsets.jar和class等</li>
+</ul>
+</li>
+<li>ExtClassLoader：【我爸】<ul>
+<li>Java类</li>
+<li>继承自URLClassLoader超类</li>
+<li>负责加载java扩展类，主要是 %JRE_HOME/lib/ext 目录下的jar和class</li>
+<li>由 <code>sun.misc.Launcher</code> 初始化</li>
+</ul>
+</li>
+<li>AppClassLoader：【我】<ul>
+<li>Java类</li>
+<li>继承自URLClassLoader超类</li>
+<li>负责加载当前java应用的classpath中的所有类。</li>
+<li>由 <code>sun.misc.Launcher</code> 初始化</li>
+</ul>
+</li>
+<li>自定义 ClassLoader：【我同辈】<ul>
+<li>Java类</li>
+<li>继承自URLClassLoader超类</li>
+</ul>
+</li>
+</ul>
+<p>其中，</p>
+<ul>
+<li>AppClassLoader 对应加载  <code>--classpath</code>，可以这样扩展：<blockquote>
+<p>JDK 9 弃用 -classpath  改用 –class-path</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">java -cp <span class="string">"./:./lib/a.jar:./lib/b.jar"</span> -jar  my-app.jar</span><br><span class="line"></span><br><span class="line">// 当 lib目录下jar过多，一般使用 shell帮忙</span><br><span class="line">CLASS_PATH=./</span><br><span class="line"><span class="keyword">for</span> jar <span class="keyword">in</span> ./lib/*.jar; <span class="keyword">do</span></span><br><span class="line">   CLASS_PATH=<span class="variable">$CLASS_PATH</span>:<span class="variable">$jar</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line">java -cp <span class="variable">$CLASS_PATH</span> -jar my-app.jar</span><br></pre></td></tr></table></figure></li>
+<li>ExtClassLoader 对应加载 <code>java.ext.dirs</code>，可以这样动态让ExtClassLoader多加载一个目录<code>./mylib</code>：<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// Linux</span><br><span class="line">java -Djava.ext.dirs=<span class="variable">$JAVA_HOME</span>/jre/lib/ext:/usr/java/packages/lib/ext:./mylib -jar  my-app.jar</span><br><span class="line"></span><br><span class="line">// Windows (分号 和 冒号的区别)</span><br><span class="line">java -Djava.ext.dirs=<span class="variable">$JAVA_HOME</span>/jre/lib/ext;/usr/java/packages/lib/ext;./mylib -jar  my-app.jar</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>所以，我们 可以利用这一点，让ExtClassLoader 帮 <code>OwnClassUtil</code> 一把，帮忙加载一些我们想扫描的jar包。</p>
+<h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><ol>
+<li>首先，优化一下我们的<code>OwnClassUtil</code> 中的<code>getClassName</code> 方法，让ExtClassLoader 进来帮帮忙：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">getClassName</span><span class="params">(String packageName)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    List&lt;String&gt; names = getClassName(Thread.currentThread().getContextClassLoader(), packageName, <span class="keyword">true</span>); <span class="comment">// 上下文ClassLoader先尝试扫描</span></span><br><span class="line">    <span class="keyword">if</span> (CollectionUtils.isEmpty(names)) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ClassLoader extClassLoader = OwnClassUtil.class.getClassLoader().getParent().getParent(); <span class="comment">// ExtClassLoader 再帮忙扫描</span></span><br><span class="line">            names = getClassName(extClassLoader, packageName, <span class="keyword">true</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            System.err.println(e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> names;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>然后，<code>mvn clean package</code>打包</li>
+<li>将打包好的<code>my-app.jar</code> 解压：<code>unzip my-app.jar</code></li>
+<li>得到三个目录：<code>BOOT-INF</code>，<code>META-INF</code> 以及 <code>org</code></li>
+<li>然后，在启动jar包时，执行这样一句命令：<code>java -jar -Djava.ext.dirs=$JAVA_HOME/jre/lib/ext;/usr/java/packages/lib/ext;./mylib -jar  my-app.jar</code></li>
+</ol>
+<p>这样一来，最终回归到 Dockerfile，是长这样的：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> openjdk:<span class="number">8</span>-alpine</span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> ./target/my-app.jar ./app/app.jar</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> ./app</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> unzip app.jar</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">8080</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"java"</span>, <span class="string">"-Djava.ext.dirs=<span class="variable">$JAVA_HOME</span>/jre/lib/ext:/usr/java/packages/lib/ext:./BOOT-INF/lib"</span>,  <span class="string">"-jar"</span>, <span class="string">"app.jar"</span>]</span></span><br></pre></td></tr></table></figure>
+<p>当然，如果你想要删除某些没必要再被ExtClassLoader扫描的jar，那可以删除它，如：我要删除除了<code>common-lib-1.0.0.jar</code>以外的所有jar包，可以这样：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> openjdk:<span class="number">8</span>-alpine</span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> ./target/my-app.jar ./app/app.jar</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> ./app</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> unzip app.jar</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> ./BOOT-INF/lib</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> ls | grep -v ^common-lib | xargs rm -rf</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> ./../../</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">8080</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"java"</span>, <span class="string">"-Djava.ext.dirs=<span class="variable">$JAVA_HOME</span>/jre/lib/ext:/usr/java/packages/lib/ext:./BOOT-INF/lib"</span>,  <span class="string">"-jar"</span>, <span class="string">"app.jar"</span>]</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="方案二：解压后直接run-JarLauncher"><a href="#方案二：解压后直接run-JarLauncher" class="headerlink" title="方案二：解压后直接run JarLauncher"></a>方案二：解压后直接run JarLauncher</h2><p>我们换个思路：其实spring有自己的专属启动方式，那我们就了解一下，它打包出来的jar包 <code>my-app.jar</code> 到底内部有什么蹊跷：<br><img src="/images/20200805/2.png" alt=""></p>
+<p>是的，spring 有自己的一套启动和类加载套路，它很通过 <code>org.springframework.boot.loader</code> 包下的 Launcher 和 ClassLoader 相关类，去很好地解决了依赖库依赖问题以及类查找问题。<br><img src="/images/20200805/3.png" alt=""></p>
+<p>而它的 <code>JarLauncher.java</code> 内部代码片段如下：<br><img src="/images/20200805/4.png" alt=""><br><img src="/images/20200805/5.png" alt=""><br>背后是让自定义类加载器<code>LuanchedURLClassLoader</code> 去做类加载的。</p>
+<p>可以看到，它是指定扫描 <code>BOOT-INF/lib</code> 里头的依赖库，所以，我们索性是可以将这个jar包解压，然后直接 用 java 指令 直接跑 <code>JarLauncher</code>， 从而启动 <code>my-app</code> 的入口<code>Application.java</code>，进而启动整个spring项目。</p>
+<p>首先解压你gen好的Spring Boot项目可执行jar包：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unzip your-app.jar</span><br></pre></td></tr></table></figure>
+<p>然后，能直接看到当前目录多了三个目录，分别是：</p>
+<ul>
+<li>BOOT-INF</li>
+<li>META-INF</li>
+<li>org</li>
+</ul>
+<p>接着，直接运行 <code>JarLauncher</code> 即可启动项目：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java org.springframework.boot.loader.JarLauncher</span><br></pre></td></tr></table></figure>
+
+<p>最终，dockerfile这么写：</p>
+<figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> openjdk:<span class="number">8</span>-alpineCOPY ./target/BCCD_EXCEPTION_HANDLER.jar ./app/app.jarWORKDIR ./appRUN unzip app.jarEXPOSE <span class="number">8080</span>CMD [<span class="string">"java"</span>, <span class="string">"org.springframework.boot.loader.JarLauncher"</span>]</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>看看 <code>OwnClassUtil</code> 在扫描类和包的时候，使用的类加载器 以及 扫描得到所有类名：</p>
+<p>其中，运行jar包 和 直接IDE运行，得到的 类加载器是：<br><img src="/images/20200805/6.png" alt=""><br>都是 <code>TomcatEmbeddedWebappClassLoader</code> 其parent 是 <code>LaunchedURLClassLoader</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TomcatEmbeddedWebappClassLoader</span><br><span class="line">  context: ROOT</span><br><span class="line">  delegate: true</span><br><span class="line">----------&gt; Parent Classloader:</span><br><span class="line">org.springframework.boot.loader.LaunchedURLClassLoader@ad9418</span><br></pre></td></tr></table></figure>
+
+<p>但是，在jar包情况下，得到的classList如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[BOOT-INF.classes.com.example.myapp.entity.Teacher, .......]</span><br></pre></td></tr></table></figure>
+
+<p>而直接IDE运行，得到的classList如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[com.example.myapp.entity.Teacher, ......., com.example.common.po.Customer, ........]</span><br></pre></td></tr></table></figure>
+<p>可以看出，在jar包情况下运行，由于jar包环境没有了目录相关的概念，spring 的<code>LaunchedURLClassLoader</code> 并没有能力很好地走正常 扫描resource 类和jar包资源的logic，拿到的都是 <code>BOOT-INF.classes</code> 中的东西，并不能摸到 <code>BOOT-INF.lib</code> 中的jar包资源；而在IDE运行或解压运行的情况下，<code>JarLauncher</code> 则能够很好地扫描目录结构，因为文件结构是现成可见的。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>通过利用ClassLoader的装载特性，可以帮助扫描装载你想要的jar；</li>
+<li>spring-maven 插件打的jar包在 通过 <code>java -jar</code> 运行时，在类的可见性方面会有所限制，虽然背后的类加载器都是自定义Spring自家的<code>LaunchedURLClassLoader</code>，但由于jar包的目录概念弱化，正常的 <code>getResource</code> 仅能触及 <code>BOOT-INF/classes</code>即当前project本身的code；</li>
+<li>通过解压 jar包，并运行 JarLauncher 类，能够打破类可见性方面的限制，文件系统再现，导致目录概念重回正轨，使得第三方类库中的类能够被当前类加载器通过<code>getResource</code> 扫描到；</li>
+<li>Spring 可执行jar包的启动是通过JarLauncher配合自定义URLClassLoader  <code>LaunchedURLClassLoader</code> 进行类加载和初始化的。一般情况下，如果我们不去定制 contextClassLoader，那么所有的线程将会默认使用 AppClassLoader，所有的类都将会是共享的， 但是在Spring 项目中，是用的自定义类加载器，所以线程上下文类加载器并非默认的AppClassLoader。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/String%E6%9C%89%E6%9C%80%E5%A4%A7%E9%95%BF%E5%BA%A6%E5%90%97%EF%BC%9F/" rel="next" title="String有最大长度吗？">
+                  <i class="fa fa-chevron-left"></i> String有最大长度吗？
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/JMH--%E7%BB%86%E7%B2%92%E5%BA%A6%E6%96%B9%E6%B3%95%E7%9A%84%E5%8E%8B%E5%8A%9B%E6%B5%8B%E8%AF%95%E7%A5%9E%E5%99%A8/" rel="prev" title="JMH--细粒度方法的压力测试神器">
+                  JMH--细粒度方法的压力测试神器 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#需求"><span class="nav-number">1.</span> <span class="nav-text">需求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现"><span class="nav-number">2.</span> <span class="nav-text">实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#抽common-lib-之后"><span class="nav-number">3.</span> <span class="nav-text">抽common lib 之后</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#打jar包之后"><span class="nav-number">4.</span> <span class="nav-text">打jar包之后</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#扫描不到类的解决方案"><span class="nav-number">5.</span> <span class="nav-text">扫描不到类的解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#方案一：ExtClassLoader帮忙扫多一个自定义目录"><span class="nav-number">5.1.</span> <span class="nav-text">方案一：ExtClassLoader帮忙扫多一个自定义目录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#思路"><span class="nav-number">5.1.1.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#步骤"><span class="nav-number">5.1.2.</span> <span class="nav-text">步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方案二：解压后直接run-JarLauncher"><span class="nav-number">5.2.</span> <span class="nav-text">方案二：解压后直接run JarLauncher</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分析"><span class="nav-number">6.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

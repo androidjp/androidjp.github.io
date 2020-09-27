@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言：一开始，先和大家可能从最开始接触Android开发时就存在的一些我们用过但不太关注的UI部件相关知识。第一篇，先说一下有关：Menu、标题栏 和 Android主题（Theme）的相关知识。">
+<meta name="keywords" content="Android,面试,基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android开发细节--查漏补缺（一）：UI篇">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Android%E5%BC%80%E5%8F%91%E7%BB%86%E8%8A%82--%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AUI%E7%AF%87&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="引言：一开始，先和大家可能从最开始接触Android开发时就存在的一些我们用过但不太关注的UI部件相关知识。第一篇，先说一下有关：Menu、标题栏 和 Android主题（Theme）的相关知识。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;app.yinxiang.com&#x2F;shard&#x2F;s49&#x2F;res&#x2F;fe5bdb86-3dc5-48b7-b3a1-4cdebb49c0b3.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-06df515625ff68b1.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-3a277f9988102697.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-e076b6dc075cb7c6.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-c87d204f1f047b1f.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-395aa3bbd52008a1.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-c4e559b8db4a60ad.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-e016baae7a52bd44.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.255Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;app.yinxiang.com&#x2F;shard&#x2F;s49&#x2F;res&#x2F;fe5bdb86-3dc5-48b7-b3a1-4cdebb49c0b3.png">
+
+<link rel="canonical" href="http://jpuneng.cn/Android%E5%BC%80%E5%8F%91%E7%BB%86%E8%8A%82--%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AUI%E7%AF%87/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Android开发细节--查漏补缺（一）：UI篇 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Android%E5%BC%80%E5%8F%91%E7%BB%86%E8%8A%82--%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AUI%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android开发细节--查漏补缺（一）：UI篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-07-18 19:55:00" itemprop="dateCreated datePublished" datetime="2016-07-18T19:55:00+08:00">2016-07-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>引言：一开始，先和大家可能从最开始接触Android开发时就存在的一些我们用过但不太关注的UI部件相关知识。第一篇，先说一下有关：Menu、标题栏 和 Android主题（Theme）的相关知识。</p>
+</blockquote>
+<a id="more"></a>
+
+<h2 id="Android-Theme（主题）"><a href="#Android-Theme（主题）" class="headerlink" title="Android Theme（主题）"></a>Android Theme（主题）</h2><hr>
+<blockquote>
+<p>注意：一般我们使用或者自定义style等，大多用于单个View，称为View的样式。而样式也能用于Activity或整个Application，这时就需要在相应<activity>或<application>标签中设置android:theme<em>属性，引用的其实也是style</em>，但一般称为主题。</p>
+</blockquote>
+<ul>
+<li><p>themes.xml: 低版本的主题，目标API level一般在10以下</p>
+</li>
+<li><p>themes_hole.xml: 从 API level 11添加的主题</p>
+<p>  <img src="https://app.yinxiang.com/shard/s49/res/fe5bdb86-3dc5-48b7-b3a1-4cdebb49c0b3.png" alt=""></p>
+</li>
+</ul>
+<p><strong>一、 support v7库</strong><br>   作用：用于某些控件和主题等兼容至Android2.1版本（API 7）<br>   对于Theme主题的影响：Theme.AppCompat系列兼容主题，在引用到v7包之后，就要求使用，而android3.0以上系统带有的Theme.Holo系列主题，则是未引用兼容包时注意使用。</p>
+<ul>
+<li>Android3.0及以上的版本的Style一般写法：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;style name=&quot;XXX&quot; parent=&quot;@android:style/Theme.Holo&quot;&gt;</span><br><span class="line">   &lt;item name=&quot;android:xxx&quot;&gt;yyy&lt;/item&gt;</span><br><span class="line">&lt;/style&gt;</span><br></pre></td></tr></table></figure></li>
+<li>Android2.1及以上兼容版本的Style一般写法：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;style name=&quot;XXX&quot; parent=&quot;@style/Theme.AppCompat&quot;&gt;</span><br><span class="line">   &lt;item name=&quot;xxx&quot;&gt;yyy&lt;/item&gt;</span><br><span class="line">&lt;/style&gt;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p><strong>二、 theme测试示例</strong></p>
+<ol>
+<li><p>无ActionBar</p>
+<ul>
+<li>白色背景： <code>Activity</code>+ <code>android:theme=&quot;@style/Theme.AppCompat.Light&quot;</code></li>
+<li>黑色背景： <code>Activity</code>+ <code>android:theme=&quot;@style/Theme.AppCompat&quot;</code></li>
+<li>自定义默认背景：<code>Activity</code>  或者 <code>Activity</code>+<code>android:theme=&quot;@style/AppTheme&quot;</code></li>
+</ul>
+</li>
+<li><p>有ActionBar</p>
+<ol>
+<li>旧版本：继承ActionBarActivity<ul>
+<li>全白色背景：<code>ActionBarActivity</code>+<code>android:theme=&quot;@style/Theme.AppCompat.Light&quot;</code></li>
+<li>全黑色背景：<code>ActionBarActivity</code>+<code>android:theme=&quot;@style/Theme.AppCompat&quot;</code></li>
+<li>白色背景黑色ActionBar：<code>ActionBarActivity</code>+<code>android:theme=&quot;@style/Theme.AppCompat.Light.DarkActionBar&quot;</code></li>
+<li>自定义默认背景：<code>ActionBarActivity</code>  或者<code>ActionBarActivity</code>+<code>android:theme=&quot;@style/AppTheme&quot;</code></li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="Menu"><a href="#Menu" class="headerlink" title="Menu"></a>Menu</h2><hr>
+<blockquote>
+<p> Android Menu 主要是两种：①OptionMenu【点击ActionBar的菜单选项或者手机硬件MENU按键触发显示菜单】 ②ContextMenu【指定的View或ViewGroup的长按触发】</p>
+</blockquote>
+<p><strong>一、 OptionMenu</strong></p>
+<ol>
+<li><p>方法执行流程<br><img src="http://upload-images.jianshu.io/upload_images/2369895-06df515625ff68b1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="OptionsMenu.png"></p>
+</li>
+<li><p>具体实现代码示例</p>
+<ul>
+<li>Activity代码中添加：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">      @Override</span><br><span class="line">    public boolean onCreateOptionsMenu(Menu menu) &#123;</span><br><span class="line">        //方式一（java）</span><br><span class="line">         /*第一个参数是groupId，如果不需要可以设置为Menu.NONE。</span><br><span class="line">将若干个menu item都设置在同一个Group中，可以使用setGroupVisible()，setGroupEnabled()，setGroupCheckable()这样的方法，</span><br><span class="line">而不需要对每个item都进行setVisible(), setEnable(), setCheckable()这样的处理，这样对我们进行统一的管理比较方便</span><br><span class="line">       * 第二个参数就是item的ID，我们可以通过menu.findItem(id)来获取具体的item</span><br><span class="line">       * 第三个参数是item的顺序，一般可采用Menu.NONE，具体看本文最后MenuInflater的部分</span><br><span class="line">       * 第四个参数是显示的内容，可以是String，或者是引用Strings.xml的ID</span><br><span class="line">       */</span><br><span class="line">        menu.add(Menu.NONE,ONE_ID,Menu.NONE,&quot;1 Pixel&quot;);</span><br><span class="line">        menu.add(Menu.NONE, TWO_ID, Menu.NONE, &quot;2 Pixels&quot;);</span><br><span class="line">        menu.add(Menu.NONE, EIGHT_ID, Menu.NONE, &quot;8 Pixels&quot;);</span><br><span class="line">        ……</span><br><span class="line">         ///方式二（xml）</span><br><span class="line">        MenuInflater mi = getMenuInflater();</span><br><span class="line">        mi.inflate(R.menu.activity_actionbar,menu);</span><br><span class="line"></span><br><span class="line">        // 子菜单设置</span><br><span class="line">        //通过addSubMenu设置子菜单，作为item加入Menu。参数和addMenu一致，为了简单，我们这里的ID直接采用数字表示</span><br><span class="line">        SubMenu submenu = menu.addSubMenu(Menu.NONE, 100, Menu.NONE, &quot;子菜单测试&quot;);</span><br><span class="line">        //在SubMenu中增加子菜单的item</span><br><span class="line">        submenu.add(Menu.NONE,101,Menu.NONE,&quot;sub One&quot;);</span><br><span class="line">        submenu.add(Menu.NONE,102,Menu.NONE,&quot;sub Two&quot;);</span><br><span class="line">        submenu.add(Menu.NONE,103,Menu.NONE,&quot;sub Three&quot;);</span><br><span class="line">        submenu.add(Menu.NONE,104,Menu.NONE,&quot;sub Four&quot;);</span><br><span class="line">        return super.onCreateOptionsMenu(menu);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onPrepareOptionsMenu(Menu menu) &#123;</span><br><span class="line">        ///----------实现每次Menu打开时的操作---------------</span><br><span class="line">        return super.onPrepareOptionsMenu(menu);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onOptionsItemSelected(MenuItem item) &#123;</span><br><span class="line">        switch (item.getItemId())&#123;</span><br><span class="line">            case R.id.action_search:</span><br><span class="line">                Toast.makeText(this, &quot;搜索&quot;,Toast.LENGTH_SHORT).show();</span><br><span class="line">               break;</span><br><span class="line">            case R.id.action_settings:</span><br><span class="line">                Toast.makeText(this, &quot;设置&quot;,Toast.LENGTH_SHORT).show();</span><br><span class="line">                break;</span><br><span class="line">        &#125;</span><br><span class="line">        return super.onOptionsItemSelected(item);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>自定义的res/menu/activity_actionbar.xml：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">    &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;menu xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</span><br><span class="line">    xmlns:yourapp=&quot;http://schemas.android.com/apk/res-auto&quot; &gt;</span><br><span class="line">    &lt;!-- 搜索, 应该展示为动作按钮 --&gt;</span><br><span class="line">    &lt;!--不使用v7兼容库，那么，就可以使用android:showAsAction属性，否则，无法使用,但是能用自己指定的yourapp:showAction--&gt;</span><br><span class="line">    &lt;!--下面的属性：‘ifRoom’表示如果ActionBar有空间，就显示这个item项；‘never’表示默认不显示--&gt;</span><br><span class="line">    &lt;item android:id=&quot;@+id/action_search&quot;</span><br><span class="line">        android:icon=&quot;@android:drawable/ic_menu_search&quot;</span><br><span class="line">        android:title=&quot;@android:string/search_go&quot;</span><br><span class="line">        yourapp:showAsAction=&quot;ifRoom&quot;  /&gt;</span><br><span class="line">    &lt;item android:id=&quot;@+id/action_settings&quot;</span><br><span class="line">        android:title=&quot;设置&quot;</span><br><span class="line">        yourapp:showAsAction=&quot;never&quot;  /&gt;</span><br><span class="line">&lt;/menu&gt;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p><strong>二、 ContextMenu</strong></p>
+<ol>
+<li>方法执行流程：<br> 每次长按指定的View，自动在所按的位置处弹出menu。</li>
+<li>设置流程：<ul>
+<li>Activity中获取一个组件，如一个Button：<br><code>private Button btn;</code></li>
+<li>让这个Button进行初始化并让其注册到ContextMenu中：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">btn  = (Button) findViewById(R.id.btn_actionbar);</span><br><span class="line">registerForContextMenu(btn);</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>重写ContextMenu相关方法，让此方法触发时，弹出指定的ContextMenu【注意是ContextMenu类型的，不是Menu类型】：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) &#123;</span><br><span class="line">    super.onCreateContextMenu(menu, v, menuInfo);</span><br><span class="line">    MenuInflater mi = getMenuInflater();</span><br><span class="line">    ///R.menu.activity_actionbar与上面OptionsMenu的一样!</span><br><span class="line">    mi.inflate(R.menu.activity_actionbar,menu);</span><br><span class="line">&#125;</span><br><span class="line">@Override</span><br><span class="line">public boolean onContextItemSelected(MenuItem item) &#123;</span><br><span class="line">    return super.onContextItemSelected(item);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="ActionBar"><a href="#ActionBar" class="headerlink" title="ActionBar"></a>ActionBar</h2><hr>
+<ol>
+<li><p>ActionBar的基本使用：</p>
+<ol>
+<li>Android 版本 &gt;= 3.0 ，所有使用Theme.Holo主题（及其子类）的Activity都包含了ActionBar，当<code>targetSdkVersion</code> 或 <code>minSdkVersion</code>属性被设置成“11”或者更大时，他是默认主题</li>
+<li>Android版本&gt;=2.1 ，要添加ActionBar，需要加载Android Support库：<code>v7 appcompat</code>库（现在AS在新建项目时，基本都会为我们添加这个库）。然后：①让<code>Activity</code>继承<code>ActionBarActivity</code> ②在manifast.xml文件中，给<activity>添加一句：<code>&lt;activity android:theme=&quot;@style/Theme.AppCompat.Light&quot; ... &gt;</code></li>
+</ol>
+</li>
+<li><p>xml中设定每个Activity的ActionBar上显示的标题（Label）：<br> 通过设置清单文件中Activity标签中的label属性，如：<code>&lt;activity android:name=&quot;.actionbar.MyActionBarActivity&quot;    android:label=&quot;ActionBar活动&quot; ……/&gt;</code><br><img src="http://upload-images.jianshu.io/upload_images/2369895-3a277f9988102697.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+</li>
+<li><p>ActionBar从创建到行为实现</p>
+<ul>
+<li>创建相应的Activity：ActionBarActivity、AppCompatActivity（均位于v7 support库中，用于兼容到Android2.1版本，即API 7）</li>
+<li>创建Menu菜单：<ul>
+<li>方式一：java代码<br>在<strong>onCreateOptionsMenu(Menu menu)</strong>方法中，加入如下示例：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">    public boolean onCreateOptionsMenu(Menu menu) &#123;</span><br><span class="line">  menu.add(Menu.NONE,ONE_ID,Menu.NONE,&quot;1 Pixel&quot;);</span><br><span class="line">        menu.add(Menu.NONE, TWO_ID, Menu.NONE, &quot;2 Pixels&quot;);</span><br><span class="line">        menu.add(Menu.NONE, EIGHT_ID, Menu.NONE, &quot;8 Pixels&quot;);</span><br><span class="line">       ……</span><br><span class="line">        return super.onCreateOptionsMenu(menu);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+<li>方式二：xml定义后再引用<br>先创建xml菜单布局文件<strong>res/menu/my_menu.xml</strong>：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;menu xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</span><br><span class="line">    xmlns:yourapp=&quot;http://schemas.android.com/apk/res-auto&quot; &gt;</span><br><span class="line">    &lt;item android:id=&quot;@+id/action_search&quot;</span><br><span class="line">        android:icon=&quot;@android:drawable/ic_menu_search&quot;</span><br><span class="line">        android:title=&quot;@android:string/search_go&quot;</span><br><span class="line">        yourapp:showAsAction=&quot;ifRoom&quot;</span><br><span class="line">  /&gt;</span><br><span class="line">    &lt;item android:id=&quot;@+id/action_settings&quot;</span><br><span class="line">        android:title=&quot;设置&quot;</span><br><span class="line">        yourapp:showAsAction=&quot;never&quot;</span><br><span class="line">  /&gt;</span><br><span class="line">…………</span><br><span class="line">&lt;/menu&gt;</span><br></pre></td></tr></table></figure>
+  此时，ActionBar已经有了菜单列表了！</li>
+</ul>
+</li>
+<li>完善ActionBar信息：<br>  在Java代码中完善ActionBar信息  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">getSupportActionBar().setIcon(R.mipmap.ic_launcher);</span><br><span class="line">getSupportActionBar().setSubtitle(&quot;我是subTitle&quot;);</span><br><span class="line">getSupportActionBar().setCustomView(R.layout.view_custom);</span><br><span class="line">getSupportActionBar().setLogo(R.mipmap.ic_launcher);</span><br><span class="line">getSupportActionBar().setElevation(50);</span><br></pre></td></tr></table></figure></li>
+<li>最终截图<br><img src="http://upload-images.jianshu.io/upload_images/2369895-e076b6dc075cb7c6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></li>
+</ul>
+</li>
+<li><p>ActionBar的自定义背景<br>完整示例：<code>res/values/themes.xml</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">  &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;resources&gt;  </span><br><span class="line">  &lt;!-- 应用于程序或者活动的主题 --&gt;   </span><br><span class="line"> &lt;style name=&quot;CustomActionBarTheme&quot;</span><br><span class="line">      parent=&quot;@style/Theme.AppCompat.Light.DarkActionBar&quot;&gt;  </span><br><span class="line">      &lt;item name=&quot;android:actionBarStyle&quot;&gt;@style/MyActionBar&lt;/item&gt;</span><br><span class="line">       &lt;item name=&quot;android:actionBarTabTextStyle&quot;&gt;@style/MyActionBarTabText&lt;/item&gt;</span><br><span class="line">       &lt;item name=&quot;android:actionMenuTextColor&quot;&gt;@android:color/holo_blue_bright&lt;/item&gt;</span><br><span class="line">        &lt;item name=&quot;android:windowActionBarOverlay&quot;&gt;true&lt;/item&gt;</span><br><span class="line">       &lt;!-- 支持库兼容 --&gt;</span><br><span class="line">       &lt;item name=&quot;actionBarStyle&quot;&gt;@style/MyActionBar&lt;/item&gt;</span><br><span class="line">       &lt;item name=&quot;actionBarTabTextStyle&quot;&gt;@style/MyActionBarTabText&lt;/item&gt;</span><br><span class="line">       &lt;item name=&quot;actionMenuTextColor&quot;&gt;@android:color/holo_blue_bright&lt;/item&gt;</span><br><span class="line">       &lt;!--ActionBar的层次覆盖模式--&gt;</span><br><span class="line">        &lt;item name=&quot;windowActionBarOverlay&quot;&gt;true&lt;/item&gt;</span><br><span class="line">    &lt;/style&gt;</span><br><span class="line">   &lt;!-- ActionBar 样式 --&gt;</span><br><span class="line">    &lt;style name=&quot;MyActionBar&quot;</span><br><span class="line">       parent=&quot;@style/Widget.AppCompat.ActionBar&quot;&gt;</span><br><span class="line">       &lt;item name=&quot;android:background&quot;&gt;@android:color/holo_green_dark&lt;/item&gt;</span><br><span class="line">       &lt;item name=&quot;android:titleTextStyle&quot;&gt;@style/MyActionBarTitleText&lt;/item&gt;</span><br><span class="line">        &lt;!-- 支持库兼容 --&gt;</span><br><span class="line">       &lt;item name=&quot;background&quot;&gt;@android:color/holo_green_dark&lt;/item&gt;</span><br><span class="line">        &lt;item name=&quot;titleTextStyle&quot;&gt;@style/MyActionBarTitleText&lt;/item&gt;</span><br><span class="line">    &lt;/style&gt;</span><br><span class="line">   &lt;!-- ActionBar 标题文本 --&gt;</span><br><span class="line">    &lt;style name=&quot;MyActionBarTitleText&quot;</span><br><span class="line">        parent=&quot;@style/TextAppearance.AppCompat.Widget.ActionBar.Title&quot;&gt;</span><br><span class="line">        &lt;item name=&quot;android:textColor&quot;&gt;@android:color/holo_red_light&lt;/item&gt;</span><br><span class="line">        &lt;!-- 文本颜色属性textColor是可以配合支持库向后兼容的 --&gt;</span><br><span class="line">    &lt;/style&gt;</span><br><span class="line">    &lt;!-- ActionBar Tab标签文本样式 --&gt;</span><br><span class="line">    &lt;style name=&quot;MyActionBarTabText&quot;</span><br><span class="line">        parent=&quot;@style/Widget.AppCompat.ActionBar.TabText&quot;&gt;</span><br><span class="line">        &lt;item name=&quot;android:textColor&quot;&gt;@android:color/holo_blue_light&lt;/item&gt;</span><br><span class="line">        &lt;!-- 文本颜色属性textColor是可以配合支持库向后兼容的 --&gt;</span><br><span class="line">    &lt;/style&gt;</span><br><span class="line">&lt;/resources&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>利用ActionBar快速构造返回上级的按钮<br>截图：<br><img src="http://upload-images.jianshu.io/upload_images/2369895-c87d204f1f047b1f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>设置步骤：</p>
+<ol>
+<li>ActionBarActivity或者AppCompatActivity的onCreate()方法中设置：<ul>
+<li><code>getSupportActionBar().setDisplayHomeAsUpEnabled(true);</code>  v7库兼容下使用</li>
+<li><code>getActionBar().setDisplayHomeAsUpEnabled(true);</code>  非兼容形式，minSdkVersion&gt;=11时使用</li>
+</ul>
+</li>
+<li>在想要设置此功能的Activity的<activity>标签中设置如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">        &lt;activity android:name=&quot;.xxxx.SecondActivity&quot;</span><br><span class="line">    android:label=&quot;ActionBar活动&quot;</span><br><span class="line">    android:parentActivityName=&quot;.MyToolBarActivity&quot;    &gt;</span><br><span class="line">    &lt;!--meta-data用于兼容support4.0以下，指明上级活动--&gt;</span><br><span class="line">    &lt;meta-data</span><br><span class="line">        android:name=&quot;android.support.PARENT_ACTIVITY&quot;</span><br><span class="line">        android:value=&quot;com.xxxxx.xxxxx.MainActivity&quot;</span><br><span class="line">        /&gt;</span><br><span class="line">&lt;/activity&gt;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="Toolbar"><a href="#Toolbar" class="headerlink" title="Toolbar"></a>Toolbar</h2><hr>
+<p><strong>一、背景</strong></p>
+<ul>
+<li>Android5.0推出的一个MD风格的导航栏。</li>
+<li>旨在取代ActionBar</li>
+</ul>
+<p><strong>二、优势</strong></p>
+<ul>
+<li>比ActionBar更加灵活：<ul>
+<li>设置导航栏图标</li>
+<li>设置App的logo</li>
+<li>支持设置标题和子标题</li>
+<li>支持添加一个或多个的自定义控件</li>
+<li>支持Action Menu</li>
+</ul>
+</li>
+<li>可以放置任何位置</li>
+</ul>
+<p><strong>三、用法</strong></p>
+<ol>
+<li><p>导入<strong>appcompat-v7</strong> 的兼容包，使用 <strong>android.support.v7.widget.Toolbar</strong> 进行开发。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">///基本格式</span><br><span class="line">&lt;android.support.v7.widget.Toolbar</span><br><span class="line">         android:id=&quot;@+id/toolbar&quot;</span><br><span class="line">         android:layout_width=&quot;match_parent&quot;</span><br><span class="line">         android:layout_height=&quot;wrap_content&quot;</span><br><span class="line">    &gt;</span><br><span class="line">&lt;/android.support.v7.widget.Toolbar&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>设置属性</p>
+<ol>
+<li><p>方式一：xml中设置（* 注意：v7兼容包的缘故，toolbar的属性不在系统中而需要额外查找导入，所有不能用<code>android:xxx</code>，而需要自定义<code>xmlns:toolbar=&quot;http://schemas.android.com/apk/res-auto&quot;</code>，另外，这种方式难以绑定menu菜单 *）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&lt;android.support.v7.widget.Toolbar</span><br><span class="line">        android:id=&quot;@+id/toolbar&quot;</span><br><span class="line">        android:layout_width=&quot;match_parent&quot;</span><br><span class="line">        android:layout_height=&quot;wrap_content&quot;</span><br><span class="line">        android:background=&quot;@color/colorAccent&quot;</span><br><span class="line">        toolbar:navigationIcon=&quot;@mipmap/ic_launcher&quot;</span><br><span class="line">        toolbar:logo=&quot;@mipmap/ic_launcher&quot;</span><br><span class="line">        toolbar:title=&quot;Title&quot;</span><br><span class="line">        toolbar:subtitle=&quot;subTitle&quot;</span><br><span class="line">        toolbar:titleTextColor=&quot;@color/colorPrimary&quot;</span><br><span class="line">        toolbar:subtitleTextColor=&quot;@color/colorPrimaryDark&quot;</span><br><span class="line">    &gt;</span><br><span class="line">    &lt;!--引入普通View--&gt;</span><br><span class="line">    &lt;TextView</span><br><span class="line">            android:layout_width=&quot;wrap_content&quot;</span><br><span class="line">            android:layout_height=&quot;wrap_content&quot;</span><br><span class="line">           android:layout_margin=&quot;20dp&quot;</span><br><span class="line">           android:text=&quot;点击&quot;</span><br><span class="line">        /&gt;</span><br><span class="line">    &lt;!--引入自定义View--&gt;</span><br><span class="line">    &lt;include</span><br><span class="line">            layout=&quot;@layout/view_custom&quot;/&gt;</span><br><span class="line">    &lt;/android.support.v7.widget.Toolbar&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/2369895-395aa3bbd52008a1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="方式一截图"></p>
+</li>
+<li><p>方式二：Java中设置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Toolbar toolbar  = (Toolbar) findViewById(R.id.toolbar);</span><br><span class="line">toolbar.setNavigationIcon(R.mipmap.ic_launcher);///导航icon</span><br><span class="line">toolbar.setLogo(android.R.drawable.ic_menu_search);///logo</span><br><span class="line">toolbar.setTitle(&quot;Title&quot;);///标题</span><br><span class="line">toolbar.setSubtitle(&quot;subTitle&quot;);///子标题</span><br><span class="line">toolbar.addView(new Button(this));//可自己动态加CustomView</span><br><span class="line">toolbar.inflateMenu(R.menu.activity_actionbar);///设置menu</span><br></pre></td></tr></table></figure>
+<p><img src="http://upload-images.jianshu.io/upload_images/2369895-c4e559b8db4a60ad.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="方式二截图"></p>
+</li>
+</ol>
+</li>
+<li><p>扩展</p>
+<ul>
+<li><p>改变menu item的文字颜色</p>
+<ul>
+<li>首先，在themes.xml文件中添加一个<style>，注意parent为<strong>parent=”Theme.AppCompat.Light.NoActionBar”</strong><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;style name=&quot;MyToolbarStyle&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;</span><br><span class="line">    &lt;item name=&quot;android:textColorPrimary&quot;&gt;@android:color/holo_red_light&lt;/item&gt;</span><br><span class="line">&lt;/style&gt;</span><br></pre></td></tr></table></figure></li>
+<li>然后，给toolbar加上属性：** toolbar:popupTheme=”@style/MyToolbarStyle”**<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;android.support.v7.widget.Toolbar</span><br><span class="line">  android:id=&quot;@+id/toolbar&quot;</span><br><span class="line">  android:layout_width=&quot;match_parent&quot;</span><br><span class="line">  android:layout_height=&quot;wrap_content&quot;</span><br><span class="line">  android:background=&quot;@color/colorAccent&quot;</span><br><span class="line">  toolbar:popupTheme=&quot;@style/MyToolbarStyle&quot;/&gt;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p><img src="http://upload-images.jianshu.io/upload_images/2369895-e016baae7a52bd44.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=" 改变menu item的文字颜色截图"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="感谢阅读"><a href="#感谢阅读" class="headerlink" title="感谢阅读"></a>感谢阅读</h2><hr>
+<p>点击进入：<a href="http://androidjp.cn" target="_blank" rel="noopener">我的博客</a></p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+              <a href="/tags/%E5%9F%BA%E7%A1%80/" rel="tag"># 基础</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/ReactiveX%20%E5%92%8C%20RxJava%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="next" title="ReactiveX 和 RxJava 学习笔记">
+                  <i class="fa fa-chevron-left"></i> ReactiveX 和 RxJava 学习笔记
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/Windows%E4%B8%8B%E6%9D%80%E6%AD%BB%E5%8D%A0%E7%94%A8%E6%9F%90%E4%B8%AA%E7%AB%AF%E5%8F%A3%E7%9A%84%E8%BF%9B%E7%A8%8B/" rel="prev" title="Windows下杀死占用某个端口的进程">
+                  Windows下杀死占用某个端口的进程 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Android-Theme（主题）"><span class="nav-number">1.</span> <span class="nav-text">Android Theme（主题）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Menu"><span class="nav-number">2.</span> <span class="nav-text">Menu</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ActionBar"><span class="nav-number">3.</span> <span class="nav-text">ActionBar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Toolbar"><span class="nav-number">4.</span> <span class="nav-text">Toolbar</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

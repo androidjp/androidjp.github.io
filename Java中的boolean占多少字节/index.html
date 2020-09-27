@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言：网上众说纷纭：1个字节；1位；4 byte……. 到底信哪个？ 这篇文章快速为你解答。">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java中的boolean占多少字节">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Java%E4%B8%AD%E7%9A%84boolean%E5%8D%A0%E5%A4%9A%E5%B0%91%E5%AD%97%E8%8A%82&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="引言：网上众说纷纭：1个字节；1位；4 byte……. 到底信哪个？ 这篇文章快速为你解答。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.260Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://jpuneng.cn/Java%E4%B8%AD%E7%9A%84boolean%E5%8D%A0%E5%A4%9A%E5%B0%91%E5%AD%97%E8%8A%82/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Java中的boolean占多少字节 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Java%E4%B8%AD%E7%9A%84boolean%E5%8D%A0%E5%A4%9A%E5%B0%91%E5%AD%97%E8%8A%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java中的boolean占多少字节
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-09 21:31:23" itemprop="dateCreated datePublished" datetime="2020-01-09T21:31:23+08:00">2020-01-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>引言：网上众说纷纭：1个字节；1位；4 byte……. 到底信哪个？ 这篇文章快速为你解答。</p>
+</blockquote>
+<a id="more"></a>
+
+<h1 id="先回答你"><a href="#先回答你" class="headerlink" title="先回答你"></a>先回答你</h1><p>boolean 占 <strong>4 byte</strong>，相当于 int 的空间占用；</p>
+<p>boolean[] 内每个元素 占 <strong>1 byte</strong>，相当于 byte 的空间占用；</p>
+<p>Boolean 属于对象类型，其内部唯一的成员变量就是一个boolean值（其余都是静态变量），理论上类实例空间占用也是 <strong>4 byte</strong></p>
+<h1 id="看看官方怎么说"><a href="#看看官方怎么说" class="headerlink" title="看看官方怎么说"></a>看看官方怎么说</h1><p>官方文档：</p>
+<blockquote>
+<p>boolean: The boolean data type has only two possible values: true and false. Use this data type for simple flags that track true/false conditions. This data type represents one bit of information, but its “size” isn’t something that’s precisely defined.</p>
+</blockquote>
+<p>上面的说的很清楚，boolean 值只有 true 和 false 两种，这个数据类型只代表 1 bit 的信息，但是它的“大小”没有严格的定义。也就是说，不管它占多大的空间，只有一个bit的信息是有意义的。</p>
+<p>JVM规范上：</p>
+<blockquote>
+<p>Although the Java Virtual Machine defines a boolean type, it only provides very limited support for it. There are no Java Virtual Machine instructions solely dedicated to operations on boolean values. Instead, expressions in the Java programming language that operate on boolean values are compiled to use values of the Java Virtual Machine int data type.</p>
+</blockquote>
+<p>Java 虚拟机虽然定义了 boolean 类型，但是支持是有限的，没有专门的虚拟机指令。在 Java 语言中，对 boolean 值的操作被替换成 int 数据类型。</p>
+<blockquote>
+<p>The Java Virtual Machine does directly support boolean arrays. Its newarray instruction (§newarray) enables creation of boolean arrays. Arrays of type boolean are accessed and modified using the byte array instructions baload and bastore (§baload, §bastore).</p>
+</blockquote>
+<p>Java 虚拟机没有直接支持 boolean 数组。boolean 类型数组和 byte 数组公用指令。</p>
+<blockquote>
+<p>In Oracle’s Java Virtual Machine implementation, boolean arrays in the Java programming language are encoded as Java Virtual Machine byte arrays, using 8 bits per boolean element.</p>
+</blockquote>
+<p>在 Oracle 的 Java 虚拟机实现中，Java 语言中的 boolean 数组被编码成 Java 虚拟机的 byte 数组，每个元素占 8 比特。</p>
+<blockquote>
+<p>The Java Virtual Machine encodes boolean array components using 1 to represent true and 0 to represent false . Where Java programming language boolean values are mapped by compilers to values of Java Virtual Machine type int , the compilers must use the same encoding.</p>
+</blockquote>
+<p>Java 虚拟机使用 1 表示 true，0 表示 false 来编码 boolean 数组。Java 语言的 boolean 值被编译器映射成 Java 虚拟机的 int 类型的时候，也是采用一样的编码。</p>
+<p><strong>简单来说</strong>：</p>
+<p>说占一个字节的人是这样认为的：计算机处理数据的最小单位是字节，一个字节等于8位，存储true和false的实际存储空间是：用1一个字节的最低位存储，其他位用0填补。虽然编译后的Boolean类型是0和1，但是依旧需要8位来进行存储，true的存储为：00000001；false的存储为：00000000。</p>
+<p>认为占4个字节的理由是：在Java虚拟机中没有任何字节码指令供boolean值专用，Java中的boolean值，在编译后都使用Java虚拟机中的int类型来代替，而boolean数组会被编码成Java虚拟机中的byte数组，数组中的每个元素占8位（1字节），由此，可以得出boolean类型在单独使用时占4个字节，作为boolean数组存在的时候是一个字节。</p>
+<p>之所以在虚拟机中将boolean类型使用int类型来代替的原因是CPU硬件来说的，转换成int对于32位的CPU来说，具有更高的存取效果。</p>
+<h1 id="从源码角度分析"><a href="#从源码角度分析" class="headerlink" title="从源码角度分析"></a>从源码角度分析</h1><p>我们跑一下下面代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public class BoolAndBoolArray &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        boolean x = true;</span><br><span class="line">        boolean y;</span><br><span class="line">        boolean[] z = new boolean[4];</span><br><span class="line">        System.out.println(x);</span><br><span class="line">        for (int i = 0; i &lt; 3; i++) &#123;</span><br><span class="line">            System.out.print(z[i]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译然后反编译</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">javac BoolAndBoolArray.java</span><br><span class="line">javap -v BoolAndBoolArray.class</span><br></pre></td></tr></table></figure>
+
+<p>看到指令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">public static void main(java.lang.String[]);</span><br><span class="line">    descriptor: ([Ljava/lang/String;)V</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=3, locals=5, args_size=1</span><br><span class="line">         0: iconst_1                         // 加载常量池中int值 1 --- 表示 true</span><br><span class="line">         1: istore_1                         // 将常量池中int值 1 存入 slot[1] 中 （这里的slot 指的是 存储本地变量的数组）</span><br><span class="line">         2: iconst_4                         // 加载常量池中int值 4</span><br><span class="line">         3: newarray       boolean           // 创建boolean[4]数组</span><br><span class="line">         5: astore_3                         // 将boolean[4]数组放入 slot[3]中</span><br><span class="line">         6: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">         9: iload_1                           // 打印 x 值，也就是 slot[1]的值</span><br><span class="line">        10: invokevirtual #3                  // Method java/io/PrintStream.println:(Z)V</span><br><span class="line">        13: iconst_0                          // 加载常量池中的int值 0</span><br><span class="line">        14: istore        4                   // 将其放入 slot[4]</span><br><span class="line">        16: iload         4                   // 将 slot[4] 的值 又加载到 操作数栈</span><br><span class="line">        18: iconst_3                          // 加载常量池中int值 3 到 操作数栈</span><br><span class="line">        19: if_icmpge     38                  // 结束循环的标记：i值&gt;=3</span><br><span class="line">        22: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">        25: aload_3                           // 将 boolean[4]数组 加载进操作数栈</span><br><span class="line">        26: iload         4                   // 将 i 载入操作数栈</span><br><span class="line">        28: baload                            // load出byte元素</span><br><span class="line">        29: invokevirtual #4                  // Method java/io/PrintStream.print:(Z)V</span><br><span class="line">        32: iinc          4, 1                // i++</span><br><span class="line">        35: goto          16</span><br><span class="line">        38: return</span><br></pre></td></tr></table></figure>
+
+<p>由字节码指令就可以证明以上所述：</p>
+<ol>
+<li>JVM指令中没有一条说是 ‘加载boolean值’ 的指令，只有 <code>iload</code> 和 <code>baload</code> 分别表示 加载 int类型  以及 byte类型 的值；</li>
+<li>JVM用 int 的 1 表示 true，0 表示 false；</li>
+<li>JVM让 boolean型的变量操作，和 int型共用 一套指令集，在JVM眼里，boolean型也就是int型；</li>
+<li>JVM让 boolean数组 中的元素操作 使用 byte相关指令，说明boolean数组中元素大小等同于 byte大小 — 1 byte；</li>
+</ol>
+<h1 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h1><ul>
+<li><a href="https://mp.weixin.qq.com/s?subscene=23&__biz=Mzg2OTA4Mjg5NQ==&mid=2247483669&idx=1&sn=9555df728fc4ec6a7160a64469fe7466&chksm=cea33375f9d4ba632a08f57fc221af9a69f6112c9bf22db954acd443ec541c834453c196e8cc&scene=7&key=69038692c09c4f48bc5af16571e5da8d0c49523b88c24758ea6772e21dec12693fb8c2ab383ff369284827d4cc1b32ffd2241ad1d77837b11eaaf1d477636694c8dec517b1d0dd147a1cb84a47ec2a30&ascene=0&uin=MjU1MDY2OTI0Mw%3D%3D&devicetype=Windows+10&version=62070158&lang=zh_CN&exportkey=A1DZSaSJy5alXMjHOOx%2B33o%3D&pass_ticket=H3eYA3Bz9co9X41uSLGzoACLUbwKFfkfHF3b0zU8m%2FxJ6K0hIwZN5UYqKKUYfymj" target="_blank" rel="noopener">Java中的boolean占多少个字节？</a></li>
+<li><a href="https://mp.weixin.qq.com/s?subscene=23&__biz=MzIzMzgxOTQ5NA==&mid=2247490231&idx=2&sn=67fcbdd631d98cf5982a2d57ce2c2afd&chksm=e8fe86bedf890fa85144c478a35bbd302587ab13d843c29d953c170742973931e104241e23c2&scene=7&key=aa7656a594d1173368ca896d7826918aeddd65bd1fe537143622380fb6c6af942a50f2c28cf7254e8f6bb270adac956445bce36fda162d7fe00c6ae470bc73f1d5c0a499e817f1148da12ba07bbcdf87&ascene=0&uin=MjU1MDY2OTI0Mw%3D%3D&devicetype=Windows+10&version=62070158&lang=zh_CN&exportkey=A4wSZoM4XsyS8RgPH%2BkTnyE%3D&pass_ticket=H3eYA3Bz9co9X41uSLGzoACLUbwKFfkfHF3b0zU8m%2FxJ6K0hIwZN5UYqKKUYfymj" target="_blank" rel="noopener">在Java中boolean类型占多少字节？大多数人都回答错了…</a></li>
+<li><a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html#jvms-6.5" target="_blank" rel="noopener">https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html#jvms-6.5</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/%E7%94%A8Gradle%E4%BB%8E%E9%9B%B6%E6%90%AD%E5%BB%BA%20Spring%20Cloud%20Greenwich.SR4%20%20%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%A1%B9%E7%9B%AE%EF%BC%88%E4%BA%8C%EF%BC%89--%20%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/" rel="next" title="用Gradle从零搭建 Spring Cloud Greenwich.SR4  微服务项目（二）-- 配置中心">
+                  <i class="fa fa-chevron-left"></i> 用Gradle从零搭建 Spring Cloud Greenwich.SR4  微服务项目（二）-- 配置中心
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0%E5%B8%A6Go%E5%B0%8F%E7%99%BD%E5%85%A5%E9%97%A8/" rel="prev" title="一篇文章带Go小白入门">
+                  一篇文章带Go小白入门 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#先回答你"><span class="nav-number">1.</span> <span class="nav-text">先回答你</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#看看官方怎么说"><span class="nav-number">2.</span> <span class="nav-text">看看官方怎么说</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#从源码角度分析"><span class="nav-number">3.</span> <span class="nav-text">从源码角度分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文章"><span class="nav-number">4.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

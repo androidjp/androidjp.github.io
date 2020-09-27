@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言：学习了一下RxJava，理解其是一个以升级版的观察者模式为核心的异步处理库。旨在以更加简介、可读性更强的代码去实现数据异步处理和线程前通信。下面，是本人对RxJava基础的学习笔记和总结，算是入门级别。">
+<meta name="keywords" content="RxJava">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReactiveX 和 RxJava 学习笔记">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;ReactiveX%20%E5%92%8C%20RxJava%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="引言：学习了一下RxJava，理解其是一个以升级版的观察者模式为核心的异步处理库。旨在以更加简介、可读性更强的代码去实现数据异步处理和线程前通信。下面，是本人对RxJava基础的学习笔记和总结，算是入门级别。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;i2.piimg.com&#x2F;567571&#x2F;e01494ea59380277.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;i4.piimg.com&#x2F;567571&#x2F;1c2b91be67aab8a5.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;i1.piimg.com&#x2F;567571&#x2F;6f2f3e1300243da9.png">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.264Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;i2.piimg.com&#x2F;567571&#x2F;e01494ea59380277.png">
+
+<link rel="canonical" href="http://jpuneng.cn/ReactiveX%20%E5%92%8C%20RxJava%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>ReactiveX 和 RxJava 学习笔记 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/ReactiveX%20%E5%92%8C%20RxJava%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ReactiveX 和 RxJava 学习笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-07-12 17:43:00" itemprop="dateCreated datePublished" datetime="2016-07-12T17:43:00+08:00">2016-07-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Rx/" itemprop="url" rel="index">
+                    <span itemprop="name">Rx</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Rx/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>引言：<br>学习了一下RxJava，理解其是一个以升级版的观察者模式为核心的异步处理库。旨在以更加简介、可读性更强的代码去实现数据异步处理和线程前通信。<br>下面，是本人对RxJava基础的学习笔记和总结，算是入门级别。</p>
+</blockquote>
+<a id="more"></a>
+
+<h2 id="Rx介绍"><a href="#Rx介绍" class="headerlink" title="Rx介绍"></a>Rx介绍</h2><hr>
+<p>  ReactiveX 简称 Rx。<br>  Rx = Observables【用于表示异步数据流】 + LINQ【用它的操作符查询异步数据流】 + Schedules【参数化异步数据流的并发处理】<br>  Rx用到的设计模式精华：观察者模式、迭代器模式<br>  RxJava中最重要的是：Observable【被观察者，事件源】+ Subscriber【观察者，订阅者】</p>
+<h2 id="RxJava图解"><a href="#RxJava图解" class="headerlink" title="RxJava图解"></a>RxJava图解</h2><hr>
+<p>  可先通过图解总览大概：<br>  RxJava之观察者模式的基本运作过程，如下：<br>  <img src="http://i2.piimg.com/567571/e01494ea59380277.png" alt="RxJava之观察者模式的基本运作过程"><br>  RxJava观察者模式顺序图，如下：<br>  <img src="http://i4.piimg.com/567571/1c2b91be67aab8a5.png" alt="RxJava观察者模式顺序图"></p>
+<blockquote>
+<p>注意：<code>Subscribe&lt;T&gt;</code> 是实现 <code>Observable&lt;T&gt;</code> 和 <code>Subscription</code> 的一个抽象类，在调用<code>subscribe(params)</code>方法时，如果这个<code>params</code>类型为<code>Observer&lt;T&gt;</code>，则最终它会转成<code>Subscriber&lt;T&gt;</code>，同时，此方法会返回一个<code>Subscription</code>对象，用于调用<code>unsubscribe()</code>方法解绑。</p>
+</blockquote>
+<h2 id="单线程中RxJava基本用法和例子"><a href="#单线程中RxJava基本用法和例子" class="headerlink" title="单线程中RxJava基本用法和例子"></a>单线程中RxJava基本用法和例子</h2><hr>
+<h3 id="1-RxJava的几种基本写法（观察者模式）"><a href="#1-RxJava的几种基本写法（观察者模式）" class="headerlink" title="1. RxJava的几种基本写法（观察者模式）"></a>1. RxJava的几种基本写法（观察者模式）</h3><h4 id="方式一："><a href="#方式一：" class="headerlink" title="方式一："></a>方式一：</h4><p>  原始的观察者模式写法，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">///被观察者</span><br><span class="line">Observable&lt;String&gt; myObservable = Observable.create(</span><br><span class="line">                new Observable.OnSubscribe&lt;String&gt;()&#123;</span><br><span class="line"></span><br><span class="line">                    @Override</span><br><span class="line">                    public void call(Subscriber&lt;? super String&gt; subscriber) &#123;</span><br><span class="line">                        subscriber.onNext(&quot;hello world&quot;);</span><br><span class="line">                        subscriber.onCompleted();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">///观察者</span><br><span class="line">Subscriber&lt;String&gt; mySubscriber = new Subscriber&lt;String&gt;() &#123;</span><br><span class="line">          @Override</span><br><span class="line">          public void onCompleted() &#123;&#125;</span><br><span class="line"></span><br><span class="line">          @Override</span><br><span class="line">          public void onError(Throwable e) &#123;&#125;</span><br><span class="line"></span><br><span class="line">          @Override</span><br><span class="line">          public void onNext(String s) &#123;</span><br><span class="line">                Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();</span><br><span class="line">            &#125;</span><br><span class="line">      &#125;;</span><br><span class="line"></span><br><span class="line">///订阅（让两者产生关联,并启动）</span><br><span class="line"> myObservable.subscribe(mySubscriber);</span><br></pre></td></tr></table></figure>
+<h4 id="方式二："><a href="#方式二：" class="headerlink" title="方式二："></a>方式二：</h4><p>  相对方式一，化简定义方法体的部分，使用Action来实现不完整回调，结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">//被观察者</span><br><span class="line">//等价于： call(String) -&gt; onNext(String)过程只调用一次 -&gt;onCompleted()/onError()</span><br><span class="line">Observable&lt;String&gt; myObservable = Observable.just(&quot;Hello world&quot;);</span><br><span class="line"></span><br><span class="line">///观察者</span><br><span class="line">///调用subscribe()时自动生成Subscriber并调用onNext()</span><br><span class="line">Action1&lt;String&gt; onNextAction = new Action1&lt;String&gt;() &#123;</span><br><span class="line">      @Override</span><br><span class="line">      public void call(String s) &#123;</span><br><span class="line">          Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();</span><br><span class="line">      &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">///观察者</span><br><span class="line">///调用subscribe()时自动生成Subscriber并调用onError()</span><br><span class="line">Action1&lt;Throwable&gt; onErrorAction = new Action1&lt;Throwable&gt;() &#123;</span><br><span class="line">    // onError()</span><br><span class="line">    @Override</span><br><span class="line">    public void call(Throwable throwable) &#123;</span><br><span class="line">        // Error handling</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">///观察者</span><br><span class="line">///调用subscribe()时自动生成Subscriber并调用onCompleted()</span><br><span class="line">Action0 onCompletedAction = new Action0() &#123;</span><br><span class="line">    // onCompleted()</span><br><span class="line">    @Override</span><br><span class="line">    public void call() &#123;</span><br><span class="line">        Log.d(tag, &quot;completed&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">//////订阅（让两者产生关联,并启动）</span><br><span class="line"> myObservable.subscribe(onNextAction);</span><br><span class="line"> // myObservable.subscribe(onErrorAction);</span><br><span class="line"> // myObservable.subscribe(onCompletedAction);</span><br></pre></td></tr></table></figure>
+<h4 id="方式三："><a href="#方式三：" class="headerlink" title="方式三："></a>方式三：</h4><p>  相对方式二，进行链式调用，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">///省略Obervable对象的创建</span><br><span class="line">Observable.just(&quot;this is your sign：&quot;)</span><br><span class="line">                ///省略Action1对象的创建，直接匿名内部类方式添加订阅</span><br><span class="line">                .subscribe(new Action1&lt;String&gt;() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public void call(String s) &#123;</span><br><span class="line">                        Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：方式三中加了map这个RxJava的映射方法，用于将事件处理的复杂过程给被观察者来做，尽可能地减少观察者的工作。<br>知识点：</p>
+</blockquote>
+<ol>
+<li>just：如果只是调用:  onNext() 【一到多次】 –&gt; onCompleted()这个过程，那么，可以使用just()快速创建Observable</li>
+</ol>
+<h3 id="2-基本应用"><a href="#2-基本应用" class="headerlink" title="2. 基本应用"></a>2. 基本应用</h3><h4 id="1-打印字符串数组"><a href="#1-打印字符串数组" class="headerlink" title="1. 打印字符串数组"></a>1. 打印字符串数组</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">String[] names = ...;</span><br><span class="line">Observable.from(names)</span><br><span class="line">    .subscribe(new Action1&lt;String&gt;() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void call(String name) &#123;</span><br><span class="line">            Log.d(tag, name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Observable.from(params) : params是数组类型的参数，在执行时，会调用Subscriber的onNext方法多次，每次处理一个item，之后，调用onCompleted()或者onError().</p>
+</blockquote>
+<h4 id="2-通过id获取图片并显示"><a href="#2-通过id获取图片并显示" class="headerlink" title="2. 通过id获取图片并显示"></a>2. 通过id获取图片并显示</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">int drawableRes = ...;</span><br><span class="line">ImageView imageView = ...;</span><br><span class="line">Observable.create(new OnSubscribe&lt;Drawable&gt;() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void call(Subscriber&lt;? super Drawable&gt; subscriber) &#123;</span><br><span class="line">        Drawable drawable = getTheme().getDrawable(drawableRes));</span><br><span class="line">        subscriber.onNext(drawable);</span><br><span class="line">        subscriber.onCompleted();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).subscribe(new Observer&lt;Drawable&gt;() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void onNext(Drawable drawable) &#123;</span><br><span class="line">        imageView.setImageDrawable(drawable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onCompleted() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onError(Throwable e) &#123;</span><br><span class="line">        Toast.makeText(activity, &quot;Error!&quot;, Toast.LENGTH_SHORT).show();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="多线程中RxJava的使用"><a href="#多线程中RxJava的使用" class="headerlink" title="多线程中RxJava的使用"></a>多线程中RxJava的使用</h2><hr>
+<blockquote>
+<p>在 RxJava 的默认规则中，事件的发出和消费都是在同一个线程的。也就是说，如果只用上面的方法，实现出来的只是一个同步的观察者模式。观察者模式本身的目的就是『后台处理，前台回调』的异步机制，因此异步对于 RxJava 是至关重要的。</p>
+</blockquote>
+<h3 id="1-基本写法"><a href="#1-基本写法" class="headerlink" title="1. 基本写法"></a>1. 基本写法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">Observable.just(1,2,3,4)</span><br><span class="line">                ///指定 subscribe() 发生在 IO 线程</span><br><span class="line">                .subscribeOn(Schedulers.io())</span><br><span class="line">                // 指定 Subscriber 的回调发生在主线程</span><br><span class="line">                .observeOn(AndroidSchedulers.mainThread())</span><br><span class="line">                .map(new Func1&lt;Integer, String&gt;() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public String call(Integer integer) &#123;</span><br><span class="line">                        Log.e(&quot;TestActivity&quot;, &quot;当前线程：&quot;+ Thread.currentThread());</span><br><span class="line">                        String res = &quot;字符串：&quot;+integer;</span><br><span class="line">                        return res;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">                .subscribe(new Subscriber&lt;String&gt;() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public void onCompleted() &#123;</span><br><span class="line">                        Toast.makeText(TestActivity.this,&quot;完成&quot;,Toast.LENGTH_SHORT).show();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    @Override</span><br><span class="line">                    public void onError(Throwable e) &#123;</span><br><span class="line"></span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    @Override</span><br><span class="line">                    public void onNext(String s) &#123;</span><br><span class="line">                        Log.e(&quot;TestActivity&quot;, &quot;当前线程：&quot;+ Thread.currentThread());</span><br><span class="line">                        Toast.makeText(TestActivity.this,s,Toast.LENGTH_SHORT).show();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>知识点：</p>
+</blockquote>
+<ol>
+<li>just((1,2,3,4):<br>前者等价于如下代码：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Observable.create(new Observable.OnSubscribe&lt;Integer&gt;() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void call(Subscriber&lt;? super Integer&gt; subscriber) &#123;</span><br><span class="line">            Log.e(&quot;TestActivity&quot;, &quot;call当前线程：&quot;+ Thread.currentThread());</span><br><span class="line">            subscriber.onNext(1);</span><br><span class="line">            subscriber.onNext(2);</span><br><span class="line">            subscriber.onNext(3);</span><br><span class="line">            subscriber.onNext(4);</span><br><span class="line">            subscriber.onCompleted();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure></li>
+<li>Scheduler：<ul>
+<li>背景：在不指定线程的情况下， RxJava 遵循的是线程不变的原则，即：在哪个线程调用 <code>subscribe()</code>，就在哪个线程生产事件；在哪个线程生产事件，就在哪个线程消费事件。</li>
+<li>概念：调度器（线程控制器）</li>
+<li>作用：切换线程传递事件，达到异步的目的</li>
+<li>RxJava内置的Scheduler：（文章下面会详细总结）<ul>
+<li><code>Schedulers.immediate()</code>:默认模式。直接使用当前线程运行。</li>
+<li><code>Schedulers.newThread()</code>:总是启动新线程，并在新线程中运行。</li>
+<li><code>Sched.io()</code>:I/O 操作（读写文件、读写数据库、网络信息交互等）所使用的 Scheduler。</li>
+<li><code>Schedulers.computation()</code>: 计算所使用的 Scheduler。</li>
+<li><code>AndroidSchedulers.mainThread()</code>:它指定的操作将在 Android 主线程运行。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Obervable.subscribeOn(Scheduler):让call方法以及之前的操作，发生在指定的线程中运行</li>
+<li>Obervable.observeOn(Scheduler):让call之后的回调操作例如map、onNext等操作，发生在指定的线程中运行。</li>
+</ol>
+<h2 id="RxJava常用操作–数据转换处理"><a href="#RxJava常用操作–数据转换处理" class="headerlink" title="RxJava常用操作–数据转换处理"></a>RxJava常用操作–数据转换处理</h2><hr>
+<blockquote>
+<p>在事件传递过程中，如果观察者有需要，还可以通过数据转换处理，将传入的数据进行加工或调用，得到更多不同类型的信息。<br>RxJava提供给我们：map，flatMap来支持数据的‘一对一’和’一对多‘的转换。</p>
+</blockquote>
+<ol>
+<li>map<br>作用：实现数据的一对一转化过程<br>以下例子可以说明：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">///省略Obervable对象的创建</span><br><span class="line">Observable.just(&quot;this is your sign：&quot;)</span><br><span class="line">                ///将传入的参数由String变成String[]</span><br><span class="line">                .map(new Func1&lt;String, String[]&gt;() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public String[] call(String s) &#123;</span><br><span class="line">                        String[] strings = s.split(&quot; &quot;);</span><br><span class="line">                        return strings;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">                ///将传入的参数由String[]变成Integer</span><br><span class="line">                .map(new Func1&lt;String[], Integer&gt;() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public Integer call(String[] strings) &#123;</span><br><span class="line">                        int len = strings.length;</span><br><span class="line">                        return len;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">                ///将传入的参数由Integer变成String</span><br><span class="line">                .map(new Func1&lt;Integer, String&gt;() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public String call(Integer integer) &#123;</span><br><span class="line">                        return integer+&quot;&quot;;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">                ///省略Action1对象的创建，直接匿名内部类方式添加订阅</span><br><span class="line">                .subscribe(new Action1&lt;String&gt;() &#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public void call(String s) &#123;</span><br><span class="line">                        Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br></pre></td></tr></table></figure></li>
+<li>flatMap<br>作用：实现数据的一对多转换过程<br>先看如下具体例子：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">private void testFlatMap() throws CloneNotSupportedException &#123;</span><br><span class="line">      List&lt;Student&gt; studentList = new ArrayList&lt;&gt;();</span><br><span class="line">      ///测试：构建两个Student对象</span><br><span class="line">      Student xiaoming = new Student();</span><br><span class="line">      Student honghong = new Student();</span><br><span class="line">      ///测试：构建Course对象集</span><br><span class="line">      Course chinese = new Course(&quot;语文&quot;);</span><br><span class="line">      Course english = new Course(&quot;英语&quot;);</span><br><span class="line">      Course math  = new  Course(&quot;数学&quot;);</span><br><span class="line"></span><br><span class="line">      ///进行赋值操作，这样一来：</span><br><span class="line">      /// xiaoming：id为“2222”，并有两门课程：语文和英语</span><br><span class="line">      /// honghong：id为“007” ，并有两门课程：英语和数学</span><br><span class="line">      xiaoming.id= &quot;2222&quot;;</span><br><span class="line">      honghong.id= &quot;007&quot;;</span><br><span class="line">      xiaoming.courseList = new ArrayList&lt;&gt;();</span><br><span class="line">      xiaoming.courseList.add(chinese.clone());</span><br><span class="line">      xiaoming.courseList.add(english.clone());</span><br><span class="line">      honghong.courseList = new ArrayList&lt;&gt;();</span><br><span class="line">      honghong.courseList.add(english.clone());</span><br><span class="line">      honghong.courseList.add(math.clone());</span><br><span class="line"></span><br><span class="line">      studentList.add(xiaoming);</span><br><span class="line">      studentList.add(honghong);</span><br><span class="line"></span><br><span class="line">      ///下面的过程，就是提取：列表中的列表</span><br><span class="line">      Observable.from(studentList)</span><br><span class="line">              .flatMap(new Func1&lt;Student, Observable&lt;Course&gt;&gt;() &#123;</span><br><span class="line">                  @Override</span><br><span class="line">                  public Observable&lt;Course&gt; call(Student student) &#123;</span><br><span class="line">                      Log.e(&quot;学生信息&quot;, student.id);</span><br><span class="line">                      return Observable.from(student.courseList);</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;)</span><br><span class="line">              .map(new Func1&lt;Course, String&gt;() &#123;</span><br><span class="line">                  @Override</span><br><span class="line">                  public String call(Course course) &#123;</span><br><span class="line">                      return course.name;</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;)</span><br><span class="line">              .subscribe(new Action1&lt;String&gt;() &#123;</span><br><span class="line">                  @Override</span><br><span class="line">                  public void call(String s) &#123;</span><br><span class="line">                      Log.e(&quot;course信息&quot;,s);</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+最终得到结果为：<br><img src="http://i1.piimg.com/567571/6f2f3e1300243da9.png" alt=""></li>
+</ol>
+<blockquote>
+<p>知识点：</p>
+</blockquote>
+<ol>
+<li>flatMap：<ul>
+<li>作用：实现传递数据的一对多变换（比如：我想要对一个列表中每一个item都进行一个数据类型转换并输出的操作）</li>
+<li>原理：<ul>
+<li>1)使用传入的事件对象创建一个 Observable 对象</li>
+<li>2)并不发送这个 Observable, 而是将它激活，于是它开始发送事件</li>
+<li>3)每一个创建出来的 Observable 发送的事件，都被汇入同一个 Observable ，而这个 Observable 负责将这些事件统一交给 Subscriber 的回调方法</li>
+<li>结果：把事件拆成了两级，通过一组新创建的 Observable 将初始的对象『铺平』之后通过统一路径分发了下去。而这个『铺平』就是 flatMap() 所谓的 flat。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Funx 和 Actionx：<ul>
+<li>‘x’的意义：从0开始，表示有x个参数的Fun()和Action()方法。</li>
+</ul>
+</li>
+</ol>
+<h2 id="RxJava各方法汇总"><a href="#RxJava各方法汇总" class="headerlink" title="RxJava各方法汇总"></a>RxJava各方法汇总</h2><hr>
+<h3 id="1-用于创建Observable的操作符："><a href="#1-用于创建Observable的操作符：" class="headerlink" title="1. 用于创建Observable的操作符："></a>1. 用于创建Observable的操作符：</h3><ul>
+<li>filter() —输出和输入相同的元素，并且会过滤掉那些不满足检查条件的。</li>
+<li>take() —输出最多指定数量的结果。</li>
+<li>Delay() —让发射数据的时机延后一段时间</li>
+<li>Create — 通过调用观察者的方法从头创建一个Observable</li>
+<li>Defer — 在观察者订阅之前不创建这个Observable，为每一个观察者创建一个新的Observable</li>
+<li>Empty/Never/Throw — 创建行为受限的特殊Observable</li>
+<li>From — 将其它的对象或数据结构转换为Observable</li>
+<li>Interval — 创建一个定时发射整数序列的Observable</li>
+<li>Just — 将对象或者对象集合转换为一个会发射这些对象的Observable</li>
+<li>Range — 创建发射指定范围的整数序列的Observable</li>
+<li>Repeat — 创建重复发射特定的数据或数据序列的Observable</li>
+<li>Start — 创建发射一个函数的返回值的Observable</li>
+<li>Timer — 创建在一个指定的延迟之后发射单个数据的Observable</li>
+</ul>
+<h3 id="2-用于对Observable发射的数据进行变换的操作符："><a href="#2-用于对Observable发射的数据进行变换的操作符：" class="headerlink" title="2. 用于对Observable发射的数据进行变换的操作符："></a>2. 用于对Observable发射的数据进行变换的操作符：</h3><ul>
+<li>Buffer — 缓存，可以简单的理解为缓存，它定期从Observable收集数据到一个集合，然后把这些数据集合打包发射，而不是一次发射一个</li>
+<li>FlatMap — 扁平映射，将Observable发射的数据变换为Observables集合，然后将这些Observable发射的数据平坦化的放进一个单独的Observable，可以认为是一个将嵌套的数据结构展开的过程。</li>
+<li>GroupBy — 分组，将原来的Observable分拆为Observable集合，将原始Observable发射的数据按Key分组，每一个Observable发射一组不同的数据</li>
+<li>Map — 映射，通过对序列的每一项都应用一个函数变换Observable发射的数据，实质是对序列中的每一项执行一个函数，函数的参数就是这个数据项</li>
+<li>Scan — 扫描，对Observable发射的每一项数据应用一个函数，然后按顺序依次发射这些值</li>
+<li>Window — 窗口，定期将来自Observable的数据分拆成一些Observable窗口，然后发射这些窗口，而不是每次发射一项。类似于Buffer，但Buffer发射的是数据，Window发射的是Observable，每一个Observable发射原始Observable的数据的一个子集</li>
+</ul>
+<h3 id="3-线程切换和控制相关操作符："><a href="#3-线程切换和控制相关操作符：" class="headerlink" title="3. 线程切换和控制相关操作符："></a>3. 线程切换和控制相关操作符：</h3><ul>
+<li>subscribeOn(Scheduler) — 指定事件的call方法以及以前的操作到一个线程中</li>
+<li>observeOn(Scheduler) — 指定事件的call方法之后的操作（如：map(),onNext(),onCompleted(),onError()）到一个线程中【注意：不包括Subscriber.onStart()方法，该方法在默认它所在的线程中执行】</li>
+<li>参数Scheduler有：<ul>
+<li>Schedulers.immediate():默认模式。直接使用当前线程运行。</li>
+<li>Schedulers.newThread():总是启动新线程，并在新线程中运行。</li>
+<li>Sched.io():I/O 操作（读写文件、读写数据库、网络信息交互等）所使用的 Scheduler。行为模式和 newThread() 差不多，区别在于 io() 的内部实现是是用一个无数量上限的线程池，可以重用空闲的线程，因此多数情况下 io() 比 newThread() 更有效率。不要把计算工作放在 io() 中，可以避免创建不必要的线程</li>
+<li>Schedulers.computation(): 计算所使用的 Scheduler。这个计算指的是 CPU 密集型计算，即不会被 I/O 等操作限制性能的操作，例如图形的计算。这个 Scheduler 使用的固定的线程池，大小为 CPU 核数。不要把 I/O 操作放在 computation() 中，否则 I/O 操作的等待时间会浪费 CPU。</li>
+<li>AndroidSchedulers.mainThread():它指定的操作将在 Android 主线程运行。</li>
+</ul>
+</li>
+</ul>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><hr>
+<ul>
+<li><a href="http://blog.csdn.net/lzyzsd/article/details/41833541" target="_blank" rel="noopener">http://blog.csdn.net/lzyzsd/article/details/41833541</a></li>
+<li><a href="https://mcxiaoke.gitbooks.io/rxdocs/content/Observables.html" target="_blank" rel="noopener">https://mcxiaoke.gitbooks.io/rxdocs/content/Observables.html</a></li>
+<li><a href="http://gank.io/post/560e15be2dca930e00da1083" target="_blank" rel="noopener">http://gank.io/post/560e15be2dca930e00da1083</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RxJava/" rel="tag"># RxJava</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/%E9%80%8F%E4%BE%A7%E7%90%86%E8%A7%A3-Android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/" rel="next" title="透侧理解-Android事件分发">
+                  <i class="fa fa-chevron-left"></i> 透侧理解-Android事件分发
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/Android%E5%BC%80%E5%8F%91%E7%BB%86%E8%8A%82--%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9AUI%E7%AF%87/" rel="prev" title="Android开发细节--查漏补缺（一）：UI篇">
+                  Android开发细节--查漏补缺（一）：UI篇 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Rx介绍"><span class="nav-number">1.</span> <span class="nav-text">Rx介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RxJava图解"><span class="nav-number">2.</span> <span class="nav-text">RxJava图解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单线程中RxJava基本用法和例子"><span class="nav-number">3.</span> <span class="nav-text">单线程中RxJava基本用法和例子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-RxJava的几种基本写法（观察者模式）"><span class="nav-number">3.1.</span> <span class="nav-text">1. RxJava的几种基本写法（观察者模式）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#方式一："><span class="nav-number">3.1.1.</span> <span class="nav-text">方式一：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方式二："><span class="nav-number">3.1.2.</span> <span class="nav-text">方式二：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方式三："><span class="nav-number">3.1.3.</span> <span class="nav-text">方式三：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-基本应用"><span class="nav-number">3.2.</span> <span class="nav-text">2. 基本应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-打印字符串数组"><span class="nav-number">3.2.1.</span> <span class="nav-text">1. 打印字符串数组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-通过id获取图片并显示"><span class="nav-number">3.2.2.</span> <span class="nav-text">2. 通过id获取图片并显示</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多线程中RxJava的使用"><span class="nav-number">4.</span> <span class="nav-text">多线程中RxJava的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-基本写法"><span class="nav-number">4.1.</span> <span class="nav-text">1. 基本写法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RxJava常用操作–数据转换处理"><span class="nav-number">5.</span> <span class="nav-text">RxJava常用操作–数据转换处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RxJava各方法汇总"><span class="nav-number">6.</span> <span class="nav-text">RxJava各方法汇总</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-用于创建Observable的操作符："><span class="nav-number">6.1.</span> <span class="nav-text">1. 用于创建Observable的操作符：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-用于对Observable发射的数据进行变换的操作符："><span class="nav-number">6.2.</span> <span class="nav-text">2. 用于对Observable发射的数据进行变换的操作符：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-线程切换和控制相关操作符："><span class="nav-number">6.3.</span> <span class="nav-text">3. 线程切换和控制相关操作符：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文章"><span class="nav-number">7.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

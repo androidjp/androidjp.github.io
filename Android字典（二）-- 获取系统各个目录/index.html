@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言： 下面列出Android系统在编译打包后由镜像文件生成的Android系统各级主要目录，以及在App中获取各个目录的说明示例。">
+<meta name="keywords" content="Android系统目录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android字典（二）-- 获取系统各个目录">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Android%E5%AD%97%E5%85%B8%EF%BC%88%E4%BA%8C%EF%BC%89--%20%E8%8E%B7%E5%8F%96%E7%B3%BB%E7%BB%9F%E5%90%84%E4%B8%AA%E7%9B%AE%E5%BD%95&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="引言： 下面列出Android系统在编译打包后由镜像文件生成的Android系统各级主要目录，以及在App中获取各个目录的说明示例。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.254Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://jpuneng.cn/Android%E5%AD%97%E5%85%B8%EF%BC%88%E4%BA%8C%EF%BC%89--%20%E8%8E%B7%E5%8F%96%E7%B3%BB%E7%BB%9F%E5%90%84%E4%B8%AA%E7%9B%AE%E5%BD%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Android字典（二）-- 获取系统各个目录 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Android%E5%AD%97%E5%85%B8%EF%BC%88%E4%BA%8C%EF%BC%89--%20%E8%8E%B7%E5%8F%96%E7%B3%BB%E7%BB%9F%E5%90%84%E4%B8%AA%E7%9B%AE%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android字典（二）-- 获取系统各个目录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-07-22 22:21:00" itemprop="dateCreated datePublished" datetime="2016-07-22T22:21:00+08:00">2016-07-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/%E7%B3%BB%E7%BB%9F%E7%9B%AE%E5%BD%95/" itemprop="url" rel="index">
+                    <span itemprop="name">系统目录</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>引言： 下面列出Android系统在编译打包后由镜像文件生成的Android系统各级主要目录，以及在App中获取各个目录的说明示例。</p>
+</blockquote>
+<a id="more"></a>
+
+<h2 id="一、Android系统目录结构"><a href="#一、Android系统目录结构" class="headerlink" title="一、Android系统目录结构"></a>一、Android系统目录结构</h2><hr>
+<ul>
+<li><strong>/init  【系统启动文件】</strong></li>
+<li><strong>/system</strong><ul>
+<li>app【系统应用安装目录】</li>
+<li>bin【常用的系统本地命令（二进制），大部分是toolbar的链接（类似于嵌入式Linux中的busybox）】</li>
+<li>etc【系统配置文件，如hosts】</li>
+<li>font【字体目录】</li>
+<li>framework【Java平台架构核心库，jar包和odex优化的文件】</li>
+<li>lib【系统底层共享库，.so库文件】</li>
+<li>xbin【不常用的系统管理工具，相当于linux 的/sbin】</li>
+<li>media<ul>
+<li>audio【铃声，提示音 等音频文件， .ogg】<ul>
+<li>notifications【通知】</li>
+<li>ui【界面】</li>
+<li>alarms【警告】</li>
+<li>ringtones【铃声】</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>usr【用户文件夹】<ul>
+<li>keychars</li>
+<li>keylayout</li>
+<li>share</li>
+<li>srec【配置】</li>
+<li>等等</li>
+</ul>
+</li>
+<li>vendor</li>
+<li>build.prop【系统设置和变更属性】</li>
+</ul>
+</li>
+<li>/etc –&gt; /system/etc</li>
+<li>/vendor –&gt; /system/vendor</li>
+<li>/dev【存放设备节点文件】</li>
+<li>/proc【全局系统信息】</li>
+<li><strong>/data</strong>【用户软件和各种数据】<ul>
+<li>local/tmp【临时目录，无权限要求】</li>
+<li>app【普遍程序安装目录】</li>
+<li>system<ul>
+<li>location【其中的location.gps记录最后的坐标，LocationManager.getLastKnownLocation()数据来自此处】</li>
+</ul>
+</li>
+<li>data<ul>
+<li><package_name>
+* files【Context.getFilesDir()， Context.getFileOutput()】
+* cache【Context.getCacheDir() , **系统会在内存不足或者目录大小达到特定数值时自动清理。**】
+* shared_pref【Context.getSharedPreferences()建立的 SharedPreferences文件存放目录】</li>
+</ul>
+</li>
+<li>anr【应用在发生ANR 时，Android将问题点的堆栈写入traces.txt文件中】</li>
+<li>location<ul>
+<li>gps【GPS location provider配置】</li>
+</ul>
+</li>
+<li>property【其中persist.sys.timezone记录系统临时区】</li>
+</ul>
+</li>
+<li><strong>/sdcard</strong> –&gt; /storage/emulated/legacy   【SD卡的FAT32文件系统挂载到这个目录】</li>
+<li><strong>Android</strong><ul>
+<li><strong>data</strong><ul>
+<li><package_name>  【应用的额外数据，应用卸载时自动删除】<ul>
+<li>files【Context.getExternalFilesDir()获取 。 设置 → 应用 → 具体应用详情→ <strong>清除数据</strong> 的操作对象】</li>
+<li>cache【Context.getExternalCacheDir()获取 。 设置 → 应用 → 具体应用详情→ <strong>清除缓存</strong> 的操作对象】</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>lost+found<ul>
+<li>yaffs文件系统固有的，类似于回收站的文件夹。</li>
+</ul>
+</li>
+<li>ODEX<ul>
+<li>从apk中提取出来的可运行文件，即原apk中classes.dex通过dex优化生成的一个单独存放的dex文件。启动应用时不需要再从apk包中提取dex，速度更快。还可以删除apk包中的dex减少体积。缺点是体积变大，而且升级某个给Odex的应用可能会出现问题。</li>
+</ul>
+</li>
+</ul>
+<h2 id="二、获取系统各个目录"><a href="#二、获取系统各个目录" class="headerlink" title="二、获取系统各个目录"></a>二、获取系统各个目录</h2><hr>
+<blockquote>
+<p>以包名为“com.androidjp.app”的应用示例实测得到以下结果，模拟器和真机结果一致。</p>
+</blockquote>
+<p><strong><em>Environment.getExternalStorageDirectory().getAbsolutePath():</em></strong><br>结果：/storage/emulated/0<br><strong>*Environment.getExternalStoragePublicDirectory(“”).getAbsolutePath(): *</strong><br>结果：/storage/emulated/0<br><strong>*MyAppl.getContext().getPackageName(): *</strong><br>结果：com.androidjp.app【你的app的包目录】<br><strong>*Environment.getDownloadCacheDirectory().getAbsolutePath(): *</strong><br>结果：/cache<br><strong>*Environment.getRootDirectory().getAbsolutePath(): *</strong><br>结果：/system<br><strong>*Environment.getDataDirectory().getAbsolutePath(): *</strong><br>结果：/data<br><strong>*MyAppl.getContext().getFilesDir().getAbsolutePath(): *</strong><br>结果：/data/user/0/com.androidjp.app/files<br><strong>*Environment.getExternalStoragePublicDirectory(“files”).getAbsolutePath(): *</strong><br>结果：/storage/emulated/0/files<br><strong>*MyAppl.getContext().getExternalFilesDir(“”).getAbsolutePath(): *</strong><br>结果：/storage/emulated/0/Android/data/com.androidjp.app/files<br><strong>*MyAppl.getContext().getCacheDir().getAbsolutePath(): *</strong><br>结果：/data/user/0/com.androidjp.app/cache<br><strong>*Environment.getExternalStoragePublicDirectory(“cache”).getAbsolutePath(): *</strong><br>结果：/storage/emulated/0/cache<br><strong>*MyAppl.getContext().getExternalCacheDir().getAbsolutePath(): *</strong><br>结果：/storage/emulated/0/Android/data/com.androidjp.app/cache</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android%E7%B3%BB%E7%BB%9F%E7%9B%AE%E5%BD%95/" rel="tag"># Android系统目录</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/Android%20AIDL%E5%9F%BA%E7%A1%80%20--%20Parcelable%E6%8E%A5%E5%8F%A3/" rel="next" title="Android AIDL基础 -- Parcelable接口">
+                  <i class="fa fa-chevron-left"></i> Android AIDL基础 -- Parcelable接口
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/Java%E9%9D%A2%E8%AF%95%E7%9B%B8%E5%85%B3%EF%BC%88%E4%B8%80%EF%BC%89--%20Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%85%A8%E8%BF%87%E7%A8%8B/" rel="prev" title="Java面试相关（一）-- Java类加载全过程">
+                  Java面试相关（一）-- Java类加载全过程 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、Android系统目录结构"><span class="nav-number">1.</span> <span class="nav-text">一、Android系统目录结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、获取系统各个目录"><span class="nav-number">2.</span> <span class="nav-text">二、获取系统各个目录</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

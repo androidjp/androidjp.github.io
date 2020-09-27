@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="AOP简介AOP（Aspect Orient Programming），我们一般称为面向方面（切面）编程，作为面向对象的一种补充，用于处理系统中分布于各个模块的横切关注点，比如事务管理、日志、缓存等等。AOP实现的关键在于AOP框架自动创建的AOP代理，AOP代理主要分为静态代理和动态代理，静态代理的代表为AspectJ；而动态代理则以Spring AOP为代表。">
+<meta name="keywords" content="spring,aop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring AOP原理与技术对比">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Spring%20AOP%E5%8E%9F%E7%90%86%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="AOP简介AOP（Aspect Orient Programming），我们一般称为面向方面（切面）编程，作为面向对象的一种补充，用于处理系统中分布于各个模块的横切关注点，比如事务管理、日志、缓存等等。AOP实现的关键在于AOP框架自动创建的AOP代理，AOP代理主要分为静态代理和动态代理，静态代理的代表为AspectJ；而动态代理则以Spring AOP为代表。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;spring_aop&#x2F;1.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;spring_aop&#x2F;2.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;spring_aop&#x2F;3.png">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.264Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;spring_aop&#x2F;1.png">
+
+<link rel="canonical" href="http://jpuneng.cn/Spring%20AOP%E5%8E%9F%E7%90%86%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Spring AOP原理与技术对比 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Spring%20AOP%E5%8E%9F%E7%90%86%E4%B8%8E%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring AOP原理与技术对比
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-04 20:12:56" itemprop="dateCreated datePublished" datetime="2019-12-04T20:12:56+08:00">2019-12-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/" itemprop="url" rel="index">
+                    <span itemprop="name">spring</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="AOP简介"><a href="#AOP简介" class="headerlink" title="AOP简介"></a>AOP简介</h1><p>AOP（Aspect Orient Programming），我们一般称为面向方面（切面）编程，作为面向对象的一种补充，用于处理系统中分布于各个模块的横切关注点，比如事务管理、日志、缓存等等。AOP实现的关键在于AOP框架自动创建的AOP代理，AOP代理主要分为静态代理和动态代理，静态代理的代表为AspectJ；而动态代理则以Spring AOP为代表。</p><a id="more"></a>
+<h1 id="Spring-AOP"><a href="#Spring-AOP" class="headerlink" title="Spring AOP"></a>Spring AOP</h1><p>其实，<code>org.springframework.boot:spring-boot-starter</code> 内部就依赖了<code>org.springframework:spring-aop</code>，也就是说，基本上只要用到spring-boot-starter相关库，内部就会有spring-aop相关支持。</p>
+<p>比如，我们去打印一个Application的启动情况，就会发现，它其实是用GCLib动态代理后的对象：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@SpringBootApplication</span><br><span class="line">public class DynamicProxyDemoApplication implements ApplicationRunner &#123;</span><br><span class="line">    @Resource</span><br><span class="line">    DynamicProxyDemoApplication mainApp;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        SpringApplication.run(DynamicProxyDemoApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run(ApplicationArguments args) throws Exception &#123;</span><br><span class="line">        System.out.println(mainApp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>打印结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">com.example.dynamic_proxy_demo.DynamicProxyDemoApplication$$EnhancerBySpringCGLIB$$c4f6520e@420bc288</span><br></pre></td></tr></table></figure>
+
+<p>Spring AOP 其实提供了多种横切逻辑织入机制（Weaving），性能损耗上也是各有差别，从运行期间的动态代理和字节码增强 Weavng，到类加载期间的 Weaving，甚至高冷的 AspectJ 二次静态编译 Weaving。</p>
+<h1 id="静态代理–AspectJ"><a href="#静态代理–AspectJ" class="headerlink" title="静态代理–AspectJ"></a>静态代理–AspectJ</h1><p><img src="../images/spring_aop/1.png" alt><br>AspectJ属于编译时增强实现AOP。</p>
+<p>AspectJ是一个Java实现的面向切面的框架，它扩展了Java语言。AspectJ有自定义的语法，所以它有一个专门的编译器用来生成遵守Java字节编码规范的Class文件。</p>
+<ul>
+<li>所谓静态代理：AOP框架在编译阶段生成AOP代理类。</li>
+<li>静态代理也被称为“编译时增强”。</li>
+</ul>
+<p>原理：AspectJ会在Java文件编译生成Class文件时，Aspect J编译器会将需要做的额外的代码逻辑的字节码一并补全到被代理类的逻辑字节码周围。之后，在运行期间，一旦命中被代理类相关的逻辑，就会进入这个增强后的AOP对象，并调用增强后的逻辑。</p>
+<blockquote>
+<p>注意：这里说的是 AspectJ编译器（acj编译器），也就说明了其是在编译期生成新的类。</p>
+</blockquote>
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><ol>
+<li>首先maven引入依赖： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.aspectj&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;aspectjrt&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;1.8.9&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.aspectj&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;aspectjtools&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;1.8.9&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure></li>
+<li>然后，在idea中将javac编译器变成acj编译器来支持AspectJ语法：<br> <img src="../images/spring_aop/2.png" alt></li>
+<li>将明星的表演抽象成一个ShowService接口，包括了唱歌、跳舞的功能 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public interface ShowService &#123;</span><br><span class="line">    // 歌唱表演</span><br><span class="line">    void sing(String songName);</span><br><span class="line">    // 舞蹈表演</span><br><span class="line">    void dance();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+ 明星类实现了ShowService接口： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public class Star implements ShowService&#123;</span><br><span class="line">    private String name;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void sing(String songName) &#123;</span><br><span class="line">        System.out.println(this.name + &quot; sing a song: &quot; + songName);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void dance() &#123;</span><br><span class="line">        System.out.println(this.name + &quot;dance&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Star(String name) &#123;</span><br><span class="line">        this.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Star() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        Star star = new Star(&quot;Eminem&quot;);</span><br><span class="line">        star.sing(&quot;Mockingbird&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>【关键】用AspectJ 的语法，来写切面类 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">public aspect AgentAspectJ &#123;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 定义切点</span><br><span class="line">     */</span><br><span class="line">    pointcut sleepPointCut():call(* Star.sing(..));</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 定义切点</span><br><span class="line">     */</span><br><span class="line">    pointcut eatPointCut():call(* Star.eat(..));</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 定义前置通知</span><br><span class="line">     *</span><br><span class="line">     * before(参数):连接点函数&#123;</span><br><span class="line">     *     函数体</span><br><span class="line">     * &#125;</span><br><span class="line">     */</span><br><span class="line">    before():sleepPointCut()&#123;</span><br><span class="line">        getMoney();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 定义后置通知</span><br><span class="line">     * after(参数):连接点函数&#123;</span><br><span class="line">     *     函数体</span><br><span class="line">     * &#125;</span><br><span class="line">     */</span><br><span class="line">    after():sleepPointCut()&#123;</span><br><span class="line">        writeReceipt();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void getMoney() &#123;</span><br><span class="line">        System.out.println(&quot;get money&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void writeReceipt() &#123;</span><br><span class="line">        System.out.println(&quot;write receipt&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h1 id="动态代理–Spring-AOP"><a href="#动态代理–Spring-AOP" class="headerlink" title="动态代理–Spring AOP"></a>动态代理–Spring AOP</h1><p><img src="../images/spring_aop/3.png" alt></p>
+<p>所谓动态代理：AOP框架不会修改字节码，而是在内存中临时为方法生成一个AOP对象，这个AOP对象包含了目标对象的全部方法（相当于动态创建目标对象的一个子类对象），并在特定的切点做了增强处理，并回调原对象的方法。</p>
+<p>Spring AOP动态代理的两种方式：</p>
+<h2 id="JDK动态代理（反射）"><a href="#JDK动态代理（反射）" class="headerlink" title="JDK动态代理（反射）"></a>JDK动态代理（反射）</h2><p>JDK动态代理通过反射来接收被代理的类，并且要求被代理的类必须实现一个接口。JDK动态代理的核心是InvocationHandler接口和Proxy类。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 提供了一系列的static方法，用来创建代理类或对象，这个类是所有动态代理类的父类</span><br><span class="line">java.lang.reflect.Proxy</span><br><span class="line"></span><br><span class="line">// 这是调用处理器接口，只有一个invoke方法，处理动态代理类对象方法的调用，每个动态代理类都会关联一个InvocationHandler</span><br><span class="line">// 可以通过实现该接口定义横切逻辑，并通过反射机制调用目标类的代码，动态地将横切逻辑和业务逻辑编织在一起</span><br><span class="line">java.lang.reflect.InvocationHandler</span><br></pre></td></tr></table></figure>
+
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">public class ProxyDemo_1 &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException &#123;</span><br><span class="line">        //(1)通过实现 InvocationHandler 接口创建自己的调用处理器</span><br><span class="line">        InvocationHandler handler = new InvocationHandler() &#123;</span><br><span class="line">            //创建委托类对象实例</span><br><span class="line">            private RealSubject subject = new RealSubject();</span><br><span class="line">            @Override</span><br><span class="line">            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable &#123;</span><br><span class="line">                //调用委托类的方法</span><br><span class="line">                return method.invoke(subject, args);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        //(2)通过为 Proxy 类指定 ClassLoader 对象和一组 interface 来创建动态代理类</span><br><span class="line">        Class&lt;?&gt; proxyClass = Proxy.getProxyClass(ProxyDemo_1.class.getClassLoader(), new Class&lt;?&gt;[]&#123;Subject.class&#125;);</span><br><span class="line">        //(3)通过反射机制获得动态代理类的构造函数，其唯一参数类型是调用处理器接口类型</span><br><span class="line">        Constructor&lt;?&gt; proxyClassConstructor = proxyClass.getConstructor(new Class&lt;?&gt;[]&#123;InvocationHandler.class&#125;);</span><br><span class="line">        //(4)通过构造函数创建动态代理类实例，构造时调用处理器对象作为参数被传入</span><br><span class="line">        Object o = proxyClassConstructor.newInstance(handler);</span><br><span class="line">        //(5)通过动态代理对象调用</span><br><span class="line">        Subject subject = (Subject) o;</span><br><span class="line">        //(6)输出委托类的结果</span><br><span class="line">        subject.doSomething();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static interface Subject &#123;</span><br><span class="line">        void doSomething();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public static class RealSubject implements Subject &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void doSomething() &#123;</span><br><span class="line">            System.out.println(&quot;Hello&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>不足：动态代理只能支持接口的代理，这也是因为java的继承性本质所限制的，因为所有的动态代理类都继承了Proxy类，所以再也无法同时继承其他类</p>
+<h2 id="CGLIB动态代理（继承）"><a href="#CGLIB动态代理（继承）" class="headerlink" title="CGLIB动态代理（继承）"></a>CGLIB动态代理（继承）</h2><p>如果目标类没有实现接口，那么Spring AOP会选择使用CGLIB来动态代理目标类。CGLIB（Code Generation Library），是一个代码生成的类库，可以在运行时动态的生成某个类的子类，在子类中采用方法拦截的技术拦截所有父类方法的调用并顺势织入横切逻辑，注意，CGLIB是通过继承的方式做的动态代理，因此如果某个类<strong>被标记为final</strong>，那么它是<strong>无法使用CGLIB做动态代理</strong>的。</p>
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public class 中介所B implements MethodInterceptor &#123;</span><br><span class="line"></span><br><span class="line">    public static &lt;T extends 房东&gt; 房东 newProxyInstance(Class&lt;T&gt; targetClass) &#123;</span><br><span class="line">        Enhancer enhancer = new Enhancer();</span><br><span class="line">        enhancer.setSuperclass(targetClass);</span><br><span class="line">        enhancer.setCallback(new 中介所B());</span><br><span class="line">        return (房东) enhancer.create();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable &#123;</span><br><span class="line">        System.out.print(objects[0] + &quot;你好，其实我是中介B，让我帮你转接电话给业务本人吧：&quot;);</span><br><span class="line">        return methodProxy.invokeSuper(o, objects);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="JDK和CGLib两种动态代理性能对比"><a href="#JDK和CGLib两种动态代理性能对比" class="headerlink" title="JDK和CGLib两种动态代理性能对比"></a>JDK和CGLib两种动态代理性能对比</h1><ul>
+<li>无论如何，他们两者相对于直接<code>new</code>对象，还是慢一点；</li>
+<li>JDK1.8之前，JDK动态代理方式会比CGLib方式慢一点点；</li>
+<li>JDK1.8之后，JDK动态代理方法甚至比后者更快。</li>
+</ul>
+<h1 id="Spring-AOP-与-AspectJ-的关系"><a href="#Spring-AOP-与-AspectJ-的关系" class="headerlink" title="Spring AOP 与 AspectJ 的关系"></a>Spring AOP 与 AspectJ 的关系</h1><p>目前来看，Spring貌似和AspectJ没半毛钱关系，那为什么在许多应用了Spring AOP的项目中都出现了@AspectJ的注解呢？Spring是应用的动态代理，怎么会还和AspectJ有关系呢，原因是Spring AOP基于注解配置的情况下，需要依赖于AspectJ包的标准注解，但是不需要额外的编译以及AspectJ的织入器，而基于XML配置不需要，所以Spring AOP只是复用了AspectJ的注解，并没有其他依赖AspectJ的地方。</p>
+<p>所以，虽然使用了Aspect的Annotation，但是并没有使用它的编译器和织入器。其实现原理是JDK动态代理或Cglib，在运行时生成代理类。</p>
+<h1 id="Spring-AOP-方式配置"><a href="#Spring-AOP-方式配置" class="headerlink" title="Spring AOP 方式配置"></a>Spring AOP 方式配置</h1><p>当需要使用@Aspectj 注解支持时，需要在Spring配置中加入如下配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;aop:aspectj-autoproxy/&gt;</span><br></pre></td></tr></table></figure>
+
+<p>当需要强制使用CGLIB：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;aop:aspectj-autoproxy proxy-target-class=&quot;true&quot;/&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="基于xml"><a href="#基于xml" class="headerlink" title="基于xml"></a>基于xml</h2><p>切面类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">package com.fufu.spring.aop;</span><br><span class="line"></span><br><span class="line">import org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line">@Component</span><br><span class="line">public class AgentAdvisorXML &#123;</span><br><span class="line"></span><br><span class="line">    public void getMoney() &#123;</span><br><span class="line">        System.out.println(&quot;get money&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void writeReceipt() &#123;</span><br><span class="line">        System.out.println(&quot;write receipt&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>配置文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;</span><br><span class="line">       xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><br><span class="line">       xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;</span><br><span class="line">       xmlns:context=&quot;http://www.springframework.org/schema/context&quot;</span><br><span class="line">       xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans</span><br><span class="line">       http://www.springframework.org/schema/beans/spring-beans.xsd</span><br><span class="line">       http://www.springframework.org/schema/context</span><br><span class="line">       http://www.springframework.org/schema/context/spring-context.xsd</span><br><span class="line">       http://www.springframework.org/schema/aop</span><br><span class="line">       http://www.springframework.org/schema/aop/spring-aop.xsd&quot;&gt;</span><br><span class="line"></span><br><span class="line">    &lt;bean id=&quot;star&quot; class=&quot;com.fufu.proxy.Star&quot;&gt;</span><br><span class="line">        &lt;property name=&quot;name&quot; value=&quot;Eminem&quot;/&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br><span class="line"></span><br><span class="line">    &lt;bean id=&quot;agentAdvisorXML&quot; class=&quot;com.fufu.spring.aop.AgentAdvisorXML&quot;/&gt;</span><br><span class="line">    </span><br><span class="line">     &lt;!--Spring基于Xml的切面--&gt;</span><br><span class="line">     &lt;aop:config&gt;</span><br><span class="line">         &lt;!-- 定义切点函数 --&gt;</span><br><span class="line">         &lt;aop:pointcut id=&quot;singPointCut&quot; expression=&quot;execution(* com.fufu.proxy.Star.sing(..))&quot;/&gt;</span><br><span class="line">         &lt;!-- 定义切面 order 定义优先级,值越小优先级越大--&gt;</span><br><span class="line">         &lt;aop:aspect ref=&quot;agentAdvisorXML&quot; order=&quot;0&quot;&gt;</span><br><span class="line">             &lt;!--前置通知--&gt;</span><br><span class="line">             &lt;aop:before method=&quot;getMoney&quot; pointcut-ref=&quot;singPointCut&quot;/&gt;</span><br><span class="line">             &lt;!--后置通知--&gt;</span><br><span class="line">             &lt;aop:after method=&quot;writeReceipt&quot; pointcut-ref=&quot;singPointCut&quot;/&gt;</span><br><span class="line">         &lt;/aop:aspect&gt;</span><br><span class="line">     &lt;/aop:config&gt;</span><br><span class="line"></span><br><span class="line">&lt;/beans&gt;</span><br></pre></td></tr></table></figure>
+<p>测试类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">package com.fufu.spring.aop;</span><br><span class="line"></span><br><span class="line">import com.fufu.proxy.ShowService;</span><br><span class="line">import org.springframework.context.support.ClassPathXmlApplicationContext;</span><br><span class="line"></span><br><span class="line">public class Main &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(&quot;spring-aop.xml&quot;);</span><br><span class="line"></span><br><span class="line">        Object star = applicationContext.getBean(&quot;star&quot;);</span><br><span class="line"></span><br><span class="line">        ShowService showService = (ShowService)star;</span><br><span class="line">        showService.sing(&quot;Mockingbird&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="基于注解"><a href="#基于注解" class="headerlink" title="基于注解"></a>基于注解</h2><p>切面类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@Aspect</span><br><span class="line">@Component</span><br><span class="line">public class AgentAdvisor &#123;</span><br><span class="line"></span><br><span class="line">    @Before(value = &quot;execution(* com.fufu.proxy.ShowService.sing(..))&quot;)</span><br><span class="line">    public void getMoney() &#123;</span><br><span class="line">        System.out.println(&quot;get money&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @After(value = &quot;execution(* com.fufu.proxy.ShowService.sing(..))&quot;)</span><br><span class="line">    public void writeReceipt() &#123;</span><br><span class="line">        System.out.println(&quot;write receipt&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>配置文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;</span><br><span class="line">       xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><br><span class="line">       xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;</span><br><span class="line">       xmlns:context=&quot;http://www.springframework.org/schema/context&quot;</span><br><span class="line">       xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans</span><br><span class="line">       http://www.springframework.org/schema/beans/spring-beans.xsd</span><br><span class="line">       http://www.springframework.org/schema/context</span><br><span class="line">       http://www.springframework.org/schema/context/spring-context.xsd</span><br><span class="line">       http://www.springframework.org/schema/aop</span><br><span class="line">       http://www.springframework.org/schema/aop/spring-aop.xsd&quot;&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &lt;context:component-scan base-package=&quot;com.fufu.proxy, com.fufu.spring.aop&quot;/&gt;</span><br><span class="line"></span><br><span class="line">    &lt;aop:aspectj-autoproxy  proxy-target-class=&quot;true&quot;/&gt;</span><br><span class="line">&lt;/beans&gt;</span><br></pre></td></tr></table></figure>
+<p>测试类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">package com.fufu.spring.aop;</span><br><span class="line"></span><br><span class="line">import com.fufu.proxy.ShowService;</span><br><span class="line">import org.springframework.context.support.ClassPathXmlApplicationContext;</span><br><span class="line"></span><br><span class="line">public class Main &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(&quot;spring-aop-annotation.xml&quot;);</span><br><span class="line"></span><br><span class="line">        Object star = applicationContext.getBean(&quot;star&quot;);</span><br><span class="line"></span><br><span class="line">        ShowService showService = (ShowService)star;</span><br><span class="line">        showService.sing(&quot;Mockingbird&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Spring-Boot-Starter-AOP-方式配置"><a href="#Spring-Boot-Starter-AOP-方式配置" class="headerlink" title="Spring Boot Starter AOP 方式配置"></a>Spring Boot Starter AOP 方式配置</h1><p>当需要使用@Aspectj 注解支持时，.properties中配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 默认是true</span><br><span class="line">spring.aop.auto=true</span><br></pre></td></tr></table></figure>
+
+<p>当需要强制使用CGLIB，.properties中配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spring.aop.proxy-target-class=true</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>AspectJ在编译时就增强了目标对象，Spring AOP的动态代理则是在每次运行时动态的增强，生成AOP代理对象。</li>
+<li>两者区别：生成AOP代理对象的时机不同。</li>
+<li>AspectJ的静态代理方式具有更好的性能，但是AspectJ需要特定的编译器进行处理，而Spring AOP则无需特定的编译器处理。</li>
+</ul>
+<h1 id="相关Demo"><a href="#相关Demo" class="headerlink" title="相关Demo"></a>相关Demo</h1><p><a href="https://github.com/androidjp/dynamic_proxy_demo.git" target="_blank" rel="noopener">https://github.com/androidjp/dynamic_proxy_demo.git</a></p>
+<h1 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h1><ul>
+<li><a href="http://thinkdevos.net/2017/09/22/2017-09-22/#more" target="_blank" rel="noopener">http://thinkdevos.net/2017/09/22/2017-09-22/#more</a></li>
+<li><a href="https://juejin.im/post/5ad3e6b36fb9a028ba1fee6a" target="_blank" rel="noopener">https://juejin.im/post/5ad3e6b36fb9a028ba1fee6a</a></li>
+<li><a href="https://juejin.im/post/5a99048a6fb9a028d5668e62" target="_blank" rel="noopener">https://juejin.im/post/5a99048a6fb9a028d5668e62</a></li>
+<li><a href="https://www.cnblogs.com/MOBIN/p/5597215.html" target="_blank" rel="noopener">https://www.cnblogs.com/MOBIN/p/5597215.html</a></li>
+<li><a href="https://mp.weixin.qq.com/s/NZP2_I918SplJy_zAuhing" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/NZP2_I918SplJy_zAuhing</a></li>
+<li><a href="https://juejin.im/post/5b90e648f265da0aea695672" target="_blank" rel="noopener">https://juejin.im/post/5b90e648f265da0aea695672</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+              <a href="/tags/aop/" rel="tag"># aop</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/CopyOnWriteArrayList%E6%98%AF%E6%80%8E%E4%B9%88%E5%B7%A5%E4%BD%9C%E7%9A%84/" rel="next" title="CopyOnWriteArrayList是怎么工作的">
+                  <i class="fa fa-chevron-left"></i> CopyOnWriteArrayList是怎么工作的
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/%E7%94%A8Gradle%E4%BB%8E%E9%9B%B6%E6%90%AD%E5%BB%BA%20Spring%20Cloud%20Greenwich.SR4%20%20%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%A1%B9%E7%9B%AE%EF%BC%88%E4%B8%80%EF%BC%89--%20%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/" rel="prev" title="用Gradle从零搭建 Spring Cloud Greenwich.SR4  微服务项目（一）-- 基础入门">
+                  用Gradle从零搭建 Spring Cloud Greenwich.SR4  微服务项目（一）-- 基础入门 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AOP简介"><span class="nav-number">1.</span> <span class="nav-text">AOP简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-AOP"><span class="nav-number">2.</span> <span class="nav-text">Spring AOP</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#静态代理–AspectJ"><span class="nav-number">3.</span> <span class="nav-text">静态代理–AspectJ</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#例子"><span class="nav-number">3.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#动态代理–Spring-AOP"><span class="nav-number">4.</span> <span class="nav-text">动态代理–Spring AOP</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK动态代理（反射）"><span class="nav-number">4.1.</span> <span class="nav-text">JDK动态代理（反射）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CGLIB动态代理（继承）"><span class="nav-number">4.2.</span> <span class="nav-text">CGLIB动态代理（继承）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JDK和CGLib两种动态代理性能对比"><span class="nav-number">5.</span> <span class="nav-text">JDK和CGLib两种动态代理性能对比</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-AOP-与-AspectJ-的关系"><span class="nav-number">6.</span> <span class="nav-text">Spring AOP 与 AspectJ 的关系</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-AOP-方式配置"><span class="nav-number">7.</span> <span class="nav-text">Spring AOP 方式配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基于xml"><span class="nav-number">7.1.</span> <span class="nav-text">基于xml</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于注解"><span class="nav-number">7.2.</span> <span class="nav-text">基于注解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-Boot-Starter-AOP-方式配置"><span class="nav-number">8.</span> <span class="nav-text">Spring Boot Starter AOP 方式配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#相关Demo"><span class="nav-number">10.</span> <span class="nav-text">相关Demo</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文章"><span class="nav-number">11.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

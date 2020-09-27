@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="网上看过不少文章，也看过书籍“Android群英传”中有关事件分发的片段，发现，其实总结起来，Android的事件分发机制并不难，下面，给大家分享一个简介易懂的Android事件分发过程。并通过一个简单实际的Demo，来加以说明">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="透侧理解-Android事件分发">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;%E9%80%8F%E4%BE%A7%E7%90%86%E8%A7%A3-Android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="网上看过不少文章，也看过书籍“Android群英传”中有关事件分发的片段，发现，其实总结起来，Android的事件分发机制并不难，下面，给大家分享一个简介易懂的Android事件分发过程。并通过一个简单实际的Demo，来加以说明">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;i2.piimg.com&#x2F;567571&#x2F;d4392bae47c97773.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;i4.piimg.com&#x2F;567571&#x2F;d3e0a34d6ebfa732.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;i1.piimg.com&#x2F;567571&#x2F;453e3e2a3c8da57d.png">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.269Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;i2.piimg.com&#x2F;567571&#x2F;d4392bae47c97773.png">
+
+<link rel="canonical" href="http://jpuneng.cn/%E9%80%8F%E4%BE%A7%E7%90%86%E8%A7%A3-Android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>透侧理解-Android事件分发 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/%E9%80%8F%E4%BE%A7%E7%90%86%E8%A7%A3-Android%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          透侧理解-Android事件分发
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-07-06 17:04:00" itemprop="dateCreated datePublished" datetime="2016-07-06T17:04:00+08:00">2016-07-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91/" itemprop="url" rel="index">
+                    <span itemprop="name">事件分发</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>网上看过不少文章，也看过书籍“Android群英传”中有关事件分发的片段，发现，其实总结起来，Android的事件分发机制并不难，下面，给大家分享一个简介易懂的Android事件分发过程。并通过一个简单实际的Demo，来加以说明</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="事件分发过程简单图解"><a href="#事件分发过程简单图解" class="headerlink" title="事件分发过程简单图解"></a>事件分发过程简单图解</h2><hr>
+<blockquote>
+<p>滑动、点击、长按、松开等，归根结底都是触摸事件，而像点击“Back”或者“Home”等，那就归为 onKeyDown事件处理中。</p>
+</blockquote>
+<h3 id="View的事件分发过程"><a href="#View的事件分发过程" class="headerlink" title="View的事件分发过程"></a>View的事件分发过程</h3><h4 id="图解"><a href="#图解" class="headerlink" title="图解"></a>图解</h4><p>  <img src="http://i2.piimg.com/567571/d4392bae47c97773.png" alt="View的事件分发过程"></p>
+<h4 id="简单过程"><a href="#简单过程" class="headerlink" title="简单过程"></a>简单过程</h4><ol>
+<li><p>View接收到触摸事件，直接执行onDispatchTouchEvent</p>
+<ul>
+<li>①判断View本身是否处于enabled状态（enable为true与否？）：是，到②</li>
+<li>②onTouchListener是否为null，否，到③</li>
+<li>③执行onTouchListener.onTouch(),如果返回为true，则事件被消费了，整个过程结束</li>
+</ul>
+</li>
+<li><p>上面三个小步骤中：①View的enabled为true 或者 ② onTouchListener为null 或者 onTouch()返回为false，那么，都执行onTouchEvent(event)</p>
+<ul>
+<li>判断View是否可点击或长按，可以，那么，onTouchEvent一定返回true，事件一定在这里被消耗</li>
+<li>查看是否有代理，有，就把事件给代理去处理，onTouchEvent一定返回true，事件一定在这里被消耗</li>
+<li>如果不能点击、不能长按，那么，事件无法在这里就被消费，还要最后给回父ViewGroup处理</li>
+<li>如果可以点击或者长按，那么，过了clickable和代理（mTouchDelegate）的判断后，开始了不同ACTION的处理：<ul>
+<li>如果view的enabled为true，并且DOWN事件持续了一定时间，那么，onLongClickListener.onLongClick()执行</li>
+<li>如果view的enabled为true，并且onLongClickListener.onLongClick()方法返回值为false，并且UP事件处理时，那么，onClickListener.onClick()执行</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>注意：</p>
+</blockquote>
+<ol>
+<li>当View的enabled为false时，所有与触摸事件的相关的Listener的方法都不会执行</li>
+<li>不论View是否可点击，默认情况下【onTouch()方法返回false时】View的onTouchEvent()总会执行</li>
+<li>只要View是可点击或可长按的，onTouchEvent()一定会返回true，表示事件一定会在此被消耗。</li>
+</ol>
+</li>
+</ol>
+<h3 id="ViewGroup配合子View的事件分发过程"><a href="#ViewGroup配合子View的事件分发过程" class="headerlink" title="ViewGroup配合子View的事件分发过程"></a>ViewGroup配合子View的事件分发过程</h3><h4 id="图解-1"><a href="#图解-1" class="headerlink" title="图解"></a>图解</h4><p>  <img src="http://i4.piimg.com/567571/d3e0a34d6ebfa732.png" alt="ViewGroup配合子View的事件分发过程"></p>
+<h4 id="简单过程-1"><a href="#简单过程-1" class="headerlink" title="简单过程"></a>简单过程</h4><ol>
+<li><p>每个触摸事件产生，都会首先从根布局开始，将事件进行分发，可以它自己处理这个事件（把他拦截，不给子View），也可以分发给它的子View/ViewGroup去处理</p>
+</li>
+<li><p>执行ViewGroup的dispatchTouchEvent，对于每一个ACTION，都会有一个IF块，每个事件都会做两个判断：①是否允许自身去拦截 ②是否拦截</p>
+</li>
+<li><p>在上述的“②是否拦截”中，就是执行ViewGroup的onInterceptTouchEvent 方法，看其返回值是否为true，是，则进行事件拦截</p>
+</li>
+<li><p>如果不拦截该事件，那么：</p>
+<ul>
+<li>DOWN事件：获取当前x、y坐标的子View，赋值给mMotionTarget , 然后执行mMotionTarget.dispatchTouchEvent (也就是找到可以处理该事件的子View<br>，然后递归地让子View做事件分发)</li>
+<li>MOVE事件：如果mMotionTarget不为null，直接执行mMotionTarget.dispatchTouchEvent 让他去分发这个MOVE事件</li>
+<li>UP事件：在给子View分发事件前，修改坐标系统，把当前触摸位置的x、y分别减去child.left 和 child.top,再传给child【此过程将点击的位置的相对对象，从当前ViewGroup换成子View】</li>
+</ul>
+</li>
+<li><p>如果拦截该事件，则自己执行onTouchEvent进行事件处理</p>
+<blockquote>
+<p>注意：实际的View上的点击事件，如果整个经过过程，是从父ViewGroup的事件分发，到子View上的事件分发处理，再返回到父ViewGroup的过程【V形】</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="事件的拦截"><a href="#事件的拦截" class="headerlink" title="事件的拦截"></a>事件的拦截</h2><hr>
+<h3 id="ViewGroup-如何实现拦截"><a href="#ViewGroup-如何实现拦截" class="headerlink" title="ViewGroup 如何实现拦截"></a>ViewGroup 如何实现拦截</h3><p>ViewGroup.onInterceptTouchEvent(MotionEvent ev)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">@Override  </span><br><span class="line">    public boolean onInterceptTouchEvent(MotionEvent ev)  </span><br><span class="line">    &#123;  </span><br><span class="line">        int action = ev.getAction();  </span><br><span class="line">        switch (action)  </span><br><span class="line">        &#123;  </span><br><span class="line">        case MotionEvent.ACTION_DOWN:  </span><br><span class="line">            //如果你觉得需要拦截  </span><br><span class="line">            return true ;   </span><br><span class="line">        case MotionEvent.ACTION_MOVE:  </span><br><span class="line">            //如果你觉得需要拦截  </span><br><span class="line">            return true ;   </span><br><span class="line">        case MotionEvent.ACTION_UP:  </span><br><span class="line">            //如果你觉得需要拦截  </span><br><span class="line">            return true ;   </span><br><span class="line">        &#125;  </span><br><span class="line"></span><br><span class="line">        return false;  </span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>由于此方法返回true时，倒置mMotionTarget为null，无法往子View传递事件。<br>优先级：DOWN -&gt; MOVE -&gt; UP</p>
+<ul>
+<li><p>在DOWN return true:子View的 DOWN,MOVE,UP过程都不会捕获事件</p>
+</li>
+<li><p>在MOVE return true：子View的MOVE，UP过程都不会捕获事件</p>
+<p>子View如何让父ViewGroup不去拦截某个事件：</p>
+<p>通过：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">requestDisallowInterceptTouchEvent(boolean)</span><br></pre></td></tr></table></figure>
+<p>设置是否允许父ViewGroup拦截，具体写法如下。</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">@Override  </span><br><span class="line">    public boolean dispatchTouchEvent(MotionEvent event)  </span><br><span class="line">    &#123;  </span><br><span class="line">        getParent().requestDisallowInterceptTouchEvent(true);    </span><br><span class="line">        int action = event.getAction();  </span><br><span class="line"></span><br><span class="line">        switch (action)  </span><br><span class="line">        &#123;  </span><br><span class="line">        case MotionEvent.ACTION_DOWN:  </span><br><span class="line">            Log.e(TAG, &quot;dispatchTouchEvent ACTION_DOWN&quot;);  </span><br><span class="line">            break;  </span><br><span class="line">        case MotionEvent.ACTION_MOVE:  </span><br><span class="line">            Log.e(TAG, &quot;dispatchTouchEvent ACTION_MOVE&quot;);  </span><br><span class="line">            break;  </span><br><span class="line">        case MotionEvent.ACTION_UP:  </span><br><span class="line">            Log.e(TAG, &quot;dispatchTouchEvent ACTION_UP&quot;);  </span><br><span class="line">            break;  </span><br><span class="line"></span><br><span class="line">        default:  </span><br><span class="line">            break;  </span><br><span class="line">        &#125;  </span><br><span class="line">        return super.dispatchTouchEvent(event);  </span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>这是ViewGroup MOVE 和 UP 拦截的部分源码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if (!disallowIntercept &amp;&amp; onInterceptTouchEvent(ev)) &#123;  </span><br><span class="line">            ………………</span><br><span class="line"></span><br><span class="line">            return true;  </span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>从上面可以看到，当子View中设置了不允许父ViewGroup去拦截，那么，相当于设置了这里的disallowIntercept 为 true，于是，上面源码的if块直接被忽略了，从而实现了不拦截。</p>
+<blockquote>
+<p>注意： 如果在父ViewGroup的 onInterceptTouchEvent(event) 方法中，关于ACTION_DOWN 的事件判断，直接返回true，那么，子View是无法获取到ACTION_DOWN 的事件的。</p>
+</blockquote>
+<h3 id="特殊情况"><a href="#特殊情况" class="headerlink" title="特殊情况"></a>特殊情况</h3><p>当ViewGroup找不到分发事件的子View：</p>
+<ul>
+<li>情况：当ViewGroup的dispatchTouchEvent()中的ACTION_DOWN事件的方法过程如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if (child.dispatchTouchEvent(ev))  &#123;  </span><br><span class="line">                              // Event handled, we have a target now.  </span><br><span class="line">                              mMotionTarget = child;  </span><br><span class="line">                              return true;  </span><br><span class="line">                          &#125;</span><br></pre></td></tr></table></figure>
+这里，如果子View的dispatchTouchEvent(ev)为false，也就是没有子View去接收这个DOWN事件或者说子View不可点击和长按，于是，这个DOWN事件就没有处理掉，那么，ViewGroup本身的dispatchTouchEvent对于这个DOWN事件，也返回false，表示需要再给到ViewGroup的父类去做，那么，我们知道，ViewGroup父类是View，于是，最终，这个DOWN事件，还是给到了ViewGroup本身来做。<br>（我们没有找到做这个事件的target，就意味着我们自己处理了～～）<blockquote>
+<p>当子View可点击或长按，那么，就必定能够自己消费这些事件。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="Demo下载"><a href="#Demo下载" class="headerlink" title="Demo下载"></a>Demo下载</h2><hr>
+<p>  本人上传了一个简单的测试Demo，用于测试事件分发过程，还有疑惑的朋友可以下载Demo来跑跑，看看整个log过程，会更加理解整个Android事件分发过程。<br>  Demo github地址：<a href="https://github.com/androidjp/jp-event-demo" target="_blank" rel="noopener">https://github.com/androidjp/jp-event-demo</a></p>
+<blockquote>
+<p> Demo项目中gradle版本为2.2.1，插件版本为1.5.0，另外，demo导入了库：com.jakewharton:butterknife:7.0.1</p>
+</blockquote>
+<p>  Demo主界面如下：<br>  <img src="http://i1.piimg.com/567571/453e3e2a3c8da57d.png" alt=""></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><hr>
+<ul>
+<li>触摸事件的分发处理过程：父ViewGroup去分发事件(分发当中想拦截就拦截) –&gt; 子View接收到事件 –&gt; 子View看看自己是否可以做这个事（是否可点击/长按等） –&gt; 子View去尝试做了这个事（有监听，看onTouchListener.onTouch返回值） –&gt;最后，如果子View可以搞定（listener.onTouch或者onTouchEvent返回true），事件就被消费 ，否则，将事件抛回给父ViewGroup</li>
+<li>onLongClickListener.onLongClick() 和 onClickListener.onClick() 是在onTouchEvent中进行判断和调用的</li>
+<li>如果ViewGroup找到了能够处理该事件的子View，则直接给子View处理，自己的onTouchEvent不会被触发。</li>
+<li>如果ViewGroup重写自己的onInterceptTouchEvent(event),并去拦截了一些事件（onInterceptTouchEvent返回true），那么，ViewGroup则自己去处理这些事件，执行自己的onTouchEvent方法</li>
+<li>子View 通过调用getParent().requestDisallowInterceptTouchEvent(true); 阻止ViewGroup对其MOVE或者UP事件进行拦截</li>
+<li>子View不管可不可以点击（是否clickable），只要手势触摸到它的范围，就会激发其onTouchEvent事件</li>
+<li>当子View的enabled为false时，无论如何都不会执行onTouchListener.onTouch()方法、onClickListener.onClick()方法、onLongClickListener.onLongClick()方法等</li>
+</ul>
+<h2 id="细节与注意点"><a href="#细节与注意点" class="headerlink" title="细节与注意点"></a>细节与注意点</h2><hr>
+<ol>
+<li>消费了Down事件的view称为‘目标View’，目标View可接收后续事件（此时，非目标view只要不去拦截它的后续事件，那非目标view不会接收后续事件）</li>
+<li>view或者viewGroup想要处理后续事件，就必须消费DOWN事件。当DOWN事件没有从父传到子的过程中没有被消耗过，那么他的后续MOVE事件和UP事件都将经过一个轮“V”字形传递过程后，回到Activity处，这时由Activity自己来接收和处理【也就是说，Activity自己觉得，我找不到一开始消耗DOWN事件的目标view，那我的后续事件肯定也找不到，所以我也不需要再往下分发MOVE和UP事件了，直接我自己来吧，处理得了就处理，处理不了就不管啦，dispatch到天上去】</li>
+<li>DOWN事件被子view消费了，但后续的MOVE事件被view的父亲viewgroup拦截，此时，ViewGroup将代替子view称为新一代目标view。【因为，有DOWN事件被消费过， 那么Activity就知道有个TargetView存在，那么，在外界有后续事件传进来时，Activity会将事件分发到下面来，让这个TargetView（Activity不知道它是谁，只知道它存在）去获取并消费它，此时，ViewGroup去拦截这些后续事件，那么，首先：①targetView是子View，是事件要去找的目标，但是，找不到（因为它被拦截了），②于是，它选择暂时让拦截了它的父ViewGroup充当起TargetView】</li>
+<li>UP事件与MOVE事件等都属于DOWN的后续事件，情况与总结三类似。</li>
+<li>如果总结三的“拦截”不存在，那么，子View就会一直被当做TargetView，不管它处不处理后续事件，这些后续事件都不会给别人处理了（“V”过程，就算返回给上层ViewGroup（不包括Activity），这时，也是路过而已，上层不会去处理它的）</li>
+<li>从<u>第二点</u>和<u>第五点</u>中得出的，只要子view没有消费touch事件，在分发调用返回时，最终会给回Activity本身，让Activity自己来处理，不管Activity有没有能力消费此事件。</li>
+<li>子view调用 <code>getParent().requestDisallowInterceptTouchEvent(true)</code>方法请求父类禁止拦截事件，那么这个方法会递归地请求所有的父类都禁止拦截事件（也就是让上层都收手）。而如果在Down事件的时候只是请求父View禁止拦截但子view本身又不消费Down事件（相当于，我叫爸爸别去管这件事，而我自己又不想管这件事，最终，这件事和后续的事都不会再给爸爸和我管了，Activity一怒之下自己管了），虽然父View不再拦截了，但后续事件也接收不到了(这个拦不拦截没有多大的意义，因为没有消费down事件，所以并不是目标view了，事件也就传递不到它了)。</li>
+<li>如果两个View不是包含关系，而是重叠关系，比如：viewA压在viewB上面， 那么，上层的ViewA先拿到事件，如果消费了，那么事件不会传给viewB，否则，事件返回给调用处，接着再传递给viewB。</li>
+<li><ul>
+<li>父类的onTouchEvent方法要想执行，要么是等所有的子View都不消费Down事件，要么是父View把事件拦截。</li>
+<li>如果子类消费了Down事件，而父View又想处理这个事件，则父View可以在dispatchTouchEvent方法处理touch事件</li>
+<li>如果子View请求了禁止父View拦截，且父View还想要拦截的话，可在父View的dispatchTouchEvent方法中不调用super.dispatchTouchEvent则把事件拦截了</li>
+</ul>
+</li>
+</ol>
+<h2 id="用法举例"><a href="#用法举例" class="headerlink" title="用法举例"></a>用法举例</h2><hr>
+<ol>
+<li>比如你需要写一个类似slidingmenu的左侧隐藏menu，主Activity上有个Button、ListView或者任何可以响应点击的View，你在当前View上死命的滑动，菜单栏也出不来；因为MOVE事件被子View处理了~ 你需要这么做：在ViewGroup的dispatchTouchEvent中判断用户是不是想显示菜单，如果是，则在onInterceptTouchEvent(ev)拦截子View的事件；自己进行处理，这样自己的onTouchEvent就可以顺利展现出菜单栏了</li>
+<li>如果你需要用到 （左右滑动切换Tab界面+上下滑动界面内列表） 时，这里很可能就出现滑动卡卡顿顿或者滑动失灵的问题，就需要根据你手势滑动的总体角度是横向还是纵向，来判断是切换tab页面还是滚动列表。</li>
+</ol>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><hr>
+<p><a href="http://www.jianshu.com/p/2be492c1df96" target="_blank" rel="noopener">可能是讲解Android事件分发最好的文章</a><br><a href="http://blog.csdn.net/lmj623565791/article/details/39102591" target="_blank" rel="noopener">鸿洋的ViewGroup事件分发</a></p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/Android%E7%B3%BB%E7%BB%9F%E7%9A%84-apk%E6%96%87%E4%BB%B6%E5%92%8C-dex%E6%96%87%E4%BB%B6/" rel="next" title="Android系统的.apk文件和.dex文件">
+                  <i class="fa fa-chevron-left"></i> Android系统的.apk文件和.dex文件
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/ReactiveX%20%E5%92%8C%20RxJava%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="prev" title="ReactiveX 和 RxJava 学习笔记">
+                  ReactiveX 和 RxJava 学习笔记 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#事件分发过程简单图解"><span class="nav-number">1.</span> <span class="nav-text">事件分发过程简单图解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#View的事件分发过程"><span class="nav-number">1.1.</span> <span class="nav-text">View的事件分发过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#图解"><span class="nav-number">1.1.1.</span> <span class="nav-text">图解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#简单过程"><span class="nav-number">1.1.2.</span> <span class="nav-text">简单过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ViewGroup配合子View的事件分发过程"><span class="nav-number">1.2.</span> <span class="nav-text">ViewGroup配合子View的事件分发过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#图解-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">图解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#简单过程-1"><span class="nav-number">1.2.2.</span> <span class="nav-text">简单过程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事件的拦截"><span class="nav-number">2.</span> <span class="nav-text">事件的拦截</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ViewGroup-如何实现拦截"><span class="nav-number">2.1.</span> <span class="nav-text">ViewGroup 如何实现拦截</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#原理"><span class="nav-number">2.2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特殊情况"><span class="nav-number">2.3.</span> <span class="nav-text">特殊情况</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Demo下载"><span class="nav-number">3.</span> <span class="nav-text">Demo下载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#细节与注意点"><span class="nav-number">5.</span> <span class="nav-text">细节与注意点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用法举例"><span class="nav-number">6.</span> <span class="nav-text">用法举例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文章"><span class="nav-number">7.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

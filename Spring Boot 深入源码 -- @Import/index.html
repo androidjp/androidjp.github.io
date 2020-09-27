@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="@Import的作用允许通过它引入 @Configuration 注解的类 (java config)， 引入ImportSelector接口(这个比较重要， 因为要通过它去判定要引入哪些@Configuration) 和 ImportBeanDefinitionRegistrar 接口的实现，也包括 @Component注解的普通类。">
+<meta name="keywords" content="Spring Boot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot 深入源码 -- @Import">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Spring%20Boot%20%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%20--%20@Import&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="@Import的作用允许通过它引入 @Configuration 注解的类 (java config)， 引入ImportSelector接口(这个比较重要， 因为要通过它去判定要引入哪些@Configuration) 和 ImportBeanDefinitionRegistrar 接口的实现，也包括 @Component注解的普通类。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.265Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://jpuneng.cn/Spring%20Boot%20%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%20--%20@Import/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Spring Boot 深入源码 -- @Import | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Spring%20Boot%20%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%20--%20@Import/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring Boot 深入源码 -- @Import
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-15 08:17:24" itemprop="dateCreated datePublished" datetime="2019-10-15T08:17:24+08:00">2019-10-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring/" itemprop="url" rel="index">
+                    <span itemprop="name">Spring</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Import的作用"><a href="#Import的作用" class="headerlink" title="@Import的作用"></a>@Import的作用</h1><p>允许通过它引入 <code>@Configuration</code> 注解的类 (java config)， 引入<code>ImportSelector</code>接口(这个比较重要， 因为要通过它去判定要引入哪些<code>@Configuration</code>) 和 <code>ImportBeanDefinitionRegistrar</code> 接口的实现，也包括 <code>@Component</code>注解的普通类。</p><a id="more"></a>
+<p>看看其源码以及注释（摘自 spring-context-5.1.8.RELEASE）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Indicates one or more &#123;@link Configuration @Configuration&#125; classes to import.</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;Provides functionality equivalent to the &#123;@code &lt;import/&gt;&#125; element in Spring XML.</span><br><span class="line"> * Allows for importing &#123;@code @Configuration&#125; classes, &#123;@link ImportSelector&#125; and</span><br><span class="line"> * &#123;@link ImportBeanDefinitionRegistrar&#125; implementations, as well as regular component</span><br><span class="line"> * classes (as of 4.2; analogous to &#123;@link AnnotationConfigApplicationContext#register&#125;).</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;&#123;@code @Bean&#125; definitions declared in imported &#123;@code @Configuration&#125; classes should be</span><br><span class="line"> * accessed by using &#123;@link org.springframework.beans.factory.annotation.Autowired @Autowired&#125;</span><br><span class="line"> * injection. Either the bean itself can be autowired, or the configuration class instance</span><br><span class="line"> * declaring the bean can be autowired. The latter approach allows for explicit, IDE-friendly</span><br><span class="line"> * navigation between &#123;@code @Configuration&#125; class methods.</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;May be declared at the class level or as a meta-annotation.</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;If XML or other non-&#123;@code @Configuration&#125; bean definition resources need to be</span><br><span class="line"> * imported, use the &#123;@link ImportResource @ImportResource&#125; annotation instead.</span><br><span class="line"> *</span><br><span class="line"> * @author Chris Beams</span><br><span class="line"> * @author Juergen Hoeller</span><br><span class="line"> * @since 3.0</span><br><span class="line"> * @see Configuration</span><br><span class="line"> * @see ImportSelector</span><br><span class="line"> * @see ImportResource</span><br><span class="line"> */</span><br><span class="line">@Target(ElementType.TYPE)</span><br><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">@Documented</span><br><span class="line">public @interface Import &#123;</span><br><span class="line">	/**</span><br><span class="line">	 * &#123;@link Configuration&#125;, &#123;@link ImportSelector&#125;, &#123;@link ImportBeanDefinitionRegistrar&#125;</span><br><span class="line">	 * or regular component classes to import.</span><br><span class="line">	 */</span><br><span class="line">	Class&lt;?&gt;[] value();</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="说说其背景"><a href="#说说其背景" class="headerlink" title="说说其背景"></a>说说其背景</h2><p>在Spring 3.0 以前，创建Bean可通过xml配置文件和扫描特定包下的类 来达到类注入Spring IoC容器的效果。而在Spring 3.0 之后，提供了所谓了 Java Config 的方式，也就是可以通过java代码的形式去注入类，将IOC容器里Bean的元信息以java代码的方式进行描述。我们可以通过<code>@Configuration</code>与<code>@Bean</code>这两个注解配合使用来将原来配置在xml文件里的bean通过java代码的方式进行描述。</p>
+<h1 id="写例子，用一下-Import"><a href="#写例子，用一下-Import" class="headerlink" title="写例子，用一下@Import"></a>写例子，用一下@Import</h1><p>通过上面贴出来的<code>@Import</code> 源码，可以了解到它是配合<code>Configuration</code>,<code>ImportSelector</code>以及<code>ImportBeanDefinitionRegistrar</code>来使用的，也可以把<code>@Import</code>修饰的类当做普通的Bean来使用。</p>
+<p>这是例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">class Service01 &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码，bean容器没有service01。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@Component</span><br><span class="line">class Service01 &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码，bean容器存在bean <code>service01</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Component</span><br><span class="line">@Bean(Service02.class)</span><br><span class="line">class Service01 &#123;&#125;</span><br><span class="line"></span><br><span class="line">class Service02 &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码，bean容器存在bean <code>service01</code> 和 <code>com.xxx.Service02</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Configuration</span><br><span class="line">@Bean(Service02.class)</span><br><span class="line">class Service01 &#123;&#125;</span><br><span class="line"></span><br><span class="line">class Service02 &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码，bean容器存在bean <code>service01</code> 和 <code>com.xxx.Service02</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Bean(Service02.class)</span><br><span class="line">class Service01 &#123;&#125;</span><br><span class="line"></span><br><span class="line">class Service02 &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码，bean容器不存在bean。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@Configuration</span><br><span class="line">@Bean(Service02.class)</span><br><span class="line">class Service01 &#123;&#125;</span><br><span class="line"></span><br><span class="line">class Service02 &#123;</span><br><span class="line">    Service02(String id) &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码，报错。由于<code>@Import</code>注入的bean 只能默认调用其无参构造器。</p>
+<p>下面我们来看看<code>ImportBeanDefinitionRegistrar</code>接口的源码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Interface to be implemented by types that register additional bean definitions when</span><br><span class="line"> * processing @&#123;@link Configuration&#125; classes. Useful when operating at the bean definition</span><br><span class="line"> * level (as opposed to &#123;@code @Bean&#125; method/instance level) is desired or necessary.</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;Along with &#123;@code @Configuration&#125; and &#123;@link ImportSelector&#125;, classes of this type</span><br><span class="line"> * may be provided to the @&#123;@link Import&#125; annotation (or may also be returned from an</span><br><span class="line"> * &#123;@code ImportSelector&#125;).</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;An &#123;@link ImportBeanDefinitionRegistrar&#125; may implement any of the following</span><br><span class="line"> * &#123;@link org.springframework.beans.factory.Aware Aware&#125; interfaces, and their respective</span><br><span class="line"> * methods will be called prior to &#123;@link #registerBeanDefinitions&#125;:</span><br><span class="line"> * &lt;ul&gt;</span><br><span class="line"> * &lt;li&gt;&#123;@link org.springframework.context.EnvironmentAware EnvironmentAware&#125;&lt;/li&gt;</span><br><span class="line"> * &lt;li&gt;&#123;@link org.springframework.beans.factory.BeanFactoryAware BeanFactoryAware&#125;</span><br><span class="line"> * &lt;li&gt;&#123;@link org.springframework.beans.factory.BeanClassLoaderAware BeanClassLoaderAware&#125;</span><br><span class="line"> * &lt;li&gt;&#123;@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware&#125;</span><br><span class="line"> * &lt;/ul&gt;</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;See implementations and associated unit tests for usage examples.</span><br><span class="line"> *</span><br><span class="line"> * @author Chris Beams</span><br><span class="line"> * @since 3.1</span><br><span class="line"> * @see Import</span><br><span class="line"> * @see ImportSelector</span><br><span class="line"> * @see Configuration</span><br><span class="line"> */</span><br><span class="line">public interface ImportBeanDefinitionRegistrar &#123;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * Register bean definitions as necessary based on the given annotation metadata of</span><br><span class="line">	 * the importing &#123;@code @Configuration&#125; class.</span><br><span class="line">	 * &lt;p&gt;Note that &#123;@link BeanDefinitionRegistryPostProcessor&#125; types may &lt;em&gt;not&lt;/em&gt; be</span><br><span class="line">	 * registered here, due to lifecycle constraints related to &#123;@code @Configuration&#125;</span><br><span class="line">	 * class processing.</span><br><span class="line">	 * @param importingClassMetadata annotation metadata of the importing class</span><br><span class="line">	 * @param registry current bean definition registry</span><br><span class="line">	 */</span><br><span class="line">	void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参数：</p>
+<ul>
+<li><code>importingClassMetadata</code>: 正在被导入的类的元数据信息；</li>
+<li><code>registry</code>: 中文翻译：“登记处”，可通过它来操作IOC容器。</li>
+</ul>
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class Service02 &#123;&#125;</span><br><span class="line"></span><br><span class="line">public class Service02BeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) &#123;</span><br><span class="line">        BeanDefinitionBuilder service02 = BeanDefinitionBuilder.rootBeanDefinition(Service02.class);</span><br><span class="line">        registry.registerBeanDefinition(&quot;service00000002&quot;, service02.getBeanDefinition());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@Configuration</span><br><span class="line">@Import(Service02BeanDefinitionRegistrar.class)</span><br><span class="line">public class Service01 &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>最终能够得到<code>service01</code> 和 <code>service00000002</code>。</p>
+<p>实际上，其作用是：在项目启动时，全局扫描<code>@Import</code>，将其中的类进行Bean注入，注入过程中发现是<code>ImportBeanDefinitionRegistrar</code>的实现类，则会给到xxx 执行，以注入满足我们自定义注入规则的类。</p>
+<p>下面再看看<code>ImportSelector</code>源码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Interface to be implemented by types that determine which @&#123;@link Configuration&#125;</span><br><span class="line"> * class(es) should be imported based on a given selection criteria, usually one or</span><br><span class="line"> * more annotation attributes.</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;An &#123;@link ImportSelector&#125; may implement any of the following</span><br><span class="line"> * &#123;@link org.springframework.beans.factory.Aware Aware&#125; interfaces,</span><br><span class="line"> * and their respective methods will be called prior to &#123;@link #selectImports&#125;:</span><br><span class="line"> * &lt;ul&gt;</span><br><span class="line"> * &lt;li&gt;&#123;@link org.springframework.context.EnvironmentAware EnvironmentAware&#125;&lt;/li&gt;</span><br><span class="line"> * &lt;li&gt;&#123;@link org.springframework.beans.factory.BeanFactoryAware BeanFactoryAware&#125;&lt;/li&gt;</span><br><span class="line"> * &lt;li&gt;&#123;@link org.springframework.beans.factory.BeanClassLoaderAware BeanClassLoaderAware&#125;&lt;/li&gt;</span><br><span class="line"> * &lt;li&gt;&#123;@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware&#125;&lt;/li&gt;</span><br><span class="line"> * &lt;/ul&gt;</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;&#123;@code ImportSelector&#125; implementations are usually processed in the same way</span><br><span class="line"> * as regular &#123;@code @Import&#125; annotations, however, it is also possible to defer</span><br><span class="line"> * selection of imports until all &#123;@code @Configuration&#125; classes have been processed</span><br><span class="line"> * (see &#123;@link DeferredImportSelector&#125; for details).</span><br><span class="line"> *</span><br><span class="line"> * @author Chris Beams</span><br><span class="line"> * @since 3.1</span><br><span class="line"> * @see DeferredImportSelector</span><br><span class="line"> * @see Import</span><br><span class="line"> * @see ImportBeanDefinitionRegistrar</span><br><span class="line"> * @see Configuration</span><br><span class="line"> */</span><br><span class="line">public interface ImportSelector &#123;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * Select and return the names of which class(es) should be imported based on</span><br><span class="line">	 * the &#123;@link AnnotationMetadata&#125; of the importing @&#123;@link Configuration&#125; class.</span><br><span class="line">	 */</span><br><span class="line">	String[] selectImports(AnnotationMetadata importingClassMetadata);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>它的作用也是可以给我们自定义想要注入哪些bean 类型，配置起来更简单，如以下例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public class AAAImportSelector implements ImportSelector &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public String[] selectImports(AnnotationMetadata importingClassMetadata) &#123;</span><br><span class="line">        return new String[]&#123;Service02.class.getName()&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果混用三者，加以分析Spring Boot启动上下文，其加载顺序为：</p>
+<ol>
+<li>Application的 <code>main</code>方法中的 <code>SpringApplication.run(...)</code>；</li>
+<li>所有<code>@Import({xxx})</code>中的<code>ImportSelector</code>实现类；</li>
+<li>所有<code>@Import({xxx})</code>中的<code>ImportBeanDefinitionRegistrar</code>实现类；</li>
+<li>所有 <code>ApplicationContextAware</code> 的实现类的 <code>setApplicationContext(...)</code>方法；</li>
+<li>所有<code>@Import({xxx})</code>中的<code>ImportSelector</code>实现类中想要注入的类的无参构造器；</li>
+<li>所有<code>@Import({Service02.class})</code>中的 <code>Service02</code>类的构造器；</li>
+<li>类内部的带有<code>@Bean</code>的方法；</li>
+<li>所有<code>@Import({xxx})</code>中的<code>ImportBeanDefinitionRegistrar</code>实现类中想要注入的类的无参构造器；</li>
+<li>对下一个<code>@Component/@Configuration</code>修饰的类循环第5、6、7、8步。（注意：这里不是优先执行<code>@Configuration</code>后执行<code>@Component</code>, 而是按照类名称字典排序来顺序扫描的。）</li>
+</ol>
+<h1 id="跟着源码的步伐"><a href="#跟着源码的步伐" class="headerlink" title="跟着源码的步伐"></a>跟着源码的步伐</h1><h2 id="（一）SpringBoot程序启动过程"><a href="#（一）SpringBoot程序启动过程" class="headerlink" title="（一）SpringBoot程序启动过程"></a>（一）SpringBoot程序启动过程</h2><p>以下过程是SpringBoot程序启动过程的代码执行过程：</p>
+<ol>
+<li><code>SpringApplication.run(String... args)</code><ol>
+<li><code>stopWatch.start();</code>：启动秒表</li>
+<li><code>System.setProperty(&quot;java.awt.headless&quot;, true/false);</code>：设置headless 为<code>true</code>or<code>false</code>。<blockquote>
+<p>Headless模式是系统的一种配置模式。在该模式下，系统缺少了显示设备、键盘或鼠标。后端开发者往往需要这个模式，因为服务器（如提供Web服务的主机）往往可能缺少前述设备，但又需要使用他们提供的功能，生成相应的数据，以提供给客户端（如浏览器所在的配有相关的显示设备、键盘和鼠标的主机）。</p>
+</blockquote>
+</li>
+<li>获取<code>SpringApplicationRunListeners</code>并让<code>listeners.starting()</code><ol>
+<li>实际上，是找到<code>EventPublishingRunListener</code>等bean 对象，并遍历让这些listener执行其<code>starting()</code>方法。</li>
+<li><code>SpringApplicationRunListener</code>接口专门监听<code>SpringApplication.run()</code>，每次程序启动都会创建一个其实现类（如：<code>EventPublishingRunListener</code>）。</li>
+<li>背后是让<code>EventPublishingRunListener</code>里头的<code>initialMulticaster</code>去分发一个<code>ApplicationStartingEvent</code>，这个event 是在 <code>Environment</code>和<code>ApplicationContext</code>可用之前，且<code>ApplicationListener</code>注册之后，发出的。</li>
+</ol>
+</li>
+<li><code>prepareEnvironment()</code><ol>
+<li>创建environment（<code>StandardServletEnvironment</code> or <code>StandardReactiveWebEnvironment</code> or <code>StandardEnvironment</code>）</li>
+<li>发送<code>ApplicationEnvironmentPreparedEvent</code></li>
+</ol>
+</li>
+<li>创建<code>ConfigurableApplicationContext</code>，同样有三种选择：Servlet、Reactive、default。</li>
+<li>…..</li>
+<li><code>prepareContext()</code><ol>
+<li><code>postProcessApplicationContext(context)</code></li>
+</ol>
+</li>
+<li><code>refreshContext(context)</code><ol>
+<li><code>refresh(context)</code><ol>
+<li>判断applicationContext 属于 AbstractApplicationContext 类，并 调用其 <code>refresh()</code><ol>
+<li>进入同步块（this.startupShutdownMonitor 的对象锁）</li>
+<li><code>prepareRefresh();</code></li>
+<li>Tell the subclass to refresh the internal bean factory</li>
+<li>Prepare the bean factory for use in this context. 此时， beanFactory 中的 beanDefinedMap 中，只有几个bean。</li>
+<li><code>postProcessBeanFactory();</code>   Allows post-processing of the bean factory in context subclasses.</li>
+<li><code>invokeBeanFactoryPostProcessors();</code>     Invoke factory processors registered as beans in the context.<ol>
+<li><strong><code>PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors()</code></strong></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><code>afterRefresh(context);</code></li>
+<li><code>stopWatch.stop();</code></li>
+<li><code>listeners.started(context);</code></li>
+<li><code>callRunners(context, {});</code></li>
+</ol>
+</li>
+</ol>
+<h2 id="（二）ConfigurationClassPostProcessor"><a href="#（二）ConfigurationClassPostProcessor" class="headerlink" title="（二）ConfigurationClassPostProcessor"></a>（二）ConfigurationClassPostProcessor</h2><p>好，然后我们看看<code>PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors()</code>里头到底做了什么？</p>
+<blockquote>
+<p>答： for 循环 遍历 <code>postProcessors</code>，拿到每一个 <code>BeanDefinitionRegistryPostProcessor</code>或其子类，然后，对每一个postProcessoer item 都调用其<code>postProcessBeanDefinitionRegistry()</code> 方法，把 <code>registry</code> 传给它。</p>
+</blockquote>
+<p>其中，就会找到<code>ConfigurationClassPostProcessor</code>类对象，并调用其方法。</p>
+<p>看看这个 <code>ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry()</code> 方法：</p>
+<ul>
+<li>作用：看方法源码注释：Derive further bean definitions from the configuration classes in the registry.【从注册表中的配置类派生更多的bean定义。】</li>
+<li>内部方法注释： Build and validate a configuration model based on the registry of 带有<code>@Configuration</code>的classes. 【基于带有<code>@Configuration</code>的类的注册表构建和验证配置模型。】</li>
+<li>内部方法过程：<ol>
+<li>首先查看是否是配置类，如果是就加入<code>configCandidates</code>候选者列表中。</li>
+<li>如果<code>configCandidates</code>为空，则直接返回。</li>
+<li>否则，对这些配置类根据<code>@Order</code>排序(如果有配<code>@Order</code>)，如果一个有<code>@Order</code>，另一个没有配，那么，有<code>@Order</code>的排在前面。</li>
+<li>Detect any custom bean name generation strategy supplied through the enclosing application context 【检测通过封闭应用程序上下文提供的任何自定义bean名称生成策略。】</li>
+<li>创建 <code>ConfigurationClassParser</code> （配置类的解析类）</li>
+<li>调用<code>ConfigurationClassParser.parse()</code>方法，开始解析<code>@Configuration</code>配置类。</li>
+</ol>
+</li>
+</ul>
+<h2 id="（三）ConfigurationClassParser-parse"><a href="#（三）ConfigurationClassParser-parse" class="headerlink" title="（三）ConfigurationClassParser.parse()"></a>（三）ConfigurationClassParser.parse()</h2><p>好，再去看，到底这个<code>ConfigurationClassParser.parse()</code>方法会做什么事情？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">public void parse(Set&lt;BeanDefinitionHolder&gt; configCandidates) &#123;</span><br><span class="line">    this.deferredImportSelectors = new LinkedList&lt;DeferredImportSelectorHolder&gt;();</span><br><span class="line">    </span><br><span class="line">    for (BeanDefinitionHolder holder : configCandidates) &#123;</span><br><span class="line">        BeanDefinition bd = holder.getBeanDefinition();</span><br><span class="line">        try &#123;</span><br><span class="line">            if (bd instanceof AnnotatedBeanDefinition) &#123;</span><br><span class="line">                parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());</span><br><span class="line">            &#125;</span><br><span class="line">            else if (bd instanceof AbstractBeanDefinition &amp;&amp; ((AbstractBeanDefinition) bd).hasBeanClass()) &#123;</span><br><span class="line">                parse(((AbstractBeanDefinition) bd).getBeanClass(), holder.getBeanName());</span><br><span class="line">            &#125;</span><br><span class="line">            else &#123;</span><br><span class="line">                parse(bd.getBeanClassName(), holder.getBeanName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        catch (BeanDefinitionStoreException ex) &#123;</span><br><span class="line">            throw ex;</span><br><span class="line">        &#125;</span><br><span class="line">        catch (Throwable ex) &#123;</span><br><span class="line">            throw new BeanDefinitionStoreException(</span><br><span class="line">                    &quot;Failed to parse configuration class [&quot; + bd.getBeanClassName() + &quot;]&quot;, ex);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    processDeferredImportSelectors();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>遍历每一个 <code>BeanDefinitionHolder</code> 候选者 （实际上只有一个候选者，那就是我们程序的入口类<code>Application.java</code>的对象，名叫<code>application</code>）</li>
+<li>看看这个候选者的<code>BeanDefinition</code>属于三种类型中的哪一种（一般会进第一种），但背后都是调用一个<code>parse()</code>方法。</li>
+<li>然后，在方法内部调用<code>processConfigurationClass()</code>方法，进行处理。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line">protected void processConfigurationClass(ConfigurationClass configClass) throws IOException &#123;</span><br><span class="line">    if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ConfigurationClass existingClass = this.configurationClasses.get(configClass);</span><br><span class="line">    //在这里处理Configuration重复import</span><br><span class="line">    //如果同一个配置类被处理两次，两次都属于被import的则合并导入类，返回。如果配置类不是被导入的，则移除旧使用新的配置类</span><br><span class="line">    if (existingClass != null) &#123;</span><br><span class="line">        if (configClass.isImported()) &#123;</span><br><span class="line">            if (existingClass.isImported()) &#123;</span><br><span class="line">                existingClass.mergeImportedBy(configClass);</span><br><span class="line">            &#125;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        else &#123;</span><br><span class="line">            this.configurationClasses.remove(configClass);</span><br><span class="line">            for (Iterator&lt;ConfigurationClass&gt; it = this.knownSuperclasses.values().iterator(); it.hasNext();) &#123;</span><br><span class="line">                if (configClass.equals(it.next())) &#123;</span><br><span class="line">                    it.remove();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 递归地处理配置类及其超类层次结构。</span><br><span class="line">    SourceClass sourceClass = asSourceClass(configClass);</span><br><span class="line">    do &#123;</span><br><span class="line">      //接着往下看吧</span><br><span class="line">        sourceClass = doProcessConfigurationClass(configClass, sourceClass);</span><br><span class="line">    &#125;</span><br><span class="line">    while (sourceClass != null);</span><br><span class="line"></span><br><span class="line">    this.configurationClasses.put(configClass, configClass);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass)</span><br><span class="line">        throws IOException &#123;</span><br><span class="line"></span><br><span class="line">    if (configClass.getMetadata().isAnnotated(Component.class.getName())) &#123;</span><br><span class="line">			// 处理递归类</span><br><span class="line">			processMemberClasses(configClass, sourceClass);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">    // 处理@PropertySource注解</span><br><span class="line">    for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(</span><br><span class="line">            sourceClass.getMetadata(), PropertySources.class,</span><br><span class="line">            org.springframework.context.annotation.PropertySource.class)) &#123;</span><br><span class="line">        if (this.environment instanceof ConfigurableEnvironment) &#123;</span><br><span class="line">            processPropertySource(propertySource);</span><br><span class="line">        &#125;</span><br><span class="line">        else &#123;</span><br><span class="line">            logger.warn(&quot;Ignoring @PropertySource annotation on [&quot; + sourceClass.getMetadata().getClassName() +</span><br><span class="line">                    &quot;]. Reason: Environment must implement ConfigurableEnvironment&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 处理 @ComponentScan 注解</span><br><span class="line">    Set&lt;AnnotationAttributes&gt; componentScans = AnnotationConfigUtils.attributesForRepeatable(</span><br><span class="line">            sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);</span><br><span class="line">    if (!componentScans.isEmpty() &amp;&amp;</span><br><span class="line">            !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) &#123;</span><br><span class="line">        for (AnnotationAttributes componentScan : componentScans) &#123;</span><br><span class="line">            // The config class is annotated with @ComponentScan -&gt; perform the scan immediately</span><br><span class="line">            Set&lt;BeanDefinitionHolder&gt; scannedBeanDefinitions =</span><br><span class="line">                    this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());</span><br><span class="line">            // Check the set of scanned definitions for any further config classes and parse recursively if needed</span><br><span class="line">            for (BeanDefinitionHolder holder : scannedBeanDefinitions) &#123;</span><br><span class="line">                BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();</span><br><span class="line">                if (bdCand == null) &#123;</span><br><span class="line">                    bdCand = holder.getBeanDefinition();</span><br><span class="line">                &#125;</span><br><span class="line">                if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) &#123;</span><br><span class="line">                    parse(bdCand.getBeanClassName(), holder.getBeanName());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    //处理Import注解，这个是咱们的菜</span><br><span class="line">    processImports(configClass, sourceClass, getImports(sourceClass), true);</span><br><span class="line"></span><br><span class="line">    // 处理@ImportResource 注解</span><br><span class="line">    if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) &#123;</span><br><span class="line">        AnnotationAttributes importResource =</span><br><span class="line">                AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);</span><br><span class="line">        String[] resources = importResource.getStringArray(&quot;locations&quot;);</span><br><span class="line">        Class&lt;? extends BeanDefinitionReader&gt; readerClass = importResource.getClass(&quot;reader&quot;);</span><br><span class="line">        for (String resource : resources) &#123;</span><br><span class="line">            String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);</span><br><span class="line">            configClass.addImportedResource(resolvedResource, readerClass);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    //处理包含@Bean注解的方法</span><br><span class="line">    Set&lt;MethodMetadata&gt; beanMethods = retrieveBeanMethodMetadata(sourceClass);</span><br><span class="line">    for (MethodMetadata methodMetadata : beanMethods) &#123;</span><br><span class="line">        configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 处理普通方法</span><br><span class="line">    processInterfaces(configClass, sourceClass);</span><br><span class="line"></span><br><span class="line">   </span><br><span class="line">    if (sourceClass.getMetadata().hasSuperClass()) &#123;</span><br><span class="line">        String superclass = sourceClass.getMetadata().getSuperClassName();</span><br><span class="line">        if (!superclass.startsWith(&quot;java&quot;) &amp;&amp; !this.knownSuperclasses.containsKey(superclass)) &#123;</span><br><span class="line">            this.knownSuperclasses.put(superclass, configClass);</span><br><span class="line">            // Superclass found, return its annotation metadata and recurse</span><br><span class="line">            return sourceClass.getSuperClass();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后，我们就会发现，实际上，上面的代码就会处理<code>@Bean</code>、<code>@ImportSource</code>、<code>@Import</code>、<code>@ComponentScan</code>、<code>@PropertySource</code>。</p>
+<p>我们focus 看 <code>@Import</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,</span><br><span class="line">        Collection&lt;SourceClass&gt; importCandidates, boolean checkForCircularImports) &#123;</span><br><span class="line"></span><br><span class="line">    if (importCandidates.isEmpty()) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (checkForCircularImports &amp;&amp; isChainedImportOnStack(configClass)) &#123;</span><br><span class="line">        this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));</span><br><span class="line">    &#125;</span><br><span class="line">    else &#123;</span><br><span class="line">        this.importStack.push(configClass);</span><br><span class="line">        try &#123;</span><br><span class="line">            for (SourceClass candidate : importCandidates) &#123;</span><br><span class="line">                // 首先， 判断如果被import的是 ImportSelector.class 接口的实现， 那么初始化这个被Import的类， 然后调用它的selectImports方法去获得所需要的引入的configuration， 然后递归处理</span><br><span class="line">                if (candidate.isAssignable(ImportSelector.class)) &#123;</span><br><span class="line">                    Class&lt;?&gt; candidateClass = candidate.loadClass();</span><br><span class="line">                    ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);</span><br><span class="line">                    ParserStrategyUtils.invokeAwareMethods(</span><br><span class="line">                            selector, this.environment, this.resourceLoader, this.registry);</span><br><span class="line">                    if (this.deferredImportSelectors != null &amp;&amp; selector instanceof DeferredImportSelector) &#123;</span><br><span class="line">                        this.deferredImportSelectors.add(</span><br><span class="line">                                new DeferredImportSelectorHolder(configClass, (DeferredImportSelector) selector));</span><br><span class="line">                    &#125;</span><br><span class="line">                    else &#123;</span><br><span class="line">                        String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());</span><br><span class="line">                        Collection&lt;SourceClass&gt; importSourceClasses = asSourceClasses(importClassNames);</span><br><span class="line">                        processImports(configClass, currentSourceClass, importSourceClasses, false);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                // 其次， 判断如果被import的是 ImportBeanDefinitionRegistrar 接口的实现， 那么初始化后将对当前对象的处理委托给这个ImportBeanDefinitionRegistrar</span><br><span class="line">                else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) &#123;</span><br><span class="line">                    Class&lt;?&gt; candidateClass = candidate.loadClass();</span><br><span class="line">                    ImportBeanDefinitionRegistrar registrar =</span><br><span class="line">                            BeanUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class);</span><br><span class="line">                    ParserStrategyUtils.invokeAwareMethods(</span><br><span class="line">                            registrar, this.environment, this.resourceLoader, this.registry);</span><br><span class="line">                    configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());</span><br><span class="line">                &#125;</span><br><span class="line">                else &#123;</span><br><span class="line">                     // 最后，将import引入的类作为一个正常的类来处理</span><br><span class="line">                    this.importStack.registerImport(</span><br><span class="line">                            currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());</span><br><span class="line">                    processConfigurationClass(candidate.asConfigClass(configClass));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        catch (BeanDefinitionStoreException ex) &#123;</span><br><span class="line">            throw ex;</span><br><span class="line">        &#125;</span><br><span class="line">        catch (Throwable ex) &#123;</span><br><span class="line">            throw new BeanDefinitionStoreException(</span><br><span class="line">                    &quot;Failed to process import candidates for configuration class [&quot; +</span><br><span class="line">                    configClass.getMetadata().getClassName() + &quot;]&quot;, ex);</span><br><span class="line">        &#125;</span><br><span class="line">        finally &#123;</span><br><span class="line">            this.importStack.pop();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从这里我们知道， 如果你引入的是一个正常的component， 那么会作为 <code>@Compoent</code> 或者 <code>@Configuration</code> 来处理， 这样在<code>BeanFactory</code>里边可以通过<code>getBean()</code>拿到， 但如果你是 <code>ImportSelector</code> 或者 <code>ImportBeanDefinitionRegistrar</code> 接口的实现， 那么spring并不会将他们注册到<code>beanFactory</code>中，而只是调用他们的方法。</p>
+<p>好，由此可见<code>@Import</code>导入流程和导入顺序。</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/Java%E5%B9%B6%E5%8F%91%E4%BF%AE%E7%82%BC-volatile%E5%85%B3%E9%94%AE%E5%AD%97/" rel="next" title="Java并发修炼--volatile关键字">
+                  <i class="fa fa-chevron-left"></i> Java并发修炼--volatile关键字
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/Spring%20Boot%20%E6%B7%B1%E5%85%A5%E6%BA%90%E7%A0%81%20--%20@Component%20%E4%B8%8E%20@Configuration/" rel="prev" title="Spring Boot 深入源码 -- @Component 与 @Configuration">
+                  Spring Boot 深入源码 -- @Component 与 @Configuration <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Import的作用"><span class="nav-number">1.</span> <span class="nav-text">@Import的作用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#说说其背景"><span class="nav-number">1.1.</span> <span class="nav-text">说说其背景</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#写例子，用一下-Import"><span class="nav-number">2.</span> <span class="nav-text">写例子，用一下@Import</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#跟着源码的步伐"><span class="nav-number">3.</span> <span class="nav-text">跟着源码的步伐</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#（一）SpringBoot程序启动过程"><span class="nav-number">3.1.</span> <span class="nav-text">（一）SpringBoot程序启动过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#（二）ConfigurationClassPostProcessor"><span class="nav-number">3.2.</span> <span class="nav-text">（二）ConfigurationClassPostProcessor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#（三）ConfigurationClassParser-parse"><span class="nav-number">3.3.</span> <span class="nav-text">（三）ConfigurationClassParser.parse()</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

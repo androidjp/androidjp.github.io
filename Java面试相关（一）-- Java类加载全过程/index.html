@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="概述：&amp;emsp;&amp;emsp;我们知道，Java中我们写类的代码，是存在于一个个.java文件中的，而这个后缀名也是让JVM识别编译的基础。可能有些Android开发者对几个ClassLoader（如：AppClassLoader等）比较熟悉，那么，整个类的加载过程：从未进行编译的.java文件，到类的初始化完毕并等待被实例化使用的过程，具体是怎么样的。&amp;emsp;&amp;emsp;收集Java资料、看">
+<meta name="keywords" content="面试,Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java面试相关（一）-- Java类加载全过程">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Java%E9%9D%A2%E8%AF%95%E7%9B%B8%E5%85%B3%EF%BC%88%E4%B8%80%EF%BC%89--%20Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%85%A8%E8%BF%87%E7%A8%8B&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="概述：&amp;emsp;&amp;emsp;我们知道，Java中我们写类的代码，是存在于一个个.java文件中的，而这个后缀名也是让JVM识别编译的基础。可能有些Android开发者对几个ClassLoader（如：AppClassLoader等）比较熟悉，那么，整个类的加载过程：从未进行编译的.java文件，到类的初始化完毕并等待被实例化使用的过程，具体是怎么样的。&amp;emsp;&amp;emsp;收集Java资料、看">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;class_load_process&#x2F;1.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;class_load_process&#x2F;2.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;class_load_process&#x2F;3.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;class_load_process&#x2F;4.png">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.262Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;class_load_process&#x2F;1.png">
+
+<link rel="canonical" href="http://jpuneng.cn/Java%E9%9D%A2%E8%AF%95%E7%9B%B8%E5%85%B3%EF%BC%88%E4%B8%80%EF%BC%89--%20Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%85%A8%E8%BF%87%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Java面试相关（一）-- Java类加载全过程 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Java%E9%9D%A2%E8%AF%95%E7%9B%B8%E5%85%B3%EF%BC%88%E4%B8%80%EF%BC%89--%20Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%85%A8%E8%BF%87%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java面试相关（一）-- Java类加载全过程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-07-24 14:31:14" itemprop="dateCreated datePublished" datetime="2016-07-24T14:31:14+08:00">2016-07-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h6 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h6><p>&emsp;&emsp;我们知道，Java中我们写类的代码，是存在于一个个.java文件中的，而这个后缀名也是让JVM识别编译的基础。可能有些Android开发者对几个ClassLoader（如：AppClassLoader等）比较熟悉，那么，整个类的加载过程：从未进行编译的.java文件，到类的初始化完毕并等待被实例化使用的过程，具体是怎么样的。<br>&emsp;&emsp;收集Java资料、看了几篇本人觉得较好的博文后，总结以下关于Java类的加载过程，掌握此过程，能够更加理解Java类的各个方法的执行顺序，以及JVM的工作和Java类生成的原理。读者笑纳～</p>
+<a id="more"></a>
+
+<h2 id="类的加载过程分析"><a href="#类的加载过程分析" class="headerlink" title="类的加载过程分析"></a>类的加载过程分析</h2><hr>
+<p>&emsp;&emsp;类<strong>从.java文件到实际加载到内存中</strong>，实际上是这样的一个<strong>过程</strong>：<br>&emsp;&emsp;.java文件 -&gt; 通过你的JDK环境相关指令编译 -&gt; .class文件 -&gt; JVM初始化之后，如果有类的执行、调用等相关操作，JVM就会将.class文件加载到内存中，并开始下面的一系列处理：（链接-&gt;初始化）</p>
+<p><img src="/images/class_load_process/1.png" alt=""></p>
+<h3 id="一、关于ClassLoader"><a href="#一、关于ClassLoader" class="headerlink" title="一、关于ClassLoader"></a>一、关于ClassLoader</h3><hr>
+<p>&emsp;&emsp;首先我们要搞清楚一点，ClassLoader是Java用于加载类的一个机制。等到程序运行时，JVM先初始化，在JVM初始化的过程中，JVM生成几个ClassLoader，JVM调用指定的ClassLoader去加载.class文件等各类路径、文件的类。</p>
+<ol>
+<li><p>程序运行时类的加载实际过程</p>
+<ul>
+<li>JDK执行指令去寻找jre目录，寻找jvm.dll，并初始化JVM；</li>
+<li>产生一个Bootstrap Loader（启动类加载器）；</li>
+<li>Bootstrap Loader自动加载Extended Loader（标准扩展类加载器），并将其父Loader设为Bootstrap Loader。</li>
+<li>Bootstrap Loader自动加载AppClass Loader（系统类加载器），并将其父Loader设为Extended Loader。</li>
+<li>最后由AppClass Loader加载HelloWorld类。</li>
+</ul>
+</li>
+<li><p>各种ClassLoader及其特点</p>
+<ul>
+<li><strong>Bootstrap Loader（启动类加载器）</strong>：加载System.getProperty(“sun.boot.class.path”)所指定的路径或jar</li>
+<li><strong>Extended Loader（标准扩展类加载器ExtClassLoader）</strong>：加载System.getProperty(“java.ext.dirs”)所指定的路径或jar。在使用Java运行程序时，也可以指定其搜索路径，例如：java -Djava.ext.dirs=d:\projects\testproj\classes HelloWorld</li>
+<li><strong>AppClass Loader（系统类加载器AppClassLoader）</strong>：加载System.getProperty(“java.class.path”)所指定的路径或jar。在使用Java运行程序时，也可以加上-cp来覆盖原有的Classpath设置，例如： java -cp ./lavasoft/classes HelloWorld</li>
+<li><strong>特点</strong><ul>
+<li>ExtClassLoader和AppClassLoader在JVM启动后，会在JVM中保存一份，并且在程序运行中无法改变其搜索路径。如果想在运行时从其他搜索路径加载类，就要产生新的类加载器。</li>
+<li>运行一个程序时，总是由AppClassLoader（系统类加载器）开始加载指定的类</li>
+<li>在加载类时，每个类加载器会将加载任务上交给其父，如果其父找不到，再由自己去加载</li>
+<li>BootstrapLoader（启动类加载器）是最顶级的类加载器了，其父加载器为null</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>各类ClassLoader的关系图解（帮助理解）<br><img src="/images/class_load_process/2.png" alt="各个ClassLoader的作用以及他们之间的关系.png"></p>
+<blockquote>
+<p>注意：图解中可得，执行代码<code>c.getClassLoader().getParent().getParent()</code>为<code>null</code>，由于get不到BootstrapLoader，因为BootstrapLoader是C层次实现的。</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="二、类的加载方式"><a href="#二、类的加载方式" class="headerlink" title="二、类的加载方式"></a>二、类的加载方式</h3><hr>
+<ol>
+<li>方式一：命令行启动应用时候由JVM初始化加载</li>
+<li>方式二：通过Class.forName()方法动态加载（默认会执行初始化块，但如果指定ClassLoader，初始化时不执行静态块  ）</li>
+<li>方式三：通过ClassLoader.loadClass()方法动态加载（不会执行初始化块 ）</li>
+</ol>
+<p>解析：<br>  方式一其实就是通过以下几种主动引用类的方式所触发的JVM的类加载和初始化过程。然后，其实这三种类加载方式，在java 层面上都是JVM调用了ClassLoader去加载类的过程，只是：方式一相对与方式二和方式三而言，属于静态方式的加载；而方式二和方式三的区别，在于<code>Class.ForName</code>源码中：<br>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">///Class.forname(String name)</span><br><span class="line">public static Class&lt;?&gt; forName(String className) throws ClassNotFoundException &#123;</span><br><span class="line">    return forName(className, true, VMStack.getCallingClassLoader());</span><br><span class="line">&#125;</span><br><span class="line">………………</span><br><span class="line">///实际调用：</span><br><span class="line">public static Class&lt;?&gt; forName(String className, boolean shouldInitialize,</span><br><span class="line">        ClassLoader classLoader) throws ClassNotFoundException &#123;</span><br><span class="line">    if (classLoader == null) &#123;</span><br><span class="line">        classLoader = BootClassLoader.getInstance();</span><br><span class="line">    &#125;</span><br><span class="line">      Class&lt;?&gt; result;</span><br><span class="line">    try &#123;</span><br><span class="line">        result = classForName(className, shouldInitialize, classLoader);</span><br><span class="line">    &#125; catch (ClassNotFoundException e) &#123;</span><br><span class="line">        Throwable cause = e.getCause();</span><br><span class="line">        if (cause instanceof LinkageError) &#123;</span><br><span class="line">            throw (LinkageError) cause;</span><br><span class="line">        &#125;</span><br><span class="line">        throw e;</span><br><span class="line">    &#125;</span><br><span class="line">    return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>  &emsp;在源码当中可以看到，参数<code>boolean shouldInitialize</code>，在默认情况下的Class.forName(String)此参数默认为<code>true</code>，则默认情况下会进行初始化，</p>
+<p>那么，初始化到时是怎么个操作过程，此过程又是怎么样去触发的呢？下面我们通过分析类的加载流程以及整体图解，来帮助说明。</p>
+<h3 id="三、详细分析整个类的加载流程"><a href="#三、详细分析整个类的加载流程" class="headerlink" title="三、详细分析整个类的加载流程"></a>三、详细分析整个类的加载流程</h3><hr>
+<p>&emsp;下面分析一下类的几种加载方式、ClassLoader对类加载的背后，是怎么个原理：</p>
+<h4 id="1-类从编译、被使用，到卸载的全过程："><a href="#1-类从编译、被使用，到卸载的全过程：" class="headerlink" title="1. 类从编译、被使用，到卸载的全过程："></a>1. 类从编译、被使用，到卸载的全过程：</h4><p><u>编译 -&gt; 加载 -&gt; 链接（验证+准备+解析）-&gt;初始化（使用前的准备）-&gt;使用-&gt; 卸载</u></p>
+<h4 id="2-类的初始化之前"><a href="#2-类的初始化之前" class="headerlink" title="2. 类的初始化之前"></a>2. 类的初始化之前</h4><p>加载（除了自定义加载）和链接的过程是完全由jvm负责的，包括：加载 -&gt; 验证 -&gt; 准备 -&gt; 解析</p>
+<blockquote>
+<p>这里的“自定义加载”可以理解为：自定义类加载器去实现自定义路径中类的加载，可以<a href="http://blog.csdn.net/huangbiao86/article/details/6910152" target="_blank" rel="noopener">参考这篇文章</a>。由于默认各个路径的类文件加载过程在JVM初始化的过程中就默认设定好了，也就是一般步骤下的加载过程，已经在JVM初始化过程中规定的AppClassLoader等加载器中规定了步骤，所以，按一般的加载步骤，就是按JVM规定的顺序，JVM肯定先负责了类的加载和链接处理，然后再进行类初始化。</p>
+</blockquote>
+<ol>
+<li><p>首先是<strong>加载</strong>：</p>
+<ul>
+<li>这一块JVM要完成3件事：<ol>
+<li>通过一个类的全限定名来获取定义此类的二进制字节流。</li>
+<li>将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构。</li>
+<li>在java堆中生成一个代表这个类的java.lang.Class对象，作为方法区这些数据的访问入口。</li>
+</ol>
+</li>
+<li>这一步很灵活,很多技术都是在这里切入，因为它并没有限定二进制流从哪里来，那么我们可以<u>用系统的类加载器，也可以用自己的方式写加载器来控制字节流的获取</u>：<ol>
+<li>从class文件来-&gt;一般的文件加载</li>
+<li>从zip包中来-&gt;加载jar中的类</li>
+<li>从网络中来-&gt;Applet</li>
+</ol>
+</li>
+<li>获取二进制流获取完成后会按照jvm所需的方式保存在方法区中，同时会在java堆中实例化一个java.lang.Class对象与堆中的数据关联起来。</li>
+</ul>
+</li>
+<li><p>然后是<strong>验证</strong>（也称为<strong>检验</strong>）：</p>
+<ul>
+<li><em>主要经历几个步骤：文件格式验证-&gt;元数据验证-&gt;字节码验证-&gt;符号引用验证</em><ul>
+<li><em>文件格式验证</em>：验证字节流是否符合Class文件格式的规范并 验证其版本是否能被当前的jvm版本所处理。ok没问题后，字节流就可以进入内存的方法区进行保存了。后面的3个校验都是在方法区进行的。</li>
+<li><em>元数据验证</em>：对字节码描述的信息进行语义化分析，保证其描述的内容符合java语言的语法规范。</li>
+<li><em>字节码检验</em>：最复杂，对方法体的内容进行检验，保证其在运行时不会作出什么出格的事来。</li>
+<li><em>符号引用验证</em>：来验证一些引用的真实性与可行性，比如代码里面引了其他类，这里就要去检测一下那些来究竟是否存在；或者说代码中访问了其他类的一些属性，这里就对那些属性的可以访问行进行了检验。（这一步将为后面的解析工作打下基础）</li>
+</ul>
+</li>
+<li>目的：确保class文件的字节流信息符合jvm的口味，不会让jvm感到不舒服。假如class文件是由纯粹的java代码编译过来的，自然不会出现类似于数组越界、跳转到不存在的代码块等不健康的问题，因为一旦出现这种现象，编译器就会拒绝编译了。但是，跟之前说的一样，Class文件流不一定是从java源码编译过来的，也可能是从网络或者其他地方过来的，甚至你可以自己用16进制写，假如jvm不对这些数据进行校验的话，可能一些有害的字节流会让jvm完全崩溃。<blockquote>
+<p>验证阶段很重要，但也不是必要的，假如说一些代码被反复使用并验证过可靠性了，实施阶段就可以尝试用-Xverify:none参数来关闭大部分的类验证措施，以简短类加载时间。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>随后是<strong>准备</strong>：</p>
+<ul>
+<li>这阶段会为类变量（指那些静态变量）分配内存并设置类比那辆初始值的阶段，这些内存在方法区中进行分配。这里要说明一下，这一步只会给那些静态变量设置一个初始的值，而那些实例变量是在实例化对象时进行分配的。<br>例如：<ul>
+<li><code>public static int value=123;</code>此时value的值为0，不是123。</li>
+<li><code>private int i = 123;</code> 此时，i 还未进行初始化，因为这句代码还不能执行。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>最后是<strong>解析</strong>：</p>
+<ul>
+<li>是对类的字段，方法等东西进行转换，具体涉及到Class文件的格式内容。</li>
+</ul>
+</li>
+</ol>
+<h4 id="3-类的初始化条件-主动对类进行引用"><a href="#3-类的初始化条件-主动对类进行引用" class="headerlink" title="3. 类的初始化条件(主动对类进行引用)"></a>3. 类的初始化条件(主动对类进行引用)</h4><blockquote>
+<p>说明：要对类进行<strong>初始化</strong>，代码上可以理解为<u><strong>‘为要初始化的类中的所有静态成员都赋予初始值、对类中所有静态块都执行一次，并且是按代码编写顺序执行’</strong></u>。<br>如下代码：输出的是‘1’。如果①和②顺序调换，则输出的是‘123’。<br>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class Main &#123;</span><br><span class="line">   public static void main(String[] args)&#123;</span><br><span class="line">        System.out.println(Super.i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">class Super&#123;</span><br><span class="line">    //①</span><br><span class="line">    static&#123;</span><br><span class="line">        i = 123;</span><br><span class="line">    &#125;</span><br><span class="line">    //②</span><br><span class="line">    protected static int i = 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<ol>
+<li>遇到new，getstatic，putstatic，invokestatic这4条字节码指令时，假如类还没进行初始化，则马上对其进行初始化工作。<br>其实就是3种情况：<ul>
+<li>用new实例化一个类时</li>
+<li>读取或者设置类的静态字段时（不包括被final修饰的静态字段，因为他们已经被塞进常量池了）</li>
+<li>执行静态方法的时候。</li>
+</ul>
+</li>
+<li>使用java.lang.reflect.*的方法对类进行反射调用的时候，如果类还没有进行过初始化，马上对其进行。</li>
+<li>初始化一个类的时候，如果他的父亲还没有被初始化，则先去初始化其父亲。</li>
+<li>当jvm启动时，用户需要指定一个要执行的主类（包含static void main(String[] args)的那个类），则jvm会先去初始化这个类。</li>
+<li>用Class.forName(String className);来加载类的时候，也会执行初始化动作。<br>【注意:ClassLoader的loadClass(String className);方法只会加载并编译某类，并不会对其执行初始化】</li>
+</ol>
+<blockquote>
+<p>说明：“主动对类进行引用”指的就是以上五种JVM规定的判定初始化与否的预处理条件。<br>那么，其他的方式，都可归为‘类被动引用’的方式，这些方式是不会引起JVM去初始化相关类的：</p>
+</blockquote>
+<ol>
+<li><u>子类调用父类</u>的静态变量（子类不会进行初始化，父类会初始化）</li>
+<li>通过<u>数组</u>引用类的情况（类Main不会被初始化）<br>如：list = Main[10];</li>
+<li>调用类中的<u>final静态常量</u>（类不会被初始化）</li>
+</ol>
+<h3 id="四、原理分析图解"><a href="#四、原理分析图解" class="headerlink" title="四、原理分析图解"></a>四、原理分析图解</h3><hr>
+<p>&emsp;类加载中每个部分详细的原理说明，可以查看<a href="http://my.oschina.net/volador/blog/87194" target="_blank" rel="noopener">这篇文章</a>。以下的图解为本人总结，算比较全地对每个步骤的原理过程一目了然：</p>
+<p><img src="/images/class_load_process/3.png" alt="Java类加载过程.png"></p>
+<blockquote>
+<p>说明： 图解左下角说的<code>&lt;clinit&gt;()</code>方法，概念上是一个方法块，这个<clinit>(){……}方法块在初始化过程中执行，可以用下面代码理解：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">class Parent&#123;</span><br><span class="line"> public static int A=1;</span><br><span class="line"> static&#123;                            </span><br><span class="line"> A=2;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line"> ---相当于----&gt;</span><br><span class="line">class Parent&#123;</span><br><span class="line"> &lt;clinit&gt;()&#123;</span><br><span class="line">   public static int A=1;</span><br><span class="line">   static&#123;</span><br><span class="line">     A=2;</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>相当于把静态变量的赋值和静态代码块等操作顺序串连成一个方法。<br>注意：</p>
+<ul>
+<li>对于类，会生成<clinit>(){……}方法体：去包含静态变量的赋值和静态块代码</li>
+<li>而对于接口，也会生成<clinit>(){……}方法体：去初始化接口中的成员变量</li>
+<li>接口和类初始化过程的区别：类的初始化执行之前要求父类全部都初始化完成了，但接口的初始化貌似对父接口的初始化不怎么感冒，也就是说，子接口初始化的时候并不要求其父接口也完成初始化，只有在真正使用到父接口的时候它才会被初始化（比如引用接口上的常量的时候啦）</li>
+</ul>
+<h3 id="五、简单代码示例说明"><a href="#五、简单代码示例说明" class="headerlink" title="五、简单代码示例说明"></a>五、简单代码示例说明</h3><hr>
+<p>这里，用一个java代码示例，来根据输出得到的各个方法和块的执行顺序，去更加形象地理解整个类的加载和运行过程：<br>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">public class Main &#123;</span><br><span class="line">    public static void main(String[] args)&#123;</span><br><span class="line">        System.out.println(&quot;我是main方法，我输出Super的类变量i：&quot;+Sub.i);</span><br><span class="line">        Sub sub  = new Sub();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">class Super&#123;</span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(&quot;我是Super成员块&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    public Super()&#123;</span><br><span class="line">        System.out.println(&quot;我是Super构造方法&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    &#123;</span><br><span class="line">        int j = 123;</span><br><span class="line">        System.out.println(&quot;我是Super成员块中的变量j：&quot;+j);</span><br><span class="line">    &#125;</span><br><span class="line">    static&#123;</span><br><span class="line">        System.out.println(&quot;我是Super静态块&quot;);</span><br><span class="line">        i = 123;</span><br><span class="line">    &#125;</span><br><span class="line">    protected static int i = 1;</span><br><span class="line">&#125;</span><br><span class="line">class Sub extends Super&#123;</span><br><span class="line">    static&#123;</span><br><span class="line">        System.out.println(&quot;我是Sub静态块&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    public Sub()&#123;</span><br><span class="line">        System.out.println(&quot;我是Sub构造方法&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(&quot;我是Sub成员块&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>得到结果为：<br><img src="/images/class_load_process/4.png" alt=""><br>说明：</p>
+<ol>
+<li>静态代码块和静态变量的赋值 是** 先于 **main方法的调用执行的。</li>
+<li>静态代码块和静态变量的赋值是按顺序执行的。</li>
+<li>子类调用父类的类变量成员，是不会触发子类本身的初始化操作的。</li>
+<li>使用new方式创建子类，对于类加载而言，是先加载父类、再加载子类（注意：此时由于父类已经在前面初始化了一次，所以，这一步，就只有子类初始化，父类不会再进行初始化）</li>
+<li>不论成员块放在哪个位置，它都 <strong>先于</strong> 类构造方法执行。</li>
+</ol>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><hr>
+<p><a href="http://my.oschina.net/volador/blog/87194" target="_blank" rel="noopener">http://my.oschina.net/volador/blog/87194</a><br><a href="http://lavasoft.blog.51cto.com/62575/184547/" target="_blank" rel="noopener">http://lavasoft.blog.51cto.com/62575/184547/</a></p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/Android%E5%AD%97%E5%85%B8%EF%BC%88%E4%BA%8C%EF%BC%89--%20%E8%8E%B7%E5%8F%96%E7%B3%BB%E7%BB%9F%E5%90%84%E4%B8%AA%E7%9B%AE%E5%BD%95/" rel="next" title="Android字典（二）-- 获取系统各个目录">
+                  <i class="fa fa-chevron-left"></i> Android字典（二）-- 获取系统各个目录
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/Android%E5%BC%80%E5%8F%91%E7%BB%86%E8%8A%82--%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E6%98%93%E5%BF%98%E9%9A%BE%E6%87%82/" rel="prev" title="Android开发细节--查漏补缺（二）：易忘难懂">
+                  Android开发细节--查漏补缺（二）：易忘难懂 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-6"><a class="nav-link" href="#概述："><span class="nav-number">1.</span> <span class="nav-text">概述：</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类的加载过程分析"><span class="nav-number"></span> <span class="nav-text">类的加载过程分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、关于ClassLoader"><span class="nav-number"></span> <span class="nav-text">一、关于ClassLoader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、类的加载方式"><span class="nav-number"></span> <span class="nav-text">二、类的加载方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、详细分析整个类的加载流程"><span class="nav-number"></span> <span class="nav-text">三、详细分析整个类的加载流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-类从编译、被使用，到卸载的全过程："><span class="nav-number"></span> <span class="nav-text">1. 类从编译、被使用，到卸载的全过程：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-类的初始化之前"><span class="nav-number"></span> <span class="nav-text">2. 类的初始化之前</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-类的初始化条件-主动对类进行引用"><span class="nav-number"></span> <span class="nav-text">3. 类的初始化条件(主动对类进行引用)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四、原理分析图解"><span class="nav-number"></span> <span class="nav-text">四、原理分析图解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五、简单代码示例说明"><span class="nav-number"></span> <span class="nav-text">五、简单代码示例说明</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文章"><span class="nav-number"></span> <span class="nav-text">参考文章</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

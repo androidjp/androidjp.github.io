@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="JDK11 发布时间：2018&#x2F;9&#x2F;25。Java 11和2017年9月份发布的Java 9以及 2018年3月份发布的Java 10相比，其最大的区别就是：在长期支持(Long-Term-Support)方面，Oracle表示会对Java 11提供大力支持，这一支持将会持续至2026年9月。这是据 Java 8 以后支持的首个长期版本。">
+<meta name="keywords" content="jdk">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JDK9~JDK11特性简读">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;JDK9-JDK11%E7%89%B9%E6%80%A7%E7%AE%80%E8%AF%BB&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="JDK11 发布时间：2018&#x2F;9&#x2F;25。Java 11和2017年9月份发布的Java 9以及 2018年3月份发布的Java 10相比，其最大的区别就是：在长期支持(Long-Term-Support)方面，Oracle表示会对Java 11提供大力支持，这一支持将会持续至2026年9月。这是据 Java 8 以后支持的首个长期版本。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.259Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://jpuneng.cn/JDK9-JDK11%E7%89%B9%E6%80%A7%E7%AE%80%E8%AF%BB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>JDK9~JDK11特性简读 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/JDK9-JDK11%E7%89%B9%E6%80%A7%E7%AE%80%E8%AF%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JDK9~JDK11特性简读
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-27 16:07:48" itemprop="dateCreated datePublished" datetime="2019-10-27T16:07:48+08:00">2019-10-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>JDK11 发布时间：2018/9/25。Java 11和2017年9月份发布的Java 9以及 2018年3月份发布的Java 10相比，其最大的区别就是：在长期支持(Long-Term-Support)方面，Oracle表示会对Java 11提供大力支持，这一支持将会持续至2026年9月。这是据 Java 8 以后支持的首个长期版本。</p>
+</blockquote><a id="more"></a>
+<h1 id="新特性-（JDK-9-11）"><a href="#新特性-（JDK-9-11）" class="headerlink" title="新特性 （JDK 9-11）"></a>新特性 （JDK 9-11）</h1><h3 id="局部变量类型推断"><a href="#局部变量类型推断" class="headerlink" title="局部变量类型推断"></a>局部变量类型推断</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var javaStack = &quot;hello&quot;;</span><br><span class="line">System.out.println(javaStack);</span><br></pre></td></tr></table></figure>
+<p>局部变量类型推断就是左边的类型直接使用 var 定义，而不用写具体的类型，编译器能根据右边的表达式自动推断类型，如上面的 String 。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var javaStack = &quot;hello&quot;;</span><br><span class="line">相当于</span><br><span class="line">String javaStack = &quot;hello&quot;;</span><br></pre></td></tr></table></figure>
+<h3 id="字符串增强"><a href="#字符串增强" class="headerlink" title="字符串增强"></a>字符串增强</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">// 判断字符串是否为空白</span><br><span class="line"></span><br><span class="line">&quot; &quot;.isBlank();                  //true</span><br><span class="line"></span><br><span class="line">// 去除首尾空格</span><br><span class="line"></span><br><span class="line">&quot; Javastack &quot;.strip();          //&quot;Javastack&quot;</span><br><span class="line"></span><br><span class="line">// 去除尾部空格</span><br><span class="line"></span><br><span class="line">&quot; Javastack &quot;.stripTrailing();  // &quot; Javastack&quot;</span><br><span class="line"></span><br><span class="line">// 去除首部空格</span><br><span class="line"></span><br><span class="line">&quot; Javastack &quot;.stripLeading();   // &quot;Javastack &quot;</span><br><span class="line"></span><br><span class="line">// 复制字符串</span><br><span class="line"></span><br><span class="line">&quot;Java&quot;.repeat(3);               //&quot;JavaJavaJava&quot;</span><br><span class="line"></span><br><span class="line">// 行数统计</span><br><span class="line">&quot;A\nB\nC&quot;.lines().count();      // 3</span><br></pre></td></tr></table></figure>
+<h3 id="集合加强-不可变集合"><a href="#集合加强-不可变集合" class="headerlink" title="集合加强(不可变集合)"></a>集合加强(不可变集合)</h3><blockquote>
+<p>Java 9 开始，Jdk里面为集合（List/Set/Map）都添加了of和copyOf方法，这两个方法都用来创建<strong>不可变集合</strong>。</p>
+</blockquote>
+<p>例子1：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var list = List.of(&quot;java&quot;, &quot;Python&quot;, &quot;C&quot;);</span><br><span class="line">var copy = List.copyOf(list);</span><br><span class="line">System.out.println(list == copy);   // true</span><br></pre></td></tr></table></figure>
+<p>例子2：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var list = new ArrayList&lt;String&gt;();</span><br><span class="line">var copy = List.copyOf(list);</span><br><span class="line">System.out.println(list == copy);   // false</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>copyOf方法会先判断来源集合是否是<code>AbstractImmutableList</code>类型的，如果是，直接返回，否则，会自动调用<code>of</code>创建一个新集合。</p>
+</blockquote>
+<p>例子2中，<code>list</code>不属于不可变 <code>AbstractImmutableList</code> 类的子类，所以<code>copyOf</code>方法又创建了一个新的实例。</p>
+<blockquote>
+<p>注意：使用 <code>of</code> 和 <code>copyOf</code> 创建的集合为不可变集合，不能进行添加、删除、替换、排序等操作，不然会报 <code>java.lang.UnsupportedOperationException</code> 异常。</p>
+</blockquote>
+<h3 id="Stream加强"><a href="#Stream加强" class="headerlink" title="Stream加强"></a>Stream加强</h3><p>Stream 是JDK 8 的新特性，而 JDK 9 开始对Stream新增加了以下4个方法：</p>
+<ol>
+<li><p>增加单个参数构造方法，可为null</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream.ofNullable(null).count();</span><br></pre></td></tr></table></figure></li>
+<li><p>takeWhile 和 DropWhile  两个截止执行方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Stream.of(1,2,3,2,1)</span><br><span class="line">  .takeWhile(n -&gt; n &lt; 3)</span><br><span class="line">  .collect(Collectors.toList()); // [1,2]</span><br></pre></td></tr></table></figure>
+<p>以上例子，从读到’3’时不满足条件，就已经截止执行了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Stream.of(1,2,3,2,1)</span><br><span class="line">  .dropWhile(n -&gt; n &lt; 3)</span><br><span class="line">  .collect(Collectors.toList()); // [3,2,1]</span><br></pre></td></tr></table></figure>
+<p>第二个例子，就是从 <code>n &lt; 3</code> 不成立的那一刻开始算。</p>
+</li>
+<li><p>iterate重载</p>
+<p>这个 iterate 方法的新重载方法，可以让你提供一个 Predicate (判断条件)来指定什么时候结束迭代。</p>
+</li>
+</ol>
+<h3 id="Optional-加强"><a href="#Optional-加强" class="headerlink" title="Optional 加强"></a>Optional 加强</h3><p>Opthonal 也增加了几个非常酷的方法，现在可以很方便的将一个 Optional 转换成一个 Stream, 或者当一个空 Optional 时给它一个替代的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Optional.of(&quot;javaStack&quot;).orElseThrow();    // javaStack</span><br><span class="line">Optional.of(&quot;javaStack&quot;).stream().count(); // 1</span><br><span class="line">Optional.ofNullable(null)</span><br><span class="line">   .or(() -&gt; Optional.of(&quot;javaStack&quot;))</span><br><span class="line">   .get();                                // javaStack</span><br></pre></td></tr></table></figure>
+<h3 id="InputStream-加强"><a href="#InputStream-加强" class="headerlink" title="InputStream 加强"></a>InputStream 加强</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// transferTo，可以用来将数据直接传输到 OutputStream，这是在处理原始数据流时非常常见的一种用法</span><br><span class="line">var classLoader = ClassLoader.getSystemClassLoader();</span><br><span class="line">var inputStream = classLoader.getResourceAsStream(&quot;javaStack.txt&quot;);</span><br><span class="line">var newFile = File.createTempFile(&quot;javaStack2&quot;, &quot;txt&quot;);</span><br><span class="line">try (var outputStream = new FileOutputStream(newFile)) &#123;</span><br><span class="line">   // inputStream 读取数据，然后丢到新文件中</span><br><span class="line">   inputStream.transferTo(outputStream);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="HTTP-Client-API-代替Apache的HttpClient的节奏"><a href="#HTTP-Client-API-代替Apache的HttpClient的节奏" class="headerlink" title="HTTP Client API (代替Apache的HttpClient的节奏)"></a>HTTP Client API (代替Apache的HttpClient的节奏)</h3><p>这是 Java 9 开始引入的一个处理 HTTP 请求的的孵化 HTTP Client API，该 API 支持同步和异步，而在 Java 11 中已经为正式可用状态，你可以在 <code>java.net</code>包中找到这个 API。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">var request = HttpRequest.newBuilder()</span><br><span class="line">    .uri(URI.create(&quot;https://javastack.cn&quot;))</span><br><span class="line">    .GET()</span><br><span class="line">    .build();</span><br><span class="line">    </span><br><span class="line">var client = HttpClient.newHttpClient();</span><br><span class="line"></span><br><span class="line">// 同步</span><br><span class="line">HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span><br><span class="line">System.out.println(response.body());</span><br><span class="line"></span><br><span class="line">// 异步</span><br><span class="line">client.sendAsync(request, HttpResponse.BodyHandlers.ofString())</span><br><span class="line">    .thenApply(HttpResponse::body)</span><br><span class="line">    .thenAccept(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h3 id="化繁为简，一个命令编译运行源码"><a href="#化繁为简，一个命令编译运行源码" class="headerlink" title="化繁为简，一个命令编译运行源码"></a>化繁为简，一个命令编译运行源码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 编译</span><br><span class="line">javac Demo.java</span><br><span class="line"></span><br><span class="line">// 运行</span><br><span class="line">java Demo</span><br></pre></td></tr></table></figure>
+<p>变成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// JDK 11</span><br><span class="line">java Demo.java</span><br></pre></td></tr></table></figure>
+<h1 id="更多新特性"><a href="#更多新特性" class="headerlink" title="更多新特性"></a>更多新特性</h1><blockquote>
+<p>这是官方发布的 Java 11 包含的所有新特性，提供17个JEP（JDK Enhancement Proposal 特性增强提议）：</p>
+<p>This release includes seventeen features:</p>
+<ul>
+<li>181: Nest- Based Access Control</li>
+<li>309: Dynamic Class-File Constants</li>
+<li>315: Improve Aarch64 Intrinsics</li>
+<li>318: Epsilon: A No-Op Garbage Collector (Experimental)</li>
+<li>320: Remove the Java EE and CORBA Modules</li>
+<li>321: HTTP Client (Standard)</li>
+<li>323: Local-Variable Syntax for Lambda Parameters</li>
+<li>324: Key Agreement with Curve25519 and Curve448</li>
+<li>327: Unicode 10328: Flight Recorder</li>
+<li>329: ChaCha20 &amp; Poly1305 Cryptographic Algorithms</li>
+<li>330: Launch single-File Source-Code Programs</li>
+<li>331: Low-Overhead Heap Profiling</li>
+<li>332: Transport Layer Security (TLS)1.3</li>
+<li>333: ZGC: A Scalable Low-Latency Garbage Collector (Experimental)</li>
+<li>335: Deprecate the Nashorn JavaScript Engine</li>
+<li>336: Deprecate the Pack200 Tools and API</li>
+</ul>
+<p>along with, of course, hundreds of smaller enhancements and countless bug fixes.</p>
+<p>Thanks to everyone who contributed JDK 11, whether by creating features of enhancements, removing old features, fixing bugs, or downloading and testing the early-access builds.</p>
+<p>Onward, to JDK 12!</p>
+</blockquote>
+<h3 id="ZGC-可扩展的低延迟垃圾收集器"><a href="#ZGC-可扩展的低延迟垃圾收集器" class="headerlink" title="ZGC: 可扩展的低延迟垃圾收集器"></a>ZGC: 可扩展的低延迟垃圾收集器</h3><p>ZGC是一款号称可以保证每次GC的停顿时间不超过10MS的垃圾回收器，并且和当前的默认垃圾回收起G1相比，吞吐量下降不超过15%。</p>
+<h3 id="psilon：什么事也不做的垃圾回收器"><a href="#psilon：什么事也不做的垃圾回收器" class="headerlink" title="psilon：什么事也不做的垃圾回收器"></a>psilon：什么事也不做的垃圾回收器</h3><p>Java 11还加入了一个比较特殊的垃圾回收器——Epsilon，该垃圾收集器被称为“no-op”收集器，将处理内存分配而不实施任何实际的内存回收机制。 也就是说，这是一款不做垃圾回收的垃圾回收器。这个垃圾回收器看起来并没什么用，<u>主要可以用来进行性能测试、内存压力测试等，Epsilon GC可以作为度量其他垃圾回收器性能的对照组</u>。大神Martijn说，Epsilon GC至少能够帮助理解GC的接口，有助于成就一个更加模块化的JVM。</p>
+<h3 id="增强var用法"><a href="#增强var用法" class="headerlink" title="增强var用法"></a>增强var用法</h3><p>Java 10中增加了本地变量类型推断的特性，可以使用var来定义局部变量。尽管这一特性被很多人诟病，但是并不影响Java继续增强他的用法，在Java 11中，var可以用来作为Lambda表达式的局部变量声明。</p>
+<h3 id="移除Java-EE和CORBA模块"><a href="#移除Java-EE和CORBA模块" class="headerlink" title="移除Java EE和CORBA模块"></a>移除Java EE和CORBA模块</h3><p>早在发布Java SE 9的时候，Java就表示过，会在未来版本中将Java EE和CORBA模块移除，而这样举动终于在Java 11中实施。终于去除了Java EE和CORBA模块。</p>
+<h3 id="HTTP客户端进一步升级"><a href="#HTTP客户端进一步升级" class="headerlink" title="HTTP客户端进一步升级"></a>HTTP客户端进一步升级</h3><p>JDK 9 中就已对 HTTP Client API 进行标准化，然后通过JEP 110，在 JDK 10 中进行了更新。在本次的Java 11的更新列表中，由以JEP 321进行进一步升级。该API通过CompleteableFutures提供非阻塞请求和响应语义，可以联合使用以触发相应的动作。 JDK 11完全重写了该功能。现在，在用户层请求发布者和响应发布者与底层套接字之间追踪数据流更容易了，这降低了复杂性，并最大程度上提高了HTTP / 1和HTTP / 2之间的重用的可能性。</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/JDK-8/" rel="next" title="JDK 8">
+                  <i class="fa fa-chevron-left"></i> JDK 8
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/Java%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%AC%94%E8%AE%B0/" rel="prev" title="Java线程池笔记">
+                  Java线程池笔记 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#新特性-（JDK-9-11）"><span class="nav-number">1.</span> <span class="nav-text">新特性 （JDK 9-11）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#局部变量类型推断"><span class="nav-number">1.0.1.</span> <span class="nav-text">局部变量类型推断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符串增强"><span class="nav-number">1.0.2.</span> <span class="nav-text">字符串增强</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集合加强-不可变集合"><span class="nav-number">1.0.3.</span> <span class="nav-text">集合加强(不可变集合)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stream加强"><span class="nav-number">1.0.4.</span> <span class="nav-text">Stream加强</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Optional-加强"><span class="nav-number">1.0.5.</span> <span class="nav-text">Optional 加强</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#InputStream-加强"><span class="nav-number">1.0.6.</span> <span class="nav-text">InputStream 加强</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-Client-API-代替Apache的HttpClient的节奏"><span class="nav-number">1.0.7.</span> <span class="nav-text">HTTP Client API (代替Apache的HttpClient的节奏)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#化繁为简，一个命令编译运行源码"><span class="nav-number">1.0.8.</span> <span class="nav-text">化繁为简，一个命令编译运行源码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更多新特性"><span class="nav-number">2.</span> <span class="nav-text">更多新特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ZGC-可扩展的低延迟垃圾收集器"><span class="nav-number">2.0.1.</span> <span class="nav-text">ZGC: 可扩展的低延迟垃圾收集器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#psilon：什么事也不做的垃圾回收器"><span class="nav-number">2.0.2.</span> <span class="nav-text">psilon：什么事也不做的垃圾回收器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增强var用法"><span class="nav-number">2.0.3.</span> <span class="nav-text">增强var用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#移除Java-EE和CORBA模块"><span class="nav-number">2.0.4.</span> <span class="nav-text">移除Java EE和CORBA模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP客户端进一步升级"><span class="nav-number">2.0.5.</span> <span class="nav-text">HTTP客户端进一步升级</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

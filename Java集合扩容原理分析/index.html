@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="编程语言提供的集合类，虽然底层还是基于数组、链表这种最基本的数据结构，但是和我们直接使用数组不同，集合在容量不足时，会触发动态扩容来保证有足够的空间存储数据。动态扩容，涉及到数据的拷贝，是一种「较重」的操作。那如果能够提前确定集合将要存储的数据量范围，就可以通过构造方法，指定集合的初始容量，来保证接下来的操作中，不至于触发动态扩容。">
+<meta name="keywords" content="jdk,java集合">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java集合扩容原理分析">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Java%E9%9B%86%E5%90%88%E6%89%A9%E5%AE%B9%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="编程语言提供的集合类，虽然底层还是基于数组、链表这种最基本的数据结构，但是和我们直接使用数组不同，集合在容量不足时，会触发动态扩容来保证有足够的空间存储数据。动态扩容，涉及到数据的拷贝，是一种「较重」的操作。那如果能够提前确定集合将要存储的数据量范围，就可以通过构造方法，指定集合的初始容量，来保证接下来的操作中，不至于触发动态扩容。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;hashMap&#x2F;hashMap_1.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;hashMap&#x2F;hashMap_2.png">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.261Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;hashMap&#x2F;hashMap_1.png">
+
+<link rel="canonical" href="http://jpuneng.cn/Java%E9%9B%86%E5%90%88%E6%89%A9%E5%AE%B9%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Java集合扩容原理分析 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Java%E9%9B%86%E5%90%88%E6%89%A9%E5%AE%B9%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java集合扩容原理分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-30 21:36:56" itemprop="dateCreated datePublished" datetime="2019-10-30T21:36:56+08:00">2019-10-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>编程语言提供的集合类，虽然底层还是基于数组、链表这种最基本的数据结构，但是和我们直接使用数组不同，集合在容量不足时，会触发动态扩容来保证有足够的空间存储数据。<br>动态扩容，涉及到数据的拷贝，是一种「较重」的操作。那如果能够提前确定集合将要存储的数据量范围，就可以通过构造方法，指定集合的初始容量，来保证接下来的操作中，不至于触发动态扩容。</p><a id="more"></a>
+<blockquote>
+<p>几个常问问题：</p>
+<p>到底是 <code>new ArrayList&lt;&gt;();</code>简单粗暴好，还是<code>new ArrayList&lt;&gt;(30);</code> 给他一个初始容量好呢？万一容量不够会怎么样呢？</p>
+<p>如果给你一个<code>new HashMap&lt;&gt;(10000)</code>，你往里头存放 1w 条缓存数据，此时，你觉得 <code>HashMap</code>还会扩容吗？ 是否真的是占用超过75%，就会扩容呢？还是另有答案呢？</p>
+</blockquote>
+<p>以上的迷惑，下面给大家快速解答。</p>
+<h1 id="Java集合类齐分析"><a href="#Java集合类齐分析" class="headerlink" title="Java集合类齐分析"></a>Java集合类齐分析</h1><p>首先，把常用的Java集合类摆上台，我们先观摩一下他们的主要特征：</p>
+<table>
+<thead>
+<tr>
+<th>集合类</th>
+<th>线程安全</th>
+<th>底层</th>
+<th>数组初始大小</th>
+<th>扩容因子</th>
+<th>扩容增量</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ArrayList</td>
+<td>否</td>
+<td>数组</td>
+<td>10</td>
+<td>1【当元素个数超过容量长度的100%时，进行扩容】</td>
+<td>原容量 + 原容量&gt;&gt;1</td>
+</tr>
+<tr>
+<td>Vector</td>
+<td>是</td>
+<td>数组</td>
+<td>10</td>
+<td>1</td>
+<td>原容量 x 2</td>
+</tr>
+<tr>
+<td>HashSet</td>
+<td>否</td>
+<td>HashMap</td>
+<td>16</td>
+<td>0.75</td>
+<td>原容量 x 2</td>
+</tr>
+<tr>
+<td>HashMap</td>
+<td>否</td>
+<td>元素是单向链表的数组</td>
+<td>16</td>
+<td>0.75</td>
+<td>原容量 x 2</td>
+</tr>
+<tr>
+<td>Hashtable</td>
+<td>是</td>
+<td>元素是单向链表的数组</td>
+<td>11</td>
+<td>0.75</td>
+<td>原容量 x 2 + 1</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>为何是16：16是2^4，可以提高查询效率，另外，32=16&lt;&lt;1</p>
+<p>用移位操作可以极大地提高性能，因为在计算机底层，对位的操作是最方便、最快的。</p>
+</blockquote>
+<p>好，我们接下来用源码来解答几个常见问题。</p>
+<h1 id="问题一：初始化集合需不需要加初始容量？初始容量设置多大为妙？"><a href="#问题一：初始化集合需不需要加初始容量？初始容量设置多大为妙？" class="headerlink" title="问题一：初始化集合需不需要加初始容量？初始容量设置多大为妙？"></a>问题一：初始化集合需不需要加初始容量？初始容量设置多大为妙？</h1><p>答：如果能够大致确定集合中可能存储的元素总量，那么，建议还是根据不同集合的扩容因子来加个初始容量，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 我最多存 30个元素</span><br><span class="line">List&lt;String&gt; list = new ArrayList&lt;&gt;(30); // 30 除以 1</span><br><span class="line">// 我最多存 30个键值对</span><br><span class="line">Map&lt;String,String&gt; map = new HashMap&lt;&gt;(40); // 30 除以 0.75</span><br></pre></td></tr></table></figure>
+
+<h1 id="问题二：HashMap扩容问题"><a href="#问题二：HashMap扩容问题" class="headerlink" title="问题二：HashMap扩容问题"></a>问题二：HashMap扩容问题</h1><p>给你一个<code>new HashMap&lt;&gt;(10000)</code>，你往里头存放 1w 条缓存数据，此时，你觉得 <code>HashMap</code>还会扩容吗？ 是否真的是占用超过75%，就会扩容呢？还是另有答案呢？</p>
+<blockquote>
+<p>其实每个集合的扩容思路大同小异，但是实现是不太一样的(比如：<code>Hashtable</code>的扩容方法叫做<code>rehash()</code>)，这里我们只分析HashMap的扩容原理。</p>
+</blockquote>
+<p>看看HashMap源码，首先看到它的几个默认值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 默认容量：必须是2的倍数，这里是 16</span><br><span class="line">static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4; // aka 16</span><br><span class="line"></span><br><span class="line">// 如果具有参数的构造函数中的任何一个隐式指定了更高的值，则使用最大容量。</span><br><span class="line">// 取值范围：[2, 1&lt;&lt;30]</span><br><span class="line">static final int MAXIMUM_CAPACITY = 1 &lt;&lt; 30;</span><br><span class="line"></span><br><span class="line">// 默认增量因子</span><br><span class="line">static final float DEFAULT_LOAD_FACTOR = 0.75f;</span><br></pre></td></tr></table></figure>
+<p>然后看到它的几个主要的fields：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">* 链表+数组 的 存储结构 --- table</span><br><span class="line">* 会分配一个2的N次幂 的数值大小，作为table的数组长度</span><br><span class="line">*/</span><br><span class="line">transient Node&lt;K,V&gt;[] table;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* Holds cached entrySet(). Note that AbstractMap fields are used</span><br><span class="line">* for keySet() and values().</span><br><span class="line">*/</span><br><span class="line">transient Set&lt;Map.Entry&lt;K,V&gt;&gt; entrySet;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* 存在于此Map中的所有key-value （键值对） 数量</span><br><span class="line">* 也就是：已占用数</span><br><span class="line">*/</span><br><span class="line">transient int size;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* HashMap结构性改变的次数，包括：</span><br><span class="line">* mapping的数量改变、rehash、用于快速失败（fail-fast） (See ConcurrentModificationException).</span><br><span class="line">*/</span><br><span class="line">transient int modCount;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* 扩容阈值：用于决定是否table需要扩容</span><br><span class="line">* threshold = capacity * load factor</span><br><span class="line">*/</span><br><span class="line">int threshold;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* 加载因子（或者说扩容因子，默认是 0.75）</span><br><span class="line">*/</span><br><span class="line">final float loadFactor;</span><br></pre></td></tr></table></figure>
+<p>好，我们看看HashMap初始化时做了什么：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">//--------</span><br><span class="line">// 构造器</span><br><span class="line">//--------</span><br><span class="line">public HashMap(int initialCapacity, float loadFactor) &#123;</span><br><span class="line">    if (initialCapacity &lt; 0)</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal initial capacity: &quot; +</span><br><span class="line">                                            initialCapacity);</span><br><span class="line">    if (initialCapacity &gt; MAXIMUM_CAPACITY)</span><br><span class="line">        initialCapacity = MAXIMUM_CAPACITY;</span><br><span class="line">    if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal load factor: &quot; +</span><br><span class="line">                                            loadFactor);</span><br><span class="line">    this.loadFactor = loadFactor;</span><br><span class="line">    this.threshold = tableSizeFor(initialCapacity);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// ...........</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* 将传入的初始容量，计算得到一个 2的n次方 数，作为数组的容量 (table.size)</span><br><span class="line">*/</span><br><span class="line">static final int tableSizeFor(int cap) &#123;</span><br><span class="line">    int n = cap - 1;</span><br><span class="line">    n |= n &gt;&gt;&gt; 1;</span><br><span class="line">    n |= n &gt;&gt;&gt; 2;</span><br><span class="line">    n |= n &gt;&gt;&gt; 4;</span><br><span class="line">    n |= n &gt;&gt;&gt; 8;</span><br><span class="line">    n |= n &gt;&gt;&gt; 16;</span><br><span class="line">    return (n &lt; 0) ? 1 : (n &gt;= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>又看到源码里头的不少方法，都会比较当前占用<code>size</code>和当前扩容阈值<code>threshold</code>，一言不合就要扩容的节奏！</p>
+<p>比如这个<code>putVal()</code>方法，看看里头的一段code：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">final V putVal(int hash, K key, V value, boolean onlyIfAbsent,</span><br><span class="line">                   boolean evict) &#123;</span><br><span class="line">    // ..........</span><br><span class="line">    ++modCount;</span><br><span class="line">    if (++size &gt; threshold)</span><br><span class="line">        resize();</span><br><span class="line">    // ..........</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>后续的update等操作，都会触发<code>resize()</code>。我们一睹它的主要逻辑：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">* resize():    </span><br><span class="line">* 初始化或加倍表大小。 如果为 null，则根据字段阈值中保持的初始容量目标进行分配。</span><br><span class="line">否则，由于我们使用的是 加工后的2的N次幂数，因此每个 bin 中的元素必须保持相同的索引，或者在扩容后的新table中以2的偏移量移动。</span><br><span class="line">* @return the table</span><br><span class="line">*/</span><br><span class="line">final Node&lt;K,V&gt;[] resize() &#123;</span><br><span class="line">    // 1. 拿到现在已存在的table，得到 原来的容量： oldCap</span><br><span class="line">    Node&lt;K,V&gt;[] oldTab = table;</span><br><span class="line">    int oldCap = (oldTab == null) ? 0 : oldTab.length;</span><br><span class="line"></span><br><span class="line">    // 2. 拿到现在已存在的阈值（threshold）： oldThr</span><br><span class="line">    int oldThr = threshold;</span><br><span class="line"></span><br><span class="line">    int newCap, newThr = 0;</span><br><span class="line">    // 3. 如果不是第一次创建table，那么，看看是否已经达到最大的可允许范围（1&lt;&lt;30），如果是，那么直接让阈值变成最大的INT值，且不进行扩容。</span><br><span class="line">    if (oldCap &gt; 0) &#123;</span><br><span class="line">        if (oldCap &gt;= MAXIMUM_CAPACITY) &#123;</span><br><span class="line">            threshold = Integer.MAX_VALUE;</span><br><span class="line">            return oldTab;</span><br><span class="line">        &#125;</span><br><span class="line">    // 4. 否则，如果 oldCap 乘以 2 ，都不超过 (1&lt;&lt;30)，那么，直接：newCap = oldCap &lt;&lt; 1</span><br><span class="line">        else if ((newCap = oldCap &lt;&lt; 1) &lt; MAXIMUM_CAPACITY &amp;&amp;</span><br><span class="line">                    oldCap &gt;= DEFAULT_INITIAL_CAPACITY)</span><br><span class="line">            newThr = oldThr &lt;&lt; 1; // double threshold  阈值 乘以 2</span><br><span class="line">    &#125;</span><br><span class="line">    else if (oldThr &gt; 0) // initial capacity was placed in threshold</span><br><span class="line">        newCap = oldThr;</span><br><span class="line">    else &#123;               // Default: 容量 = 1&lt;&lt;4， 阈值 = 0.75 * 容量</span><br><span class="line">        newCap = DEFAULT_INITIAL_CAPACITY;</span><br><span class="line">        newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // .........</span><br><span class="line"></span><br><span class="line">    threshold = newThr;</span><br><span class="line">    @SuppressWarnings(&#123;&quot;rawtypes&quot;,&quot;unchecked&quot;&#125;)</span><br><span class="line">    Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])new Node[newCap];</span><br><span class="line">    table = newTab;</span><br><span class="line">    if (oldTab != null) &#123;</span><br><span class="line">        // 将 旧table的索引 往 新table 上面搬运。</span><br><span class="line">        // ............</span><br><span class="line">    &#125;</span><br><span class="line">    return newTab;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>HashMap 源码告诉我们：</p>
+<ul>
+<li>table就是那个链表数组的存储结构；</li>
+<li>loadFactor 默认是 0.75；</li>
+<li>initialCapacity 是初始容量，不设置，capacity则为默认16，取值范围是 [2, 1&lt;&lt;30]；</li>
+<li>capacity 一定是 2的N次幂数，通过<code>tableSizeFor()</code> 方法保证；</li>
+<li>threshold 是 扩容阈值；</li>
+<li>threshold = table.size * loadFactor；</li>
+<li>HashMap 是否扩容，由 threshold 决定，而 threshold 又由初始容量和 loadFactor 决定；</li>
+<li><code>putVal(..)</code>方法告诉我们：在每次调用<code>put(k,v)</code>的过程中，里头会判断当前占用是否大于 threshold，如果大于，则做 扩容；</li>
+<li><code>resize()</code>方法告诉我们：<ul>
+<li>第一次初始化 容量（capacity）和 阈值（threshold）时：<ul>
+<li>容量（capacity） = 1 &lt;&lt; 4 = 16</li>
+<li>阈值（threshold） = 0.75 * 容量（capacity）</li>
+</ul>
+</li>
+<li>后续的扩容：<ul>
+<li>容量（capacity） = capacity * 2</li>
+<li>阈值（threshold） = threshold * 2</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>那么，回到前面的问题：如果是一个初始入参<code>capacity=10000</code>的HashMap，那么，到底会不会在put 了 1w 条记录时 进行扩容？</p>
+<p>我们带入源码，会得到：<br><img src="/images/hashMap/hashMap_1.png" alt></p>
+<p>哦，其实此时，我们的table初始容量，并不是 <code>10000</code>，而是 <code>16384</code>。那么，阈值我们口算一下就能得到: <code>15384*0.75 = 12288</code>。所以，当我们插入1w条记录，HashMap的这段逻辑：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (++size &gt; threshold)</span><br><span class="line">    resize();</span><br></pre></td></tr></table></figure>
+<p>这段代码是无法走进来的！！所以，初始给1w的HashMap，往里扔1w条记录，是否会扩容？ <strong>答案是：不会扩容</strong>。</p>
+<p>当然，如果给他初始容量设为1000，这又不一样了：<br><img src="/images/hashMap/hashMap_2.png" alt><br>好，可以看到，此时，它调整为<code>1024</code>，<code>阈值 = 1024  * 0.75 = 768</code>，那么，当我们插入1k条记录，那此时就会扩容了~</p>
+<h1 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h1><ul>
+<li><a href="https://juejin.im/post/5db92860e51d4529ee588406" target="_blank" rel="noopener">https://juejin.im/post/5db92860e51d4529ee588406</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java%E9%9B%86%E5%90%88/" rel="tag"># java集合</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/Dubbo%E6%9E%B6%E6%9E%84%E5%9B%BE%E8%A7%A3%E5%88%86%E6%9E%90/" rel="next" title="Dubbo架构图解分析">
+                  <i class="fa fa-chevron-left"></i> Dubbo架构图解分析
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/CopyOnWriteArrayList%E6%98%AF%E6%80%8E%E4%B9%88%E5%B7%A5%E4%BD%9C%E7%9A%84/" rel="prev" title="CopyOnWriteArrayList是怎么工作的">
+                  CopyOnWriteArrayList是怎么工作的 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java集合类齐分析"><span class="nav-number">1.</span> <span class="nav-text">Java集合类齐分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#问题一：初始化集合需不需要加初始容量？初始容量设置多大为妙？"><span class="nav-number">2.</span> <span class="nav-text">问题一：初始化集合需不需要加初始容量？初始容量设置多大为妙？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#问题二：HashMap扩容问题"><span class="nav-number">3.</span> <span class="nav-text">问题二：HashMap扩容问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文章"><span class="nav-number">4.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

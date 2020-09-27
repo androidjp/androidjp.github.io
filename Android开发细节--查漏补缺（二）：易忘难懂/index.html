@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="这篇文章先汇总一下部分在平常容易遇到或可能遇到的一些难以理解或者容易忘记是什么的问题。">
+<meta name="keywords" content="Android,面试,基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android开发细节--查漏补缺（二）：易忘难懂">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Android%E5%BC%80%E5%8F%91%E7%BB%86%E8%8A%82--%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E6%98%93%E5%BF%98%E9%9A%BE%E6%87%82&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="这篇文章先汇总一下部分在平常容易遇到或可能遇到的一些难以理解或者容易忘记是什么的问题。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-0f3595eb8249ed44.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-c108a164f086f0f2.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-71511813a835a544.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-cd5b8e9ce86970d8.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-9a0e6a728886c2d8.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-3cf75cc2042a2e15.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.255Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-0f3595eb8249ed44.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
+
+<link rel="canonical" href="http://jpuneng.cn/Android%E5%BC%80%E5%8F%91%E7%BB%86%E8%8A%82--%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E6%98%93%E5%BF%98%E9%9A%BE%E6%87%82/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Android开发细节--查漏补缺（二）：易忘难懂 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Android%E5%BC%80%E5%8F%91%E7%BB%86%E8%8A%82--%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E6%98%93%E5%BF%98%E9%9A%BE%E6%87%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android开发细节--查漏补缺（二）：易忘难懂
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-07-25 14:59:00" itemprop="dateCreated datePublished" datetime="2016-07-25T14:59:00+08:00">2016-07-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>这篇文章先汇总一下部分在平常容易遇到或可能遇到的一些难以理解或者容易忘记是什么的问题。</p>
+</blockquote>
+<a id="more"></a>
+
+<hr>
+<ol>
+<li><p>android:supportsRtl=”true”是什么？<br><code>android:supportsRtl=&quot;true&quot;</code> 故名思义，“Rtl”就是“right to left” ，一般用于适配language文本方向，如切换系统语言为阿拉伯文时，actionbar布局要变为从右向左排列，就需要这个属性。</p>
+<blockquote>
+<p>注意：<br>此属性最低SDK版本为17（Android 4.2.x）<br>在使用这个属性时，尽量不适用<code>layout_marginRight</code>这类，而是使用<code>layout_marginEnd</code>这种。</p>
+</blockquote>
+<hr>
+</li>
+<li><p>Android res/menu/my_nemu.xml中不易记的属性：</p>
+<ul>
+<li>android:<strong>alphabeticShortcut</strong>=”n” ：表示快捷键为：Ctrl+n 、Alt+n</li>
+<li>android:<strong>orderInCategory</strong> = “3”：表示在菜单列表中的排序，值可以为大于等于0的任何整数，数值越小，排序越前。</li>
+<li>android:<strong>checkableBehavior</strong> = “single|all|none”：分别表示radio button、checkbox、checkable=false</li>
+<li>&lt;group android:id=”xx”……&gt; <item android:id="yy"/>……</group>： 用一个组，包含几个menu_item，这样，组内部的item的顺序就可以重新定义。</li>
+</ul>
+<hr>
+</li>
+<li><p>Android中用Java代码设置菜单项快捷键的方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">menu.setQwertyMode(true);</span><br><span class="line">menu.findItem(TWO_ID).setNumericShortcut(&apos;2&apos;);</span><br></pre></td></tr></table></figure>
+<hr>
+</li>
+<li><p><RelativeLayout>中子view的属性：</p>
+<ul>
+<li><strong>android:below=”@+id/xx”</strong> ：表示本view在xx的下面</li>
+<li><strong>android:above=”@+id/xx”</strong>：表示本view在xx的上面</li>
+</ul>
+<hr>
+</li>
+<li><p>implements Parcelable的对象的一般写法：（详见我的另一篇博文：<a href="http://www.jianshu.com/p/b1fcff2728bd" target="_blank" rel="noopener">Android AIDL基础 – Parcelable接口</a>）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">public class Student implements Parcelable&#123;</span><br><span class="line">    ///-------------------------------</span><br><span class="line">    /// （1）：基本类型、String/CharSequence、Bundle、IBinder、Serializable、Parcelable 的成员</span><br><span class="line">    private T t;</span><br><span class="line">    ……</span><br><span class="line">    ///---------------------------------</span><br><span class="line">    ///（2）：构造方法（可选，怎么方便赋值成员变量值并构建实例，就怎么写）</span><br><span class="line">    public Student() &#123;</span><br><span class="line">        ……</span><br><span class="line">    &#125;</span><br><span class="line">   //=========================================================</span><br><span class="line">   //  下面是Parcelable需要实现的方法</span><br><span class="line">   //=========================================================</span><br><span class="line">    protected Student(Parcel in) &#123;</span><br><span class="line">        ///建议：按成员变量顺序写【因为：需要与writeToParcel()方法中的写入顺序一致】</span><br><span class="line">        id = in.readInt();//如：基本数据类型成员</span><br><span class="line">        name = in.readString();//如：String类型成员</span><br><span class="line">        home = in.readParcelable(Address.class.getClassLoader());//如：Parcelable类型成员</span><br><span class="line">        ……</span><br><span class="line">    &#125;</span><br><span class="line">    public static final Creator&lt;Student&gt; CREATOR = new Creator&lt;Student&gt;() &#123;</span><br><span class="line">        ///CREATOR成员，格式必须如下，‘CREATOR’变量名也固定。</span><br><span class="line">        @Override</span><br><span class="line">        public Student createFromParcel(Parcel in) &#123;</span><br><span class="line">            return new Student(in);</span><br><span class="line">        &#125;</span><br><span class="line">        @Override</span><br><span class="line">        public Student[] newArray(int size) &#123;</span><br><span class="line">            return new Student[size];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    @Override</span><br><span class="line">    public int describeContents() &#123;</span><br><span class="line">        /// 描述标志，默认为0即可</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    @Override</span><br><span class="line">    public void writeToParcel(Parcel dest, int flags) &#123;</span><br><span class="line">        ////写入Parcel的方法【需要与writeToParcel()方法中的写入顺序一致】</span><br><span class="line">        dest.writeInt(id);</span><br><span class="line">        dest.writeString(name);</span><br><span class="line">        dest.writeParcelable(home, flags);</span><br><span class="line">        ……</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>Android Studio获取Android签名证书SHA1的简易步骤：</p>
+<ul>
+<li>Android Studio中打开terminal或者配置了全局变量之后直接打开终端输入：<br><strong><code>keytool -list -v -keystore 你的签名文件所在的路径</code></strong></li>
+<li>输入密钥库密码</li>
+<li>成功显示：MD5、SHA1、SHA256等信息<blockquote>
+<p>想知道Eclipse的获取方式，更详细的地址可以看：<a href="http://lbs.amap.com/dev/ticket#/faq/86" target="_blank" rel="noopener">SHA1查看</a></p>
+</blockquote>
+</li>
+</ul>
+<hr>
+</li>
+<li><p>JSON封装库的效率对比：<br>如果对JSON的解析速度敏感：大文件用：<strong>Jackson</strong>，小文件用：<strong>Gson</strong>，两种文件都有用：<strong>JSON.simple</strong></p>
+<hr>
+</li>
+<li><p>Java代码执行new一个类实例对象的过程中，static块、static方法、main方法的执行顺序：</p>
+<ul>
+<li>static块【最先执行，因为静态代码块属于类层次，在类编译时就执行】</li>
+<li>-&gt; main方法</li>
+<li>-&gt; 成员块</li>
+<li>-&gt; 构造方法</li>
+<li>-&gt; static方法【在被调用时才执行】<blockquote>
+<p>详细可以看看本人的相关文章：<a href="http://www.jianshu.com/p/ace2aa692f96" target="_blank" rel="noopener">Java面试相关（一）– Java类加载全过程</a></p>
+</blockquote>
+</li>
+</ul>
+<hr>
+</li>
+<li><p>在写Fragment的时候，Fragment.onCreateView()方法中，一般是这样的一个结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@Nullable</span><br><span class="line">@Override</span><br><span class="line">public View onCreateView(LayoutInflater inflater,  ViewGroup container,  Bundle savedInstanceState) &#123;</span><br><span class="line">  if (rootLayout == null) &#123;</span><br><span class="line">    rootLayout = inflater.inflate(R.layout.fragment_reclist, null);///①</span><br><span class="line">    rootLayout = inflater.inflate(R.layout.fragment_reclist, container, false);///②</span><br><span class="line">    ///rootLayout = inflater.inflate(R.layout.fragment_reclist, container);///③这样不行！！</span><br><span class="line">    ……  </span><br><span class="line">  &#125;</span><br><span class="line">……</span><br><span class="line">return rootLayout;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里，要注意代码中注释掉的地方，这里有一个对于Fragment的知识点：<br><code>inflater.inflate(id, ViewGroup);</code><br>说明：<br> 这个方法传入：【目的布局的R.layout 的id】 + 【目的布局的父容器】。那么，对于Fragment的来说，Fragment的onCreateView()方式最终返回的View会自动判断本Fragment所在的父容器位置。<br> <strong>为什么上面代码③不行呢?</strong> 答：因为<code>inflater.inflate(id, ViewGroup);</code>最终会调用<code>inflater.inflate(id, ViewGroup,boolean);</code> 方法，当ViewGroup不为null时，这方法的第三个参数值会为true，表示的是‘inflate出来的布局自动加到它的父viewgroup中’，那么问题就来了，如果这个父布局是一个ViewPager或者其他不易确定子View放置位置的容器，那么，方法就会<strong>报错</strong>，因为找不到插入点！所以，对于Fragment的布局，一般情况不需要设置自动添加到父布局，所以，上述代码①和②二选一都可以。</p>
+<hr>
+</li>
+<li><p>Fragment 与 它所在的Activity的生命周期方法执行次序：<br>下面用一个常用布局作为示例【FragmentActivity中用ViewPager装载两个Fragment 部分代码示例】来演示 ，看运行的Log就可以说明整个执行顺序：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">public class CommonTabActivity extends FragmentActivity &#123;</span><br><span class="line">……</span><br><span class="line">/// TabLayout + ViewPager的主界面容器</span><br><span class="line">PagerAdapter mPagerAdapter;</span><br><span class="line">ViewPager mViewPager;</span><br><span class="line">TabLayout mTabLayout;</span><br><span class="line">////两个 Fragment</span><br><span class="line">RecListFragment homeFragment;</span><br><span class="line">RecListFragment collectionFragment;</span><br><span class="line">……</span><br><span class="line"> @Override</span><br><span class="line"> protected void onCreate(Bundle savedInstanceState) &#123;</span><br><span class="line">     super.onCreate(savedInstanceState);</span><br><span class="line">     setContentView(R.layout.activity_commontab);</span><br><span class="line">     initView();</span><br><span class="line"> &#125;</span><br><span class="line">  private void initView() &#123;</span><br><span class="line">    ///初始化ViewPager等控件</span><br><span class="line">    ……</span><br><span class="line"></span><br><span class="line">        mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public Fragment getItem(int position) &#123;</span><br><span class="line">                switch (position) &#123;</span><br><span class="line">/////////////////////////使用第一个Fragment</span><br><span class="line">                    case 0:</span><br><span class="line">                    default:  </span><br><span class="line">                        if(homeFragment==null)&#123;</span><br><span class="line">                            homeFragment = new RecListFragment();</span><br><span class="line">                        &#125;</span><br><span class="line">                        return homeFragment;</span><br><span class="line">///////////////////////////使用第二个Fragment</span><br><span class="line">                    case 1:</span><br><span class="line">                        if (collectionFragment==null)&#123;</span><br><span class="line">                            collectionFragment =  new RecListFragment();</span><br><span class="line">                        &#125;</span><br><span class="line">                        return collectionFragment;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            …………</span><br><span class="line">        &#125;;</span><br><span class="line">        mViewPager.setAdapter(mPagerAdapter);</span><br><span class="line">        mTabLayout.setupWithViewPager(mViewPager);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的结构大家应该都比较熟悉，那么，我测试后给大家列出几种情况下Activity和两个Fragment的生命周期方法执行情况：</p>
+<ul>
+<li><p>本Activity被startActivity()等方式启动：<br><img src="http://upload-images.jianshu.io/upload_images/2369895-0f3595eb8249ed44.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+</li>
+<li><p>本Activity由于点击HOME、MENU等弹回桌面时：<br> 下图是Android N版本下点击MENU按键时的操作截图（类似平常我们长按HOME键弹出运行中程序）：<br><img src="http://upload-images.jianshu.io/upload_images/2369895-c108a164f086f0f2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br><img src="http://upload-images.jianshu.io/upload_images/2369895-71511813a835a544.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+</li>
+<li><p>本Activity启动其他Activity，并被完全遮掩覆盖时：<br><img src="http://upload-images.jianshu.io/upload_images/2369895-cd5b8e9ce86970d8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+</li>
+<li><p>Activity退出时：<br><img src="http://upload-images.jianshu.io/upload_images/2369895-9a0e6a728886c2d8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+</li>
+<li><p>总结：</p>
+<ul>
+<li>启动Activity时，由于ViewPager默认采用预加载的方式，所以，虽然默认显示第一个Fragment，第二个Fragment依然会被加载和初始化。</li>
+<li>启动Activity时，Activity先执行了它本身的onCreate()-&gt;onStart()-&gt;onResume()，之后，ViewPager才真的开始运行起来并加载指定给他的Fragment，Fragment才开始它的生命周期。</li>
+<li>不论Activity是被另一个Activity覆盖、还是App被返回桌面、或者是弹出启动中应用的界面遮掩Activity，此时，Activity都是被完全遮掩（弹出Dialog等不全屏的窗体时，Activity属于部分被遮掩），此时，Activity都会调用到onStop()方法，并且这种方式中Fragment与Activity的生命周期方法执行顺序都一样(如上面截图)。</li>
+<li>当Activity退出时，①Fragment执行onStop()后，Activity再执行onStop() ②Fragment执行onDestroyView()和onDestroy()后，Activity才执行onDestroy()</li>
+</ul>
+</li>
+<li><p>另外，如果到这里，忘了Fragment整个生命周期是怎么样的，这里，本人附上<strong>*<u>Fragment的生命周期图解</u>*</strong>：<br><img src="http://upload-images.jianshu.io/upload_images/2369895-3cf75cc2042a2e15.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Fragment的生命周期"></p>
+</li>
+</ul>
+<hr>
+</li>
+<li><p>关于v4、v7、v13兼容包：</p>
+<ul>
+<li><strong>Android Support v4：</strong>为了兼容Android1.6及更高版本而设计的。（eclipse新建工程时，都默认带有v4包）</li>
+<li><strong>Android Support v7：</strong>为了兼容Android2.1及以上版本而设计的，但不包含更低，故如果不考虑1.6,我们可以采用再加上这个包，另外注意，v7是要依赖v4这个包的，即，两个得同时被包含。</li>
+<li><strong>Android Support v13：</strong>为了Android 3.2及更高版本的，一般我们都不常用，平板开发中能用到。</li>
+</ul>
+</li>
+</ol>
+<h3 id="感谢阅读～"><a href="#感谢阅读～" class="headerlink" title="感谢阅读～"></a>感谢阅读～</h3><p>本篇文章将持续更新～<br>喜欢的读者可以点个关注，本人将持续发布Android相关文章～</p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+              <a href="/tags/%E5%9F%BA%E7%A1%80/" rel="tag"># 基础</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/Java%E9%9D%A2%E8%AF%95%E7%9B%B8%E5%85%B3%EF%BC%88%E4%B8%80%EF%BC%89--%20Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%85%A8%E8%BF%87%E7%A8%8B/" rel="next" title="Java面试相关（一）-- Java类加载全过程">
+                  <i class="fa fa-chevron-left"></i> Java面试相关（一）-- Java类加载全过程
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/MVP%E6%9E%B6%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/" rel="prev" title="MVP架构的理解">
+                  MVP架构的理解 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#感谢阅读～"><span class="nav-number">1.</span> <span class="nav-text">感谢阅读～</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

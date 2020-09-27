@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="keywords" content="git">
+<meta property="og:type" content="article">
+<meta property="og:title" content="git指南">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;git%E6%8C%87%E5%8D%97&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;git_01.png">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.267Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;images&#x2F;git_01.png">
+
+<link rel="canonical" href="http://jpuneng.cn/git%E6%8C%87%E5%8D%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>git指南 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/git%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          git指南
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-09-27 14:42:07" itemprop="dateCreated datePublished" datetime="2019-09-27T14:42:07+08:00">2019-09-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86/" itemprop="url" rel="index">
+                    <span itemprop="name">版本管理</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="/images/git_01.png" alt=""></p>
+<a id="more"></a>
+
+<h1 id="克隆"><a href="#克隆" class="headerlink" title="克隆"></a>克隆</h1><ul>
+<li>克隆到githome目录  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone ssh://xxx.com:myProject ./githome</span><br></pre></td></tr></table></figure></li>
+<li>只克隆Dev分支到本地  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone -b Dev ssh://xxx.com:myProject</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="拉取与推送"><a href="#拉取与推送" class="headerlink" title="拉取与推送"></a>拉取与推送</h1><h2 id="fetch-和-pull-的区别"><a href="#fetch-和-pull-的区别" class="headerlink" title="fetch 和 pull 的区别"></a>fetch 和 pull 的区别</h2><ul>
+<li><code>$ git fetch origin develop</code>：只是拉取远程的develop分支的最新提交版本，到本地的<code>.git/refs/remotes</code> 目录【远程版本库】中，并没有合并到本地分支，也就是本地分支仍然只有<code>master</code>，没有<code>develop</code>.【本地版本库目录：<code>.git/refs/heads</code>】</li>
+<li><code>$ git pull origin develop</code>：相当于：<code>git fetch origin develop</code>+<code>git merge develop</code>; 获取远程develop分支，并将其合并到当前你所在的本地分支。</li>
+<li>将本地当前分支推送到远程仓库的master分支  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push origin master</span><br></pre></td></tr></table></figure></li>
+<li>将dev分支推送到远程仓库的master分支  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push origin master:dev</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="Commit-的简写"><a href="#Commit-的简写" class="headerlink" title="Commit 的简写"></a>Commit 的简写</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git commit -am &quot;something&quot;</span><br><span class="line">git push</span><br></pre></td></tr></table></figure>
+<p>相当于</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git add .</span><br><span class="line">git commit -m &quot;something&quot;</span><br><span class="line">git push</span><br></pre></td></tr></table></figure>
+
+<h2 id="区分-merge-和-rebase"><a href="#区分-merge-和-rebase" class="headerlink" title="区分 merge 和 rebase"></a>区分 merge 和 rebase</h2><p>将 <from> 的内容整合过来，在当前分支生成一个新的commit</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git merge &lt;from&gt;</span><br></pre></td></tr></table></figure>
+<p>将当前分支的内容挂在<to>分支之上，相当于在<to>分支上长了一个新的commit。[如果当前分支在<to>分支的继承链中，直接当前分支的指针前移]</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git rebase &lt;to&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="拉取远程git项目的某个分支"><a href="#拉取远程git项目的某个分支" class="headerlink" title="拉取远程git项目的某个分支"></a>拉取远程git项目的某个分支</h2><ul>
+<li>master分支：默认会拉取的分支，直接<code>git clone URL</code>就可以获取到。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git clone https://git.oschina.net/androidJP/Demo.git</span><br></pre></td></tr></table></figure></li>
+<li>非master分支：需要<code>git fetch</code>和<code>git checkout -b XXX remote仓库/XXX</code>结合使用。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git clone https://git.oschina.net/androidJP/Demo.git</span><br><span class="line">///项目的默认分支被克隆下来了</span><br><span class="line">$ git branch</span><br><span class="line">/// 输出：如master 等已经拉取到的分支名和当前分支</span><br><span class="line">$ git fetch</span><br><span class="line">$ git checkout -b develop origin/develop</span><br><span class="line">/// 拉取远程的develop分支并本地切换到了develop分支</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="远程分支pull不了"><a href="#远程分支pull不了" class="headerlink" title="远程分支pull不了"></a>远程分支pull不了</h2><p>原因：你的本地分支没有关联上远程分支。</p>
+<ul>
+<li>方法一：直接指定要pull哪个远程分支（默认会merge）：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git pull origin &lt;远程分支名&gt;</span><br></pre></td></tr></table></figure></li>
+<li>方法二：绑定某个分支，之后就直接<code>git pull</code> 即可：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git branch --set-upstream-to=origin/&lt;远程分支名&gt;  &lt;本地分支名&gt;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="本地创建一个新分支并推送到远程，让远程也生成新分支"><a href="#本地创建一个新分支并推送到远程，让远程也生成新分支" class="headerlink" title="本地创建一个新分支并推送到远程，让远程也生成新分支"></a>本地创建一个新分支并推送到远程，让远程也生成新分支</h2>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout -b branchA</span><br><span class="line">....</span><br><span class="line">$ git add . </span><br><span class="line">$ git commit -m &quot;what you change&quot;</span><br><span class="line">/// 将本地分支推到远程的同名分支上</span><br><span class="line">$ git push origin branchA</span><br><span class="line">或者  (-u 的作用是选定默认远程仓库)</span><br><span class="line">$ git push -u origin branchA</span><br></pre></td></tr></table></figure>
+
+<h2 id="将本地project-push到自己的github-码云仓库中"><a href="#将本地project-push到自己的github-码云仓库中" class="headerlink" title="将本地project push到自己的github/码云仓库中"></a>将本地project push到自己的github/码云仓库中</h2><p>无论如何，得在相应平台上事先创建一个项目</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git init</span><br><span class="line">git add .</span><br><span class="line">git commit -m &quot;first commit&quot;</span><br><span class="line">git remote add origin https://github.com/androidjp/&lt;你的远程项目名&gt;.git</span><br><span class="line">git remote add origin https://gitee.com/androidJP/&lt;你的远程项目名&gt;.git</span><br><span class="line">git push -u origin master</span><br></pre></td></tr></table></figure>
+
+<h1 id="看Log"><a href="#看Log" class="headerlink" title="看Log"></a>看Log</h1><ul>
+<li><code>git log --pretty=oneline</code>: 查看当前分支的所有的提交记录</li>
+<li><code>git log --oneline -3</code>: 查看最近三次提交</li>
+<li><code>git log --graph --decorate --oneline --all</code>: 查看所有分支的所有提交记录树状图</li>
+<li><code>git log --graph --decorate --oneline --simplify-by-decoration A B C</code>: 查看A,B,C三个分支的树状图</li>
+</ul>
+<blockquote>
+<p>说明：</p>
+<ul>
+<li><code>--decorate</code> 标记会让git log显示每个commit的引用(如:分支、tag等) </li>
+<li><code>--oneline</code> 一行显示</li>
+<li><code>--simplify-by-decoration</code> 只显示被branch或tag引用的commit</li>
+<li><code>--all</code> 表示显示所有的branch</li>
+</ul>
+</blockquote>
+<h1 id="回滚的艺术"><a href="#回滚的艺术" class="headerlink" title="回滚的艺术"></a>回滚的艺术</h1><h2 id="版本回滚和还原"><a href="#版本回滚和还原" class="headerlink" title="版本回滚和还原"></a>版本回滚和还原</h2><ol>
+<li>回滚<ul>
+<li>法一：通过<code>git log</code>查看版本号，然后通过版本号来定位<code>HEAD</code>应该指向哪里。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git log --pretty=oneline</span><br><span class="line">$ git reset --hard 12345</span><br></pre></td></tr></table></figure></li>
+<li>法二：通过<code>HEAD^</code> 等，回滚到上一个/上N个版本<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 上个版本</span><br><span class="line">$ git reset --hard HEAD^</span><br><span class="line">//上上个版本</span><br><span class="line">$ git reset --hard HEAD^^</span><br><span class="line">// 前100个版本</span><br><span class="line">$ git reset --hard HEAD~100</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>还原 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git reflog  // 可查看历史操作记录，最新的记录在第一条</span><br><span class="line">$ git reset --hard &lt;版本号&gt;</span><br></pre></td></tr></table></figure>
+原理：还是使用<code>reset --hard &lt;版本号&gt;</code>的方式实现，并通过<code>git reflog</code>来获取以前的git操作记录，从而得到对应的版本号。</li>
+</ol>
+<h2 id="不小心写了句“老板真欠扁”，怎么办？"><a href="#不小心写了句“老板真欠扁”，怎么办？" class="headerlink" title="不小心写了句“老板真欠扁”，怎么办？"></a>不小心写了句“老板真欠扁”，怎么办？</h2><ul>
+<li>【修改处于工作区】幸好，我的文件还在工作区，没有被add。 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">///将我这个文件myFile.txt的所有修改都清空</span><br><span class="line">$ git checkout -- myFile.txt</span><br></pre></td></tr></table></figure></li>
+<li>【修改处理暂存区】哦哦，我的文件add进了暂存区。 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 第一步，还原 add 这个操作（暂存区 --&gt; 工作区）</span><br><span class="line">$ git reset HEAD myFile.txt</span><br><span class="line">// 第二步，清空工作区（工作区 --&gt; 未修改）</span><br><span class="line">$ git checkout -- myFile.txt</span><br></pre></td></tr></table></figure></li>
+<li>【修改已提交】如果你已经commit了<br>恭喜你，只能用版本回滚了。（如果老板没有你最新提交版本的版本号的话）<ul>
+<li>法一：<code>git rebase -i head~&lt;N&gt;</code> 把包含你的错误提交在内的前N的提交，重新选择，其中，选择<code>drop</code>给你的错误提交，这样，就删除了你的错误提交了。</li>
+<li>法二：<code>git reset --hard HEAD~1</code> 把你骂老板的本地提交强行回滚到之前的一个提交，虽然这样本地依然存在这样的一个记录，但是当你push时，这个记录是不会推送到远程仓库里面的。</li>
+</ul>
+</li>
+<li>【修改已push】如果已经push code了，那怎么办呢？****理论上，是无论如何，骂老板的记录都会在的。<ul>
+<li>法一：<code>git revert &lt;错误提交id&gt;</code> 把错误纠正，然后提交，这么做，这棵commit树上的记录中，你的错误提交记录依然存在，能被人看到。（所以，在这种case下，不推荐）</li>
+<li>法二：<code>git rebase -i head~&lt;N&gt;</code>，这种方式，在这种情况下，类似revert，对远程分支<code>origin/master</code>是不会达到删除提交记录的效果的，类似于和本地<code>master</code>分支做merge/rebase，最终和revert的效果一致  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git rebase -i head~&lt;N&gt; // 只选择正确的commit</span><br><span class="line">....</span><br><span class="line">git merge / git rebase</span><br><span class="line">git push</span><br></pre></td></tr></table></figure>
+<h2 id="git-reset-详解"><a href="#git-reset-详解" class="headerlink" title="git reset 详解"></a>git reset 详解</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git reset [--mixed | --soft | --hard | --merge | --keep] [-q] [&lt;commit&gt;]</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><code>--mixed</code>：【默认】回退版本库，暂存区。</li>
+<li><code>--hard</code>：回退版本库，暂存区，工作区</li>
+<li><code>--soft</code>：回退版本库</li>
+</ul>
+<h3 id="–keep例子"><a href="#–keep例子" class="headerlink" title="–keep例子"></a>–keep例子</h3><p>假设你正在编辑一些文件，并且已经提交，接着继续工作，但是现在你发现当前在working tree中的内容应该属于另一个branch，与这之前的commit没有什么关系。此时，你可以开启一个新的branch，并且保留着working tree中的内容。 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git tag start </span><br><span class="line">$ git checkout -b branch1 </span><br><span class="line">$ edit </span><br><span class="line">$ git commit ...                            (1) </span><br><span class="line">$ edit </span><br><span class="line">$ git checkout -b branch2                   (2) </span><br><span class="line">$ git reset --keep start                    (3)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>(1) 这次是把在branch1中的改变提交了。 </li>
+<li>(2) 此时发现，之前的提交不属于这个branch，此时你新建了branch2，并切换到了branch2上。 </li>
+<li>(3) 此时你可以用reset –keep把在start之后的commit清除掉，但是保持working tree不变。 </li>
+</ul>
+<h3 id="–merge例子"><a href="#–merge例子" class="headerlink" title="–merge例子"></a>–merge例子</h3><p>在被污染的working tree中回滚merge或者pull </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git pull                         (1) </span><br><span class="line">Auto-merging nitfol </span><br><span class="line">Merge made by recursive. </span><br><span class="line">nitfol                |   20 +++++---- </span><br><span class="line">... </span><br><span class="line">$ git reset --merge ORIG_HEAD      (2)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>(1) 即便你已经在本地更改了一些你的working tree，你也可安全的git pull，前提是你知道将要pull的内容不会覆盖你的working tree中的内容。 </li>
+<li>(2) git pull完后，你发现这次pull下来的修改不满意，想要回滚到pull之前的状态，从前面的介绍知道，我们可以执行<code>git reset --hard ORIG_HEAD</code>，但是这个命令有个副作用就是清空你的working tree，即丢弃你的本地未add的那些改变。为了避免丢弃working tree中的内容，可以使用<code>git reset --merge ORIG_HEAD</code>，注意其中的<code>--hard</code>换成了<code>--merge</code>，这样就可以避免在回滚时清除working tree。 </li>
+</ul>
+<h1 id="关于HEAD"><a href="#关于HEAD" class="headerlink" title="关于HEAD"></a>关于HEAD</h1><p>一整个分支树上，同时只有一个HEAD指针。</p>
+<h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><h3 id="1-看-HEAD-指向"><a href="#1-看-HEAD-指向" class="headerlink" title="1. 看 HEAD 指向"></a>1. 看 HEAD 指向</h3><p>看 HEAD 指向，可以通过 <code>cat .git/HEAD</code> 查看， 如果 HEAD 指向的是一个引用，还可以用 <code>git symbolic-ref HEAD</code> 查看它的指向</p>
+<h3 id="2-让-HEAD-指向某个指定的commit，而不是某个分支"><a href="#2-让-HEAD-指向某个指定的commit，而不是某个分支" class="headerlink" title="2. 让 HEAD 指向某个指定的commit，而不是某个分支"></a>2. 让 HEAD 指向某个指定的commit，而不是某个分支</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git chekout &lt;commit id&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="让master分支强行指向dev分支的第3个的commit"><a href="#让master分支强行指向dev分支的第3个的commit" class="headerlink" title="让master分支强行指向dev分支的第3个的commit"></a>让master分支强行指向dev分支的第3个的commit</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git checkout dev // 首先让master分支的HEAD指向对应的分支dev</span><br><span class="line">git branch -f master HEAD~3</span><br></pre></td></tr></table></figure>
+<h2 id="如何在几个提交记录间随意穿梭"><a href="#如何在几个提交记录间随意穿梭" class="headerlink" title="如何在几个提交记录间随意穿梭"></a>如何在几个提交记录间随意穿梭</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/// 查看logId</span><br><span class="line">git log --pretty=oneline</span><br><span class="line"></span><br><span class="line">// 选择logID来跳转</span><br><span class="line">git reset --hard &lt;logId&gt;</span><br></pre></td></tr></table></figure>
+
+<h1 id="用git快速debug"><a href="#用git快速debug" class="headerlink" title="用git快速debug"></a>用git快速debug</h1><ul>
+<li><code>git bisect start [终点] [起点]</code>: 开始检查某一段提交中的哪一次提交出了问题，每次都用二分法，看中间的这次提交有没有问题，一般：<code>git bisect start HEAD 4d83cf</code></li>
+<li><code>git bisect good</code>: 如果当前的提交是没问题的，那么就标记为good</li>
+<li><code>git bisect bad</code>: 如果当前的提交是有问题的，那么就标记为bad</li>
+<li><code>git bisect reset</code>: 推出差错过程，指针回到HEAD</li>
+</ul>
+<h1 id="cherry-pick-和-rebase-i"><a href="#cherry-pick-和-rebase-i" class="headerlink" title="cherry-pick 和 rebase -i"></a>cherry-pick 和 rebase -i</h1><h2 id="抽取想要的几个commit"><a href="#抽取想要的几个commit" class="headerlink" title="抽取想要的几个commit"></a>抽取想要的几个commit</h2><p><code>git cherry-pick &lt;logId[空格..]&gt;</code>: 选择某个分支，merge到本分支。</p>
+<h2 id="如何合并历史的几个commit到一个commit"><a href="#如何合并历史的几个commit到一个commit" class="headerlink" title="如何合并历史的几个commit到一个commit"></a>如何合并历史的几个commit到一个commit</h2><p>这里有个例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">192eb39de1fdbb56f1f2693c99611365855d58d0 (HEAD -&gt; master) xx</span><br><span class="line">f0819adfb5e1bed8bc2fa86d1ce3f6ee878c6f0c add `333`</span><br><span class="line">8f26c03c69a06928b6045087e0b01b6ac88a106a add `222`</span><br><span class="line">01579e444c53c20f1ef3bfa18a0832f1ae5b26cd add `111`</span><br><span class="line">436c7d3166d95bd1a0626ea660fec9c50714441d init abc.txt &amp; add `abc`</span><br></pre></td></tr></table></figure>
+<p>现在我想变成：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">352f0d9fe36c0e38938be8cb3a881f93f8158f18 (HEAD -&gt; master) add `111` -&gt; add `222` -&gt; add `333` -&gt; xx</span><br><span class="line">436c7d3166d95bd1a0626ea660fec9c50714441d init abc.txt &amp; add `abc`</span><br></pre></td></tr></table></figure>
+<ol>
+<li><code>git rebase -i HEAD~4</code>: 首先基于<code>HEAD~4</code>这个父commit，选择最顶端4个commit</li>
+<li>会弹出一个交互框，内部可以看到<code>pick</code>, <code>squash</code>等字样，我们会这样写： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pick commit_1 111</span><br><span class="line">squash commit_2 222</span><br><span class="line">squash commit_3 333</span><br><span class="line">squash commit_4 xx</span><br></pre></td></tr></table></figure>
+ 这里是想把前3个子commit合并到前面的第一个父commit中。</li>
+<li><code>git rebase --continue</code>: 填写一波description并生成一个新的commit，覆盖原来的4个子commit。</li>
+</ol>
+<h1 id="和远程仓库打交道"><a href="#和远程仓库打交道" class="headerlink" title="和远程仓库打交道"></a>和远程仓库打交道</h1><ol>
+<li>创建<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git remote add origin git@github.com:michaelliao/learngit.git</span><br></pre></td></tr></table></figure></li>
+<li>推送<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/// 第一次推送，-u 作用是将本地仓库与远程仓库origin 绑定</span><br><span class="line">$ git push -u origin master </span><br><span class="line"></span><br><span class="line">/// 以后的推送，则不需要再次绑定了</span><br><span class="line">$ git push origin master</span><br></pre></td></tr></table></figure></li>
+<li>查看远程库信息<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git remote  /// 远程库名</span><br><span class="line">$ git remote -v ///详细信息</span><br></pre></td></tr></table></figure></li>
+<li>查看远程分支<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git branch -a  ///查看所有分支（包括本地和远程仓库）</span><br><span class="line">$ git branch</span><br></pre></td></tr></table></figure></li>
+<li>删除远程分支<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git branch -r -d origin/develop    /// 删除远程分支develop</span><br><span class="line">$ git push origin :develop   ///删除远程的develop分支</span><br></pre></td></tr></table></figure>
+<h2 id="分支重命名"><a href="#分支重命名" class="headerlink" title="分支重命名"></a>分支重命名</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch [&lt;options&gt;] (-m | -M) [&lt;old-branch&gt;] &lt;new-branch&gt;</span><br></pre></td></tr></table></figure>
+例子：将<code>feature/canvas</code>重命名为：<code>feature/canvas2</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch -M feature/canvas feature/canvas2</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="让本地分支追溯到远程某个分支"><a href="#让本地分支追溯到远程某个分支" class="headerlink" title="让本地分支追溯到远程某个分支"></a>让本地分支追溯到远程某个分支</h2><hr>
+<p>如果发现，自己创建的本地分支pull不了，那么，可能是本地分支没有与远程分支建立关联，这时：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch --set-upstream-to=origin/&lt;branch&gt; develop</span><br></pre></td></tr></table></figure>
+<p>就可以建立连接，之后，就是各种push、pull和merge了！</p>
+<h2 id="Pull-不下来怎么办？"><a href="#Pull-不下来怎么办？" class="headerlink" title="Pull 不下来怎么办？"></a>Pull 不下来怎么办？</h2><hr>
+<ul>
+<li>如果发现是这种报错：<code>fatal: refusing to merge unrelated histories</code>【在新建Ionic项目的时候经常这样】，那么，用这条语句来pull: <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git pull origin master --allow-unrelated-histories</span><br></pre></td></tr></table></figure>
+<h2 id="git-clone-指定目录"><a href="#git-clone-指定目录" class="headerlink" title="git clone 指定目录"></a>git clone 指定目录</h2></li>
+</ul>
+<hr>
+<p>如果我们不想每次先cd到那个目录在进行clone操作，那么，这句命令很有用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone &lt;git url&gt; &quot;C:\a\b&quot;</span><br></pre></td></tr></table></figure>
+<p>其中：<code>a</code>表示指定目录，<code>b</code>表示你自定义的文件夹名，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;git clone https://github.com/androidjp/xxxxx.git &quot;D:\aaa\bbb&quot;</span><br></pre></td></tr></table></figure>
+<p>最终，会创建<code>aaa\bbb</code>目录和文件夹，然后在内部拉取所有代码。</p>
+<h1 id="stash"><a href="#stash" class="headerlink" title="stash"></a>stash</h1><h2 id="dev分支码到一半，发现master分支的版本有bug，要马上改"><a href="#dev分支码到一半，发现master分支的版本有bug，要马上改" class="headerlink" title="dev分支码到一半，发现master分支的版本有bug，要马上改"></a>dev分支码到一半，发现master分支的版本有bug，要马上改</h2><p><strong>思路：</strong>dev的修改先保存起来，然后切换到master分支，再打bug分支修复bug，修复成功并合并后，最终切回dev分支，并取回之前保存的dev分支的修改内容，继续码。<br><strong>步骤</strong>：</p>
+<ol>
+<li>暂存dev工作现场<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git stash</span><br></pre></td></tr></table></figure></li>
+<li>切回master, 打bug修复分支，修复并合并<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master</span><br><span class="line">$ git checkout -b bug-solve-101</span><br><span class="line">////修复bug中。。。。</span><br><span class="line">$ git checkout master</span><br><span class="line">$ git merge --no-ff -m &quot;bug 101修复成功&quot; bug-solve-101</span><br></pre></td></tr></table></figure></li>
+<li>最终，切回dev分支，并还原工作现场<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ git stash pop   /// 还原现场，并清除存储栈中的内容</span><br><span class="line">/// $ git stash list /// 查看存储栈中的工作现场列表</span><br><span class="line">/// $ git stash apply  ///只恢复，不删除栈</span><br><span class="line">/// $ git stash drop /// 删除栈存储区</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h1 id="Lag标签"><a href="#Lag标签" class="headerlink" title="Lag标签"></a>Lag标签</h1><ol>
+<li><code>git tag &lt;name&gt;</code>：新建一个标签，默认为HEAD，也可以指定一个commit id；</li>
+<li><code>git tag -a &lt;tagname&gt; -m &quot;blablabla...&quot;</code>：可以指定标签信息；</li>
+<li><code>git tag -s &lt;tagname&gt; -m &quot;blablabla...&quot;</code>：可以用PGP签名标签；</li>
+<li><code>git tag</code>：可以查看所有标签</li>
+<li><code>git push origin &lt;tagname&gt;</code>：可以推送一个本地标签；</li>
+<li><code>git push origin --tags</code>：可以推送全部未推送过的本地标签；</li>
+<li><code>git tag -d &lt;tagname&gt;</code>：可以删除一个本地标签；</li>
+<li><code>git push origin :refs/tags/&lt;tagname&gt;</code>：可以删除一个远程标签。</li>
+</ol>
+<h1 id="解决每次拉取、提交代码时都需要输入用户名和密码"><a href="#解决每次拉取、提交代码时都需要输入用户名和密码" class="headerlink" title="解决每次拉取、提交代码时都需要输入用户名和密码"></a>解决每次拉取、提交代码时都需要输入用户名和密码</h1><p>1.在~/.gitconfig目录下多出一个文件，用来记录你的密码和帐号</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --global credential.helper store</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>再最后输入一次正确的用户名和密码，就可以成功的记录下来</li>
+</ol>
+<h1 id="git-使用-push-提交到远程仓库出现-The-requested-URL-returned-error-403-错误"><a href="#git-使用-push-提交到远程仓库出现-The-requested-URL-returned-error-403-错误" class="headerlink" title="git 使用 push 提交到远程仓库出现 The requested URL returned error: 403 错误"></a>git 使用 push 提交到远程仓库出现 The requested URL returned error: 403 错误</h1><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>电脑已经注册过一个 github 帐号，一直在本机使用，配置过 SSH。</p>
+<p>新建另一个 github 帐号，本地建立好项目之后，使用命令：$ git push -u origin master 时出现以下错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">remote: Permission to userName/repositorieName.git denied to clxering.</span><br><span class="line">fatal: unable to access &apos;https://github.com/userName/repositorieName.git/&apos;: The requested URL returned error: 403</span><br></pre></td></tr></table></figure>
+
+<h2 id="问题原因"><a href="#问题原因" class="headerlink" title="问题原因"></a>问题原因</h2><p>问题主要出在原注册账号上，系统保存了账号的信息。在使用新帐号时，信息不一致，所以报错。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><ol>
+<li>打开cmd，输入命令：<code>rundll32.exe keymgr.dll,KRShowKeyMgr</code>，出现系统存储的用户名和密码窗口；</li>
+<li>将 github 相关的条目删除；</li>
+<li>重新执行命令：<code>$ git push -u origin master</code>，提示输入账户名及密码即可。</li>
+</ol>
+<h1 id="查看git信息存储位置"><a href="#查看git信息存储位置" class="headerlink" title="查看git信息存储位置"></a>查看git信息存储位置</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git help -a | grep credential</span><br></pre></td></tr></table></figure>
+<p>查看自己系统支持的crendential, cache 代表内存中的缓存，store 代表磁盘。</p>
+<h1 id="查看cache、store等git配置信息"><a href="#查看cache、store等git配置信息" class="headerlink" title="查看cache、store等git配置信息"></a>查看cache、store等git配置信息</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config credential.helper</span><br></pre></td></tr></table></figure>
+<p>命令可以看到 cache、store、osxkeychain(钥匙串)中是否还有git的配置信息</p>
+<h1 id="配置全局用户名和邮箱"><a href="#配置全局用户名和邮箱" class="headerlink" title="配置全局用户名和邮箱"></a>配置全局用户名和邮箱</h1><p>一般配置方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global (--replace-all) user.name &quot;你的用户名&quot;</span><br><span class="line">git config --global (--replace-all) user.email &quot;你的邮箱&quot;</span><br></pre></td></tr></table></figure>
+<p>如果上述步骤没有效果，我们就需要清除缓存(<code>.gitconfig</code>)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git config --local --unset credential.helper</span><br><span class="line">git config --global --unset credential.helper</span><br><span class="line">git config --system --unset credential.helper</span><br></pre></td></tr></table></figure>
+
+<h1 id="git-revert-一次-revert-多个-commit"><a href="#git-revert-一次-revert-多个-commit" class="headerlink" title="git revert 一次 revert 多个 commit"></a>git revert 一次 revert 多个 commit</h1><h2 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h2><p>假如git commit 链是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A -&gt; B -&gt; C -&gt; D</span><br></pre></td></tr></table></figure>
+<p>如果想把B，C，D都给revert，除了一个一个revert之外，还可以使用range revert</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git revert B^..D</span><br></pre></td></tr></table></figure>
+<p>这样就把B,C,D都给revert了，变成：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A-&gt; B -&gt;C -&gt; D -&gt; D&apos;-&gt; C&apos; -&gt; B&apos;</span><br></pre></td></tr></table></figure>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p><code>git revert OLDER_COMMIT^..NEWER_COMMIT</code></p>
+<p>如果我们想把这三个revert不自动生成三个新的commit，而是用一个commit完成，可以这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git revert -n OLDER_COMMIT^..NEWER_COMMIT</span><br><span class="line">git commit -m &quot;revert OLDER_COMMIT to NEWER_COMMIT&quot;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/git/" rel="tag"># git</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/MVP%E6%9E%B6%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/" rel="next" title="MVP架构的理解">
+                  <i class="fa fa-chevron-left"></i> MVP架构的理解
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/Markdown%20%E5%85%AC%E5%BC%8F%E4%B8%8E%E6%95%B0%E5%AD%A6%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="prev" title="Markdown 公式与数学表达式">
+                  Markdown 公式与数学表达式 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#克隆"><span class="nav-number">1.</span> <span class="nav-text">克隆</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#拉取与推送"><span class="nav-number">2.</span> <span class="nav-text">拉取与推送</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#fetch-和-pull-的区别"><span class="nav-number">2.1.</span> <span class="nav-text">fetch 和 pull 的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Commit-的简写"><span class="nav-number">3.</span> <span class="nav-text">Commit 的简写</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#区分-merge-和-rebase"><span class="nav-number">3.1.</span> <span class="nav-text">区分 merge 和 rebase</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拉取远程git项目的某个分支"><span class="nav-number">3.2.</span> <span class="nav-text">拉取远程git项目的某个分支</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#远程分支pull不了"><span class="nav-number">3.3.</span> <span class="nav-text">远程分支pull不了</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本地创建一个新分支并推送到远程，让远程也生成新分支"><span class="nav-number">3.4.</span> <span class="nav-text">本地创建一个新分支并推送到远程，让远程也生成新分支</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将本地project-push到自己的github-码云仓库中"><span class="nav-number">3.5.</span> <span class="nav-text">将本地project push到自己的github/码云仓库中</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#看Log"><span class="nav-number">4.</span> <span class="nav-text">看Log</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#回滚的艺术"><span class="nav-number">5.</span> <span class="nav-text">回滚的艺术</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#版本回滚和还原"><span class="nav-number">5.1.</span> <span class="nav-text">版本回滚和还原</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不小心写了句“老板真欠扁”，怎么办？"><span class="nav-number">5.2.</span> <span class="nav-text">不小心写了句“老板真欠扁”，怎么办？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#git-reset-详解"><span class="nav-number">5.3.</span> <span class="nav-text">git reset 详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#–keep例子"><span class="nav-number">5.3.1.</span> <span class="nav-text">–keep例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#–merge例子"><span class="nav-number">5.3.2.</span> <span class="nav-text">–merge例子</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#关于HEAD"><span class="nav-number">6.</span> <span class="nav-text">关于HEAD</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基础"><span class="nav-number">6.1.</span> <span class="nav-text">基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-看-HEAD-指向"><span class="nav-number">6.1.1.</span> <span class="nav-text">1. 看 HEAD 指向</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-让-HEAD-指向某个指定的commit，而不是某个分支"><span class="nav-number">6.1.2.</span> <span class="nav-text">2. 让 HEAD 指向某个指定的commit，而不是某个分支</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#让master分支强行指向dev分支的第3个的commit"><span class="nav-number">6.2.</span> <span class="nav-text">让master分支强行指向dev分支的第3个的commit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何在几个提交记录间随意穿梭"><span class="nav-number">6.3.</span> <span class="nav-text">如何在几个提交记录间随意穿梭</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#用git快速debug"><span class="nav-number">7.</span> <span class="nav-text">用git快速debug</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#cherry-pick-和-rebase-i"><span class="nav-number">8.</span> <span class="nav-text">cherry-pick 和 rebase -i</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#抽取想要的几个commit"><span class="nav-number">8.1.</span> <span class="nav-text">抽取想要的几个commit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何合并历史的几个commit到一个commit"><span class="nav-number">8.2.</span> <span class="nav-text">如何合并历史的几个commit到一个commit</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#和远程仓库打交道"><span class="nav-number">9.</span> <span class="nav-text">和远程仓库打交道</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#分支重命名"><span class="nav-number">9.1.</span> <span class="nav-text">分支重命名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#让本地分支追溯到远程某个分支"><span class="nav-number">9.2.</span> <span class="nav-text">让本地分支追溯到远程某个分支</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pull-不下来怎么办？"><span class="nav-number">9.3.</span> <span class="nav-text">Pull 不下来怎么办？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#git-clone-指定目录"><span class="nav-number">9.4.</span> <span class="nav-text">git clone 指定目录</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#stash"><span class="nav-number">10.</span> <span class="nav-text">stash</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#dev分支码到一半，发现master分支的版本有bug，要马上改"><span class="nav-number">10.1.</span> <span class="nav-text">dev分支码到一半，发现master分支的版本有bug，要马上改</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lag标签"><span class="nav-number">11.</span> <span class="nav-text">Lag标签</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解决每次拉取、提交代码时都需要输入用户名和密码"><span class="nav-number">12.</span> <span class="nav-text">解决每次拉取、提交代码时都需要输入用户名和密码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#git-使用-push-提交到远程仓库出现-The-requested-URL-returned-error-403-错误"><span class="nav-number">13.</span> <span class="nav-text">git 使用 push 提交到远程仓库出现 The requested URL returned error: 403 错误</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">13.1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题原因"><span class="nav-number">13.2.</span> <span class="nav-text">问题原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">13.3.</span> <span class="nav-text">解决方案</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查看git信息存储位置"><span class="nav-number">14.</span> <span class="nav-text">查看git信息存储位置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查看cache、store等git配置信息"><span class="nav-number">15.</span> <span class="nav-text">查看cache、store等git配置信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置全局用户名和邮箱"><span class="nav-number">16.</span> <span class="nav-text">配置全局用户名和邮箱</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#git-revert-一次-revert-多个-commit"><span class="nav-number">17.</span> <span class="nav-text">git revert 一次 revert 多个 commit</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#场景"><span class="nav-number">17.1.</span> <span class="nav-text">场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用法"><span class="nav-number">17.2.</span> <span class="nav-text">用法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

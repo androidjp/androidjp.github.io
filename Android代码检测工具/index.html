@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="引言：努力提高代码质量是每一个开发人员必须具备的素质和自我要求。但是靠自己总会不小心遗漏一些细节，所以引入代码检测工具，应用到软件工程中，以此帮助大家养成良好的编程习惯，提升技能。  接下来，和大家一起分析Android相关的代码检测工具的用法。">
+<meta name="keywords" content="Android,代码检测">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android代码检测工具">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Android%E4%BB%A3%E7%A0%81%E6%A3%80%E6%B5%8B%E5%B7%A5%E5%85%B7&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="引言：努力提高代码质量是每一个开发人员必须具备的素质和自我要求。但是靠自己总会不小心遗漏一些细节，所以引入代码检测工具，应用到软件工程中，以此帮助大家养成良好的编程习惯，提升技能。  接下来，和大家一起分析Android相关的代码检测工具的用法。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http:&#x2F;&#x2F;i1.piimg.com&#x2F;567571&#x2F;9b310e60b1722877.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;i1.piimg.com&#x2F;567571&#x2F;be225c0df57aacc2.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;i4.piimg.com&#x2F;567571&#x2F;4d7c24e4ceabc6e9.png">
+<meta property="og:image" content="http:&#x2F;&#x2F;i1.piimg.com&#x2F;567571&#x2F;2bf16b96058d09a4.png">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.254Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;i1.piimg.com&#x2F;567571&#x2F;9b310e60b1722877.png">
+
+<link rel="canonical" href="http://jpuneng.cn/Android%E4%BB%A3%E7%A0%81%E6%A3%80%E6%B5%8B%E5%B7%A5%E5%85%B7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Android代码检测工具 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Android%E4%BB%A3%E7%A0%81%E6%A3%80%E6%B5%8B%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android代码检测工具
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-06-28 15:05:00" itemprop="dateCreated datePublished" datetime="2016-06-28T15:05:00+08:00">2016-06-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/%E4%BB%A3%E7%A0%81%E6%A3%80%E6%B5%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">代码检测</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>引言：努力提高代码质量是每一个开发人员必须具备的素质和自我要求。<br>但是靠自己总会不小心遗漏一些细节，所以引入代码检测工具，应用到软件工程中，以此帮助大家养成良好的编程习惯，提升技能。<br>  接下来，和大家一起分析Android相关的代码检测工具的用法。</p>
+</blockquote>
+<a id="more"></a>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>IDE：Android Studio</em><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>操作系统：Ubuntu</em></p>
+<h3 id="代码检测工具分类"><a href="#代码检测工具分类" class="headerlink" title="代码检测工具分类"></a>代码检测工具分类</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;目前常用的Java代码检测工具有：AndroidLint、CheckStyle、FindBugs、PDM</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其中，AndroidLint 已经作为插件被集成到Android Studio中；CheckStyle 可以作为插件安装使用；FindBugs 和 PDM 对Android Studio的支持较差，没有可用的插件或插件存在一些问题，但可以利用Gradle生成代码检测报告。</p>
+<h3 id="代码检测工具的工作方式、功能"><a href="#代码检测工具的工作方式、功能" class="headerlink" title="代码检测工具的工作方式、功能"></a>代码检测工具的工作方式、功能</h3><h5 id="一、什么是静态代码分析"><a href="#一、什么是静态代码分析" class="headerlink" title="一、什么是静态代码分析"></a>一、什么是静态代码分析</h5><p>静态代码分析是指无需运行被测代码，仅通过分析或检查源程序的语法、结构、过程、接口等来检查程序的正确性，找出代码隐藏的错误和缺陷，如参数不匹配，有歧义的嵌套语句，错误的递归，非法计算，可能出现的空指针引用等等。
+在软件开发过程中，静态代码分析往往先于动态测试之前进行，同时也可以作为制定动态测试用例的参考。统计证明，在整个软件开发生命周期中，30% 至 70% 的代码逻辑设计和编码缺陷是可以通过静态代码分析来发现和修复的。
+但是，由于静态代码分析往往要求大量的时间消耗和相关知识的积累，因此对于软件开发团队来说，使用静态代码分析工具自动化执行代码检查和分析，能够极大地提高软件可靠性并节省软件开发和测试成本。</p>
+
+<h5 id="二、静态代码分析工具的优势"><a href="#二、静态代码分析工具的优势" class="headerlink" title="二、静态代码分析工具的优势"></a>二、静态代码分析工具的优势</h5><ol>
+<li>帮助程序开发人员自动执行静态代码分析，快速定位代码隐藏错误和缺陷。</li>
+<li>帮助代码设计人员更专注于分析和解决代码设计缺陷。</li>
+<li>显著减少在代码逐行检查上花费的时间，提高软件可靠性并节省软件开发和测试成本。</li>
+</ol>
+<h5 id="三、Java-静态代码分析理论基础和主要技术"><a href="#三、Java-静态代码分析理论基础和主要技术" class="headerlink" title="三、Java 静态代码分析理论基础和主要技术"></a>三、Java 静态代码分析理论基础和主要技术</h5><ul>
+<li><p>缺陷模式匹配：缺陷模式匹配事先从代码分析经验中收集足够多的共性缺陷模式，将待分析代码与已有的共性缺陷模式进行模式匹配，从而完成软件的安全分析。这种方式的优点是简单方便，但是要求内置足够多缺陷模式，且容易产生误报。</p>
+</li>
+<li><p>类型推断：类型推断技术是指通过对代码中运算对象类型进行推理，从而保证代码中每条语句都针对正确的类型执行。这种技术首先将预定义一套类型机制，包括类 型等价、类型包含等推理规则，而后基于这一规则进行推理计算。类型推断可以检查代码中的类型错误，简单，高效，适合代码缺陷的快速检测。</p>
+</li>
+<li><p>模型检查：模型检验建立于有限状态自动机的概念基础之上，这一理论将被分析代码抽象为一个自动机系统，并且假设该系统是有限状态的、或者是可以通过抽象归 结为有限状态。模型检验过程中，首先将被分析代码中的每条语句产生的影响抽象为一个有限状态自动机的一个状态，而后通过分析有限状态机从而达到代码分析的 目的。模型检验主要适合检验程序并发等时序特性，但是对于数据值域数据类型等方面作用较弱。</p>
+</li>
+<li><p>数据流分析：数据流分析也是一种软件验证技术，这种技术通过收集代码中引用到的变量信息，从而分析变量在程序中的赋值、引用以及传递等情况。对数据流进行 分析可以确定变量的定义以及在代码中被引用的情况，同时还能够检查代码数据流异常，如引用在前赋值在后、只赋值无引用等。数据流分析主要适合检验程序中的 数据域特性。</p>
+</li>
+</ul>
+<h3 id="四种工具简介-及其-特点"><a href="#四种工具简介-及其-特点" class="headerlink" title="四种工具简介 及其 特点"></a>四种工具简介 及其 特点</h3><h4 id="AndroidLint"><a href="#AndroidLint" class="headerlink" title="AndroidLint"></a>AndroidLint</h4><h6 id="nbsp-nbsp-1-简介"><a href="#nbsp-nbsp-1-简介" class="headerlink" title="&nbsp;&nbsp;1.简介"></a>&nbsp;&nbsp;1.简介</h6><p>
+&nbsp;&nbsp;&nbsp;&nbsp;“Android lint工具是一个静态代码分析工具，它能检查安卓项目源文件的潜在缺陷和优化改进的正确性，安全性，性能，可用性，可访问性和国际化。”
+正如官方网站所说，Android Lint是另一种静态分析工具，专门为Android服务。它是非常强大的，能给你大量的建议以提高你的代码质量。
+</p>
+
+<h6 id="nbsp-nbsp-2-使用方法"><a href="#nbsp-nbsp-2-使用方法" class="headerlink" title="&nbsp;&nbsp;2.使用方法"></a>&nbsp;&nbsp;2.使用方法</h6><div>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;点击Android studio工具栏 ——>Analyze ——>Inspect Code</p>
+![](http://i2.piimg.com/567571/85bea3be27ae47b3.png)
+<p>&nbsp;&nbsp;&nbsp;&nbsp;选择分析的文件范围</p>
+![](http://i4.piimg.com/567571/c5cebf5f8a3f34e4.png)
+<p>&nbsp;&nbsp;&nbsp;&nbsp;点击OK, 顶部会出现分析报告</p>
+![](http://i2.piimg.com/567571/ec998783ca446c66.png)
+</div>
+
+<hr>
+<h4 id="CheckStyle"><a href="#CheckStyle" class="headerlink" title="CheckStyle"></a>CheckStyle</h4><h6 id="nbsp-nbsp-1-简介-1"><a href="#nbsp-nbsp-1-简介-1" class="headerlink" title="&nbsp;&nbsp;1.简介"></a>&nbsp;&nbsp;1.简介</h6><p>
+&nbsp;&nbsp;&nbsp;&nbsp;“Checkstyle是一个开发工具用来帮助程序员编写符合代码规范的Java代码。它能自动检查Java代码为空闲的人进行这项无聊(但重要)的任务。”
+正如Checkstyle的开发者所言，这个工具能够帮助你在项目中定义和维持一个非常精确和灵活的代码规范形式。当你启动CheckStyle，它会根据所提供的配置文件分析你的Java代码并告诉你发现的所有错误。
+Checkstyle会发现大量的问题，特别是在你运用了大量的规则配置，如同你设置了一个非常精确的语法。尽管我通过Gradle使用checkstyle，例如在我进行推送之前，我仍然推荐你为IntellJ/Android Studio使用checkstyle插件(你可以通过Android Studio的工作面板文件/设置/插件直接安装插件)。这种方式下，你可以根据那些为Gradle配置的相同文件在你的工程中使用checkstyle，但是远不止这些，你可以直接在Android Studio中获取带有超链接结果，这些结果通过超链接在你的代码中对应，这是非常有用的(Gradle的这种方式仍然很重要的，因为你可以使用它自动构建系统，如Jenkins)。
+</p>
+
+<h6 id="nbsp-nbsp-2-使用方法-1"><a href="#nbsp-nbsp-2-使用方法-1" class="headerlink" title="&nbsp;&nbsp;2.使用方法"></a>&nbsp;&nbsp;2.使用方法</h6><p>1) 首先进入设置页面进入Plugin页面，如图所示<br/><br><img src="http://i1.piimg.com/567571/9b310e60b1722877.png" alt="图一"></p>
+<p>2) 点击Browse repositories进入选择页面，输入checkstyle即可选择安装，如图所示<br/><br><img src="http://i1.piimg.com/567571/be225c0df57aacc2.png" alt=""></p>
+<p>3) 安装完成后点击Other Settings中的checkstyle进入选择文件页面，点击右上方的“+”选择你自己的checkstyle文件并应用即可。<br/><br><img src="http://i4.piimg.com/567571/4d7c24e4ceabc6e9.png" alt=""></p>
+<div>
+&nbsp;&nbsp;&nbsp;&nbsp;这里可以选择本地的checkstyle配置文件，也可以选择SVN等远程的配置文件
+![](http://i4.piimg.com/567571/d43084f5d5da26b1.png)
+</div>
+
+<div>
+&nbsp;&nbsp;&nbsp;&nbsp;安装完成后点击你自己写的java文件，再点击左边绿色箭头,点击“运行”，插件会根据你的checkstyle文件指明你代码的一些不规范的地方，如下图所示
+![](http://i4.piimg.com/567571/e6cf59c8f4668370.png)
+<p>&nbsp;&nbsp;&nbsp;&nbsp;按照提示修改代码即可</p>
+</div>
+
+<blockquote>
+<p>注意：如果找不到或者install失败的情况下，可以去 此网站等下载 CheckStyle的zip包到本地，然后让Android Studio 的 “install plugin from disk”获取本地插件<br/><img src="http://i1.piimg.com/567571/2bf16b96058d09a4.png" alt=""></p>
+</blockquote>
+<hr>
+<h4 id="FindBugs"><a href="#FindBugs" class="headerlink" title="FindBugs"></a>FindBugs</h4><h6 id="nbsp-nbsp-1-简介-2"><a href="#nbsp-nbsp-1-简介-2" class="headerlink" title="&nbsp;&nbsp;1.简介"></a>&nbsp;&nbsp;1.简介</h6><p>
+&nbsp;&nbsp;&nbsp;&nbsp;Findbugs是否需要一个简介呢？我想它的名称已经让人顾名思义了。“FindBugs使用静态分析方法为出现bug模式检查Java字节码”。FindBugs基本上只需要一个程序来做分析的字节码，所以这是非常容易使用。它能检测到常见的错误，如错误的布尔运算符。FindBugs也能够检测到由于误解语言特点的错误，如Java参数调整（这不是真的有可能因为它的参数是传值）。
+</p>
+
+<h6 id="nbsp-nbsp-2-使用方法-2"><a href="#nbsp-nbsp-2-使用方法-2" class="headerlink" title="&nbsp;&nbsp;2.使用方法"></a>&nbsp;&nbsp;2.使用方法</h6><p>
+&nbsp;&nbsp;&nbsp;&nbsp;详见下面的Gradle生成代码检测报告
+</p>
+
+<hr>
+<h4 id="PDM"><a href="#PDM" class="headerlink" title="PDM"></a>PDM</h4><h6 id="nbsp-nbsp-1-简介-3"><a href="#nbsp-nbsp-1-简介-3" class="headerlink" title="&nbsp;&nbsp;1.简介"></a>&nbsp;&nbsp;1.简介</h6><p>
+&nbsp;&nbsp;&nbsp;&nbsp;这个工具有个有趣的事实：PMD不存在一个准确的名称。(所以)在官网上你可以发现很有有趣的名称，例如:
+* Pretty Much Done
+* Project Meets Deadline
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;事实上，PMD是一个工作有点类似Findbugs的强大工具，但是(PMD)直接检查源代码而不是检查字节码(顺便说句，PMD适用很多语言)。 (PMD和Findbugs)的核心目标是相同的，通过静态分析方法找出哪些模式引起的bug。因此为什么同时使用Findbugs和PMD呢？好吧！尽管Findbugs和PMD拥有相同的目标，(但是)他们的检查方法是不同的。所以PMD有时检查出的bug但是Findbugs却检查不出来，反之亦然。</p>
+</p>
+
+<h6 id="nbsp-nbsp-2-使用方法-3"><a href="#nbsp-nbsp-2-使用方法-3" class="headerlink" title="&nbsp;&nbsp;2.使用方法"></a>&nbsp;&nbsp;2.使用方法</h6><p>
+&nbsp;&nbsp;&nbsp;&nbsp;详见下面的Gradle生成代码检测报告
+</p>
+
+<hr>
+<h4 id="Gradle-命令生成代码检测报告"><a href="#Gradle-命令生成代码检测报告" class="headerlink" title="Gradle 命令生成代码检测报告"></a>Gradle 命令生成代码检测报告</h4><blockquote>
+<p>相关Github示例 ：<strong>我强烈建议你拷贝下这个<a href="https://github.com/vincentbrison/vb-android-app-quality" target="_blank" rel="noopener">项目工程</a></strong>，尽管我将介绍的案例都是来自它。与此同时，你将能够测试下自己对这些工具的了解情况。</p>
+</blockquote>
+<h5 id="nbsp-nbsp-1-关于Gradle任务"><a href="#nbsp-nbsp-1-关于Gradle任务" class="headerlink" title="&nbsp;&nbsp;1.关于Gradle任务"></a>&nbsp;&nbsp;1.关于Gradle任务</h5><p>Gradle任务的概念(在Gradle中的含义)是理解该篇文章(以及如何以一种通用的方式写Gradle脚本)的基础。<strong>我强烈建议你去看下这两篇关于Gradle任务的文档（<a href="https://docs.gradle.org/current/userguide/tutorial_using_tasks.html" target="_blank" rel="noopener">Gradle文档第14章</a>和<a href="https://docs.gradle.org/current/userguide/writing_build_scripts.html" target="_blank" rel="noopener">Gradle文档第17章</a>）。这个文档包含了大量的例子，因此它非常容易开始学习。如果不想看英文原版，这里我推荐极客学院wiki更新的<a href="http://wiki.jikexueyuan.com/project/gradleIn-action/install-gradle.html" target="_blank" rel="noopener">Gradle中文指南</a></strong>现在，我假定你拷贝了我的Repo，你导入这个工程到你的Android Studio，并且你熟悉Gradle任务。如果不是，别担心，我将尽我最大的努力让我的讲解更有意义。</p>
+<h5 id="nbsp-nbsp-2-示例各个检测工具的Gradle任务结构"><a href="#nbsp-nbsp-2-示例各个检测工具的Gradle任务结构" class="headerlink" title="&nbsp;&nbsp;2.示例各个检测工具的Gradle任务结构"></a>&nbsp;&nbsp;2.示例各个检测工具的Gradle任务结构</h5><p>
+&nbsp;&nbsp;&nbsp;&nbsp;在上面的示例项目中，这几个检测工具的Gradle形式如图所示：
+![](http://i4.piimg.com/567571/2c9c9f4ab702e286.png)
+&nbsp;&nbsp;&nbsp;&nbsp;这里的config文件完全与Android项目解耦，如果你的项目要用到Gradle进行项目的代码检测并生成错误报告，直接复制此文件夹到你的项目根目录下即可
+</p>
+
+<h5 id="nbsp-nbsp-3-生成文档流程"><a href="#nbsp-nbsp-3-生成文档流程" class="headerlink" title="&nbsp;&nbsp;3.生成文档流程"></a>&nbsp;&nbsp;3.生成文档流程</h5><p>
+&emsp;显然，如果我们能同时使用这四个工具会更好。你可以添加你的gradle任务之间的依赖，比如当你执行一个任务，其他任务则是第一个完成后执行。通常在Gradle中，通过让工具具有“check”任务来达到工具之间的相互关系：
+check.dependsOn 'checkstyle', 'findbugs', 'pmd', 'lint'
+<br/>
+&emsp;现在，当执行“check” 任务的时候，Checkstyle, Findbugs, PMD, and Android Lint将会同时执行。在你执行/ commiting / pushing / ask merge request 之前进行质量检查是一个很棒的方式。
+</p>
+
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;1)首先，将示例项目中的这个config文件夹拷贝到你的项目根目录（或者可以参考它的写法，自己定制一个Gradle任务集）</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;2）打开终端，命令行执行Gradle任务：
+`gradle check`
+![](http://i4.piimg.com/567571/e1565a327d606735.png)
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;3）任务执行完后，就可以在指定的输出目录下找到文档：（示例是输出在<your_buildPath>/reports目录下）
+![](http://i4.piimg.com/567571/f275090129e02125.png)
+</p>
+
+
+<h5 id="nbsp-nbsp-4-各个工具的具体Gradle表现形式以及使用技巧"><a href="#nbsp-nbsp-4-各个工具的具体Gradle表现形式以及使用技巧" class="headerlink" title="&nbsp;&nbsp;4.各个工具的具体Gradle表现形式以及使用技巧"></a>&nbsp;&nbsp;4.各个工具的具体Gradle表现形式以及使用技巧</h5><h6 id="nbsp-nbsp-nbsp-nbsp-CheckStyle"><a href="#nbsp-nbsp-nbsp-nbsp-CheckStyle" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp; CheckStyle"></a>&nbsp;&nbsp;&nbsp;&nbsp; CheckStyle</h6><p>&nbsp;&nbsp;&nbsp;&nbsp;1) Gradle任务形式<br><br/><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;下面的代码向你展示了在你的项目中使用Checkstyle的最基本的配置(如Gradle任务):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">task checkstyle(type: Checkstyle) &#123;</span><br><span class="line">  configFile file(&quot;$&#123;project.rootDir&#125;/config/quality/checkstyle/checkstyle.xml&quot;)</span><br><span class="line">  configProperties.checkstyleSuppressionsPath = file(&quot;$&#123;project.rootDir&#125;/config/quality/checkstyle/suppressions.xml&quot;).absolutePath</span><br><span class="line">  source &apos;src&apos;</span><br><span class="line">  include &apos;**/*.java&apos;</span><br><span class="line">  exclude &apos;**/gen/**&apos;</span><br><span class="line">  classpath = files()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;2) CheckStyle使用技巧</p>
+<p>
+&emsp;&emsp;Checkstyle会发现大量的问题，特别是在你运用了大量的规则配置，如同你设置了一个非常精确的语法。尽管我通过Gradle使用 checkstyle，例如在我进行推送之前，我仍然推荐你为IntellJ/Android Studio使用checkstyle插件(你可以通过Android Studio的工作面板文件/设置/插件直接安装插件)。这种方式下，你可以根据那些为Gradle配置的相同文件在你的工程中使用 checkstyle，但是远不止这些，你可以直接在Android Studio中获取带有超链接结果，这些结果通过超链接在你的代码中对应，这是非常有用的(Gradle的这种方式仍然很重要的，因为你可以使用它自动构建系统，如Jenkins)。
+</p>
+
+
+
+<h6 id="nbsp-nbsp-nbsp-nbsp-FindBugs"><a href="#nbsp-nbsp-nbsp-nbsp-FindBugs" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp; FindBugs"></a>&nbsp;&nbsp;&nbsp;&nbsp; FindBugs</h6><p>&nbsp;&nbsp;&nbsp;&nbsp;1) Gradle任务形式<br><br/><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;下面的代码向你展示了在你的项目中使用Findbugs的最基本的配置(以Gradle任务为例):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">task findbugs(type: FindBugs, dependsOn: assembleDebug) &#123;</span><br><span class="line">    ignoreFailures = false</span><br><span class="line">    effort = &quot;max&quot;</span><br><span class="line">    reportLevel = &quot;high&quot;</span><br><span class="line">    excludeFilter = new File(&quot;$&#123;project.rootDir&#125;/config/quality/findbugs/findbugs-filter.xml&quot;)</span><br><span class="line">    classes = files(&quot;$&#123;project.rootDir&#125;/app/build/intermediates/classes&quot;)</span><br><span class="line">    source &apos;src&apos;</span><br><span class="line">    include &apos;**/*.java&apos;</span><br><span class="line">    exclude &apos;**/gen/**&apos;</span><br><span class="line">    reports &#123;</span><br><span class="line">        xml.enabled = false</span><br><span class="line">        html.enabled = true</span><br><span class="line">        xml &#123;</span><br><span class="line">            destination &quot;$project.buildDir/reports/findbugs/findbugs.xml&quot;</span><br><span class="line">        &#125;</span><br><span class="line">        html &#123;</span><br><span class="line">            destination &quot;$project.buildDir/reports/findbugs/findbugs.html&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    classpath = files()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;&emsp;&emsp;它是如此的像一个Checkstyle任务。尽管Findbugs支持HTML和XML两种报告形式，我选择HTML形式，因为这种形式更具有可读性。而且，你只需要把报告的位置设置为书签就可以快速访问它的位置。这个任务也会失败如果发现Findbgus错误失败(同样生成报告)。执行 FindBugs任务，就像执行CheckStyle任务（除了任务的名称是“FindBugs”）。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;2) FindBugs使用技巧</p>
+<p>
+&emsp;&emsp;由于Android项目是从Java项目略有不同，我强烈推荐使用FindBugs过滤器(规则配置)。你可以在这一个例子（例如项目之一）。它基本上忽略了R文件和你的Manifest文件。顺便说一句，由于(使用)FindBugs分析你的代码，你至少需要编译一次你的代码才能够测试它。
+</p>
+
+<h6 id="nbsp-nbsp-nbsp-nbsp-PMD"><a href="#nbsp-nbsp-nbsp-nbsp-PMD" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp; PMD"></a>&nbsp;&nbsp;&nbsp;&nbsp; PMD</h6><p>&nbsp;&nbsp;&nbsp;&nbsp;1) Gradle任务形式<br><br/><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;下面的代码向你展示了在你的项目中使用PMD的最基本的配置(以Gradle任务为例):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">task pmd(type: Pmd) &#123;</span><br><span class="line">    ignoreFailures = false</span><br><span class="line">    ruleSetFiles = files(&quot;$&#123;project.rootDir&#125;/config/quality/pmd/pmd-ruleset.xml&quot;)</span><br><span class="line">    ruleSets = []</span><br><span class="line">    source &apos;src&apos;</span><br><span class="line">    include &apos;**/*.java&apos;</span><br><span class="line">    exclude &apos;**/gen/**&apos;</span><br><span class="line">    reports &#123;</span><br><span class="line">        xml.enabled = false</span><br><span class="line">        html.enabled = true</span><br><span class="line">        xml &#123;</span><br><span class="line">            destination &quot;$project.buildDir/reports/pmd/pmd.xml&quot;</span><br><span class="line">        &#125;</span><br><span class="line">        html &#123;</span><br><span class="line">            destination &quot;$project.buildDir/reports/pmd/pmd.html&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>&emsp;&emsp;&emsp;&emsp;就PMD来说，它几乎与Findbugs相同。PMD支持HTML和XML两种报告形式，所以我再次选择HTML形式。我强烈建议你使用自己的通用配置集文件，正如同我在这个例子(check this file)中一样。所以，你当然应该去看下这些通用配置集文件。我建议你，因为PMD可比FindBugs更有争议的很多，例如：如果你不声明”if statement”或”if statement”为空，它基本上会给你警告信息。如果这些规则是正确的，或这对于您的项目(来说是正确的)，我真的认可你和你队友的工作。我不希望程序因为”if statement”崩溃，我认为这样程序的可读性很差。执行PMD任务，就像是(执行)CheckStyle任务（除了任务的名称是“PMD”）。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;2) FindBugs使用技巧</p>
+<p>
+&emsp;&emsp;我建议你不要使用默认的规则配置集，你需要添加这行代码(已经加上)：
+ruleSets = [ ]
+<br/>
+否则，因为默认值是这些基本的规则配置集，基本的规则配置集会和你定义的规则集一起执行。所以，如果你的自定义规则集不在那些基本配置集中，他们仍然会执行。
+</p>
+
+<h5 id="nbsp-nbsp-5-Gradle任务执行方式检测的总结"><a href="#nbsp-nbsp-5-Gradle任务执行方式检测的总结" class="headerlink" title="&nbsp;&nbsp;5.Gradle任务执行方式检测的总结"></a>&nbsp;&nbsp;5.Gradle任务执行方式检测的总结</h5><p>
+&emsp;配置好后，利用Gradle对Android使用代码质量检查工具是非常容易。比使用质量工具局部检查您的项目在您自己的计算机上，这些工具可以用于自动构建如Jenkins/Hudson这样的平台，让你自动进行质量检查，同时自动建立过程。执行所有我从CLI展现的测试，如同在 Jenkins/Hudson上执行，简单地执行：
+gradle check
+</p>
+
+<hr>
+<h4 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h4><p><a href="http://www.oschina.net/question/129540_23043?fromerr=C4u4jrna" target="_blank" rel="noopener">常用 Java 静态代码分析工具的分析与比较</a><br/><br><a href="http://www.devtf.cn/?p=790" target="_blank" rel="noopener">如何提高你的代码质量</a><br/><br><a href="http://blog.csdn.net/maritimesun/article/details/7668966" target="_blank" rel="noopener">Checkstyle的检查项配置详解</a><br/><br><a href="http://gudong.name/2016/04/07/checkstyle.html" target="_blank" rel="noopener">使用 CheckStyle 检查代码</a><br/><br>优秀的开源项目的checkstyle配置文件：<br/><br><a href="https://gist.github.com/yoxin/d55c5d178290ed44763123a796de7ce6" target="_blank" rel="noopener">https://gist.github.com/yoxin/d55c5d178290ed44763123a796de7ce6</a><br/><br><a href="https://github.com/JakeWharton/butterknife/blob/master/checkstyle.xml" target="_blank" rel="noopener">https://github.com/JakeWharton/butterknife/blob/master/checkstyle.xml</a><br/><br><a href="https://github.com/square/picasso/blob/master/checkstyle.xml" target="_blank" rel="noopener">https://github.com/square/picasso/blob/master/checkstyle.xml</a><br/><br>使用Gralde集成错误报告的github地址：<br/><br><a href="https://github.com/vincentbrison/vb-android-app-quality" target="_blank" rel="noopener">https://github.com/vincentbrison/vb-android-app-quality</a></p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E4%BB%A3%E7%A0%81%E6%A3%80%E6%B5%8B/" rel="tag"># 代码检测</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/Ubuntu%E6%90%AD%E5%BB%BAHexo%E7%8E%AF%E5%A2%83%E7%AE%80%E6%98%93%E6%AD%A5%E9%AA%A4%EF%BC%88%E5%AE%9E%E6%B5%8B%EF%BC%89/" rel="next" title="Ubuntu搭建Hexo环境简易步骤（实测）">
+                  <i class="fa fa-chevron-left"></i> Ubuntu搭建Hexo环境简易步骤（实测）
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/Android%E7%B3%BB%E7%BB%9F%E7%9A%84-apk%E6%96%87%E4%BB%B6%E5%92%8C-dex%E6%96%87%E4%BB%B6/" rel="prev" title="Android系统的.apk文件和.dex文件">
+                  Android系统的.apk文件和.dex文件 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#代码检测工具分类"><span class="nav-number">1.</span> <span class="nav-text">代码检测工具分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码检测工具的工作方式、功能"><span class="nav-number">2.</span> <span class="nav-text">代码检测工具的工作方式、功能</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一、什么是静态代码分析"><span class="nav-number">2.0.1.</span> <span class="nav-text">一、什么是静态代码分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#二、静态代码分析工具的优势"><span class="nav-number">2.0.2.</span> <span class="nav-text">二、静态代码分析工具的优势</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#三、Java-静态代码分析理论基础和主要技术"><span class="nav-number">2.0.3.</span> <span class="nav-text">三、Java 静态代码分析理论基础和主要技术</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四种工具简介-及其-特点"><span class="nav-number">3.</span> <span class="nav-text">四种工具简介 及其 特点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AndroidLint"><span class="nav-number">3.1.</span> <span class="nav-text">AndroidLint</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-1-简介"><span class="nav-number">3.1.0.1.</span> <span class="nav-text">  1.简介</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-2-使用方法"><span class="nav-number">3.1.0.2.</span> <span class="nav-text">  2.使用方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CheckStyle"><span class="nav-number">3.2.</span> <span class="nav-text">CheckStyle</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-1-简介-1"><span class="nav-number">3.2.0.1.</span> <span class="nav-text">  1.简介</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-2-使用方法-1"><span class="nav-number">3.2.0.2.</span> <span class="nav-text">  2.使用方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FindBugs"><span class="nav-number">3.3.</span> <span class="nav-text">FindBugs</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-1-简介-2"><span class="nav-number">3.3.0.1.</span> <span class="nav-text">  1.简介</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-2-使用方法-2"><span class="nav-number">3.3.0.2.</span> <span class="nav-text">  2.使用方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PDM"><span class="nav-number">3.4.</span> <span class="nav-text">PDM</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-1-简介-3"><span class="nav-number">3.4.0.1.</span> <span class="nav-text">  1.简介</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-2-使用方法-3"><span class="nav-number">3.4.0.2.</span> <span class="nav-text">  2.使用方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gradle-命令生成代码检测报告"><span class="nav-number">3.5.</span> <span class="nav-text">Gradle 命令生成代码检测报告</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#nbsp-nbsp-1-关于Gradle任务"><span class="nav-number">3.5.1.</span> <span class="nav-text">  1.关于Gradle任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nbsp-nbsp-2-示例各个检测工具的Gradle任务结构"><span class="nav-number">3.5.2.</span> <span class="nav-text">  2.示例各个检测工具的Gradle任务结构</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nbsp-nbsp-3-生成文档流程"><span class="nav-number">3.5.3.</span> <span class="nav-text">  3.生成文档流程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nbsp-nbsp-4-各个工具的具体Gradle表现形式以及使用技巧"><span class="nav-number">3.5.4.</span> <span class="nav-text">  4.各个工具的具体Gradle表现形式以及使用技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-CheckStyle"><span class="nav-number">3.5.4.1.</span> <span class="nav-text">     CheckStyle</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-FindBugs"><span class="nav-number">3.5.4.2.</span> <span class="nav-text">     FindBugs</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-PMD"><span class="nav-number">3.5.4.3.</span> <span class="nav-text">     PMD</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nbsp-nbsp-5-Gradle任务执行方式检测的总结"><span class="nav-number">3.5.5.</span> <span class="nav-text">  5.Gradle任务执行方式检测的总结</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参考文章"><span class="nav-number">3.6.</span> <span class="nav-text">参考文章</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

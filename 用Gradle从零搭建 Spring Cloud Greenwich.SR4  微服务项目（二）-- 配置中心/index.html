@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="这篇，重点关注我们的配置中心，在各种场景下该如何运用，才会最妙！">
+<meta name="keywords" content="gradle,spring cloud">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用Gradle从零搭建 Spring Cloud Greenwich.SR4  微服务项目（二）-- 配置中心">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;%E7%94%A8Gradle%E4%BB%8E%E9%9B%B6%E6%90%AD%E5%BB%BA%20Spring%20Cloud%20Greenwich.SR4%20%20%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%A1%B9%E7%9B%AE%EF%BC%88%E4%BA%8C%EF%BC%89--%20%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="这篇，重点关注我们的配置中心，在各种场景下该如何运用，才会最妙！">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https:&#x2F;&#x2F;i.loli.net&#x2F;2019&#x2F;12&#x2F;10&#x2F;nFxj32iRBtYgKpX.png">
+<meta property="og:image" content="https:&#x2F;&#x2F;i.loli.net&#x2F;2019&#x2F;12&#x2F;09&#x2F;sfH6k1hyIiqv482.png">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.268Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https:&#x2F;&#x2F;i.loli.net&#x2F;2019&#x2F;12&#x2F;10&#x2F;nFxj32iRBtYgKpX.png">
+
+<link rel="canonical" href="http://jpuneng.cn/%E7%94%A8Gradle%E4%BB%8E%E9%9B%B6%E6%90%AD%E5%BB%BA%20Spring%20Cloud%20Greenwich.SR4%20%20%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%A1%B9%E7%9B%AE%EF%BC%88%E4%BA%8C%EF%BC%89--%20%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>用Gradle从零搭建 Spring Cloud Greenwich.SR4  微服务项目（二）-- 配置中心 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/%E7%94%A8Gradle%E4%BB%8E%E9%9B%B6%E6%90%AD%E5%BB%BA%20Spring%20Cloud%20Greenwich.SR4%20%20%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%A1%B9%E7%9B%AE%EF%BC%88%E4%BA%8C%EF%BC%89--%20%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用Gradle从零搭建 Spring Cloud Greenwich.SR4  微服务项目（二）-- 配置中心
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-11 20:26:56" itemprop="dateCreated datePublished" datetime="2019-12-11T20:26:56+08:00">2019-12-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring-cloud/" itemprop="url" rel="index">
+                    <span itemprop="name">spring cloud</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring-cloud/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这篇，重点关注我们的配置中心，在各种场景下该如何运用，才会最妙！</p>
+<a id="more"></a>
+
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>怎么验证是否能够读取到git上面的配置呢？</p>
+<blockquote>
+<p>答：直接启动配置中心，然后，访问对应你想要访问的git上面的目录或文件，如：</p>
+<ul>
+<li><code>http://localhost:9010/micro-financial/manager</code></li>
+<li><code>http://localhost:9010/micro-financial-manager/dev</code></li>
+<li><code>http://localhost:9010/micro-financial-manager.yml</code></li>
+</ul>
+</blockquote>
+<p>修改了git上面的配置，配置中心是如何收到更新通知的？</p>
+<blockquote>
+<p>答：同样，通过访问上述的几个API，此时，配置中心就会自动读取最新提交内容：</p>
+<ul>
+<li><code>http://localhost:9010/micro-financial/manager</code></li>
+<li><code>http://localhost:9010/micro-financial-manager/dev</code></li>
+<li><code>http://localhost:9010/micro-financial-manager.yml</code></li>
+</ul>
+</blockquote>
+<p>仓库中的配置文件会被转换为web接口，访问参照以下规则：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/&#123;application&#125;/&#123;profile&#125;[/&#123;label&#125;]</span><br><span class="line">/&#123;application&#125;-&#123;profile&#125;.yml</span><br><span class="line">/&#123;label&#125;/&#123;application&#125;-&#123;profile&#125;.yml</span><br><span class="line">/&#123;application&#125;-&#123;profile&#125;.properties</span><br><span class="line">/&#123;label&#125;/&#123;application&#125;-&#123;profile&#125;.properties</span><br></pre></td></tr></table></figure>
+
+<h2 id="相关配置参数"><a href="#相关配置参数" class="headerlink" title="相关配置参数"></a>相关配置参数</h2><table>
+<thead>
+<tr>
+<th>属性</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>spring.cloud.config.allow-override</td>
+<td>true</td>
+<td>外部源配置是否可被覆盖</td>
+</tr>
+<tr>
+<td>spring.cloud.config.override-none</td>
+<td>false</td>
+<td>外部源配置是否不覆盖任何源</td>
+</tr>
+<tr>
+<td>spring.cloud.config.override-system-properties</td>
+<td>true</td>
+<td>外部源配置是否可覆盖本地属性</td>
+</tr>
+</tbody></table>
+<p>针对相应的属性的值对应的外部源在Environment对象中的读取优先级，罗列如下</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>读取优先级</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>spring.cloud.config.allow-override=false</td>
+<td>最高</td>
+</tr>
+<tr>
+<td>spring.cloud.config.override-none=false&amp;&amp;spring.cloud.config.override-system-properties=true</td>
+<td>最高(默认)</td>
+</tr>
+<tr>
+<td>spring.cloud.config.override-none=true</td>
+<td>最低</td>
+</tr>
+<tr>
+<td>spring上下文无systemEnvironment属性</td>
+<td>最低</td>
+</tr>
+<tr>
+<td>spring上下文有systemEnvironment属性 &amp;&amp; spring.cloud.config.override-system-properties=false</td>
+<td>在systemEnvironment之后</td>
+</tr>
+<tr>
+<td>spring上下文有systemEnvironment属性 &amp;&amp; spring.cloud.config.override-system-properties=false</td>
+<td>在systemEnvironment之前</td>
+</tr>
+</tbody></table>
+<ul>
+<li>即默认情况下，外部源的配置属性的读取优先级是最高的。</li>
+<li>且除了<code>spring.cloud.config.override-none=true</code>的情况下，其他情况下外部源的读取优先级均比本地配置文件高。</li>
+</ul>
+<blockquote>
+<p>Note:值得注意的是，如果用户想复写上述的属性，则放在<code>bootstrap.yml</code>|<code>application.yml</code>配置文件中是无效的，根据源码分析只能是自定义一个<code>PropertySourceLocator</code>接口实现类并放置在相应的<code>spring.factories</code>文件中方可生效。</p>
+</blockquote>
+<h2 id="自定义PropertySourceLocator接口"><a href="#自定义PropertySourceLocator接口" class="headerlink" title="自定义PropertySourceLocator接口"></a>自定义PropertySourceLocator接口</h2><p>目的：想要将部分的参数优先读本地配置</p>
+<p>假设有这么一个场景，远程仓库的配置都是公有的，我们也不能修改它，我们只在项目中去复写相应的配置以达到兼容的目的。那么用户就需要自定义去编写接口了。</p>
+<ol>
+<li>编写PropertySourceLocator接口实现类 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * @description 自定义的PropertySourceLocator的顺序应该要比远程仓库读取方式要优先</span><br><span class="line"> * @see org.springframework.cloud.config.client.ConfigServicePropertySourceLocator</span><br><span class="line"> */</span><br><span class="line">@Order(value = Ordered.HIGHEST_PRECEDENCE + 1)</span><br><span class="line">public class CustomPropertySourceLocator implements PropertySourceLocator &#123;</span><br><span class="line"></span><br><span class="line">    private static final String OVERRIDE_ADD_MAPPING = &quot;spring.resources.add-mappings&quot;;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public PropertySource&lt;?&gt; locate(Environment environment) &#123;</span><br><span class="line"></span><br><span class="line">        Map&lt;String, Object&gt; customMap = new HashMap&lt;&gt;(2);</span><br><span class="line">        // 远程仓库此配置为false，本地进行复写</span><br><span class="line">        customMap.put(OVERRIDE_ADD_MAPPING, &quot;true&quot;);</span><br><span class="line"></span><br><span class="line">        return new MapPropertySource(&quot;custom&quot;, customMap);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>编写BootstrapConfiguration <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@Configuration</span><br><span class="line">public class CustomBootstrapConfiguration &#123;</span><br><span class="line"></span><br><span class="line">    @Bean(&quot;customPropertySourceLocator&quot;)</span><br><span class="line">    public CustomPropertySourceLocator propertySourceLocator() &#123;</span><br><span class="line">        return new CustomPropertySourceLocator();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>在src\main\resources目录下创建META-INF\spring.factories文件 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># Bootstrap components</span><br><span class="line">org.springframework.cloud.bootstrap.BootstrapConfiguration=\</span><br><span class="line">com.example.configdemo.propertysource.CustomBootstrapConfiguration</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h1 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h1><h2 id="直接读取本地配置"><a href="#直接读取本地配置" class="headerlink" title="直接读取本地配置"></a>直接读取本地配置</h2><p>好，对于本地环境，或者默认环境，直接读取本地配置文件会是一个OK的选择：</p>
+<p><code>basic-config</code>的<code>application-dev.yml</code>这么配：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  cloud:</span><br><span class="line">    config:</span><br><span class="line">      server:</span><br><span class="line">        native:</span><br><span class="line">          search-locations: classpath:/config</span><br></pre></td></tr></table></figure>
+<p>然后，在<code>resources/config/application-dev.yml</code>作为给到别的微服务的配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">test: Mike</span><br></pre></td></tr></table></figure>
+<p>最后，<code>micro-financial-manager</code>的<code>bootstrap.yml</code>这么配：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: micro-financial-manager</span><br><span class="line">  cloud:</span><br><span class="line">    config:</span><br><span class="line">      discovery:</span><br><span class="line">        enabled: true</span><br><span class="line">        service-id: basic-config</span><br><span class="line">      profile: $&#123;JP_CLOUD_CONFIG_PROFILE:dev&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置放在git仓库"><a href="#配置放在git仓库" class="headerlink" title="配置放在git仓库"></a>配置放在git仓库</h2><p>首先，新建github仓库，把你的配置扔上去：</p>
+<p>github上面配置文件的目录结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">|_ qa</span><br><span class="line">  |_ micro-financial-manager.yml</span><br><span class="line">|_ prod</span><br></pre></td></tr></table></figure>
+<p>其中，文件<code>micro-financial-manager.yml</code>配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jpcloud:</span><br><span class="line">  test: Jay</span><br></pre></td></tr></table></figure>
+
+<p>然后，<code>basic-config</code>的<code>application-qa-git.yml</code>这么配：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  cloud:</span><br><span class="line">    config:</span><br><span class="line">      server:</span><br><span class="line">        git:</span><br><span class="line">          uri: git@github.com:jpuneng/jp-cloud-gradle-config-repo.git</span><br><span class="line">          search-paths: qa</span><br><span class="line">      label: master</span><br></pre></td></tr></table></figure>
+<p>这里的<code>uri</code>也可以使用HTTPs方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/jpuneng/jp-cloud-gradle-config-repo.git</span><br></pre></td></tr></table></figure>
+
+<p>最后，<code>miro-financial-manager</code>的<code>boostrap.yml</code>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: micro-financial-manager  # 对应&#123;application&#125;部分</span><br><span class="line">  cloud:</span><br><span class="line">    config:</span><br><span class="line">      discovery:                   # 通过eureka发现配置中心</span><br><span class="line">        enabled: true</span><br><span class="line">        service-id: basic-config   # 指定配置中心的service-id，便于扩展为高可用配置集群。</span><br><span class="line">      label: master                # 对应git的分支。如果配置中心使用的是本地存储，则该参数无用</span><br><span class="line">      profile: dev                 # 对应&#123;profile&#125;部分</span><br><span class="line">      fail-fast: true</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>特别注意：上面这些与spring-cloud相关的属性必须配置在bootstrap.properties中，config部分内容才能被正确加载。因为config的相关配置会先于application.properties，而bootstrap.properties的加载也是先于application.properties。</p>
+</blockquote>
+<p>在微服务启动时，读取配置中心相关配置的过程涉及到三个类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ConfigServicePropertySourceLocator ---- 调用 locate() 方法，真的去请求获取远程配置</span><br><span class="line">ConfigClientHealthProperties ---------- 相关配置（如：时间间隔）</span><br><span class="line">PropertySourceBootstrapConfiguration -- 真的将远程配置更新到微服务自己的各个属性</span><br></pre></td></tr></table></figure>
+
+<p>只要有注入<code>spring-cloud-starter-config</code>并且有配置这个<code>spring.cloud.config.discovery.enabled=true</code>，那么，就会默认每5分钟去config service上面读取配置。注意：是去配置中心上面拿配置，此时，配置中心回去看看git上面的配置的version对不对，有没有被修改过，并最终将version信息返回给到微服务。定时读取配置的相关类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ConfigServerHealthIndicator ---------- Scheduler调用的方法入口</span><br><span class="line">ConfigClientHealthProperties --------- 相关配置（如：时间间隔）</span><br><span class="line">ConfigServicePropertySourceLocator --- 调用 locate() 方法，真的去请求获取远程配置</span><br></pre></td></tr></table></figure>
+<p>如果要自定义定时获取配置的时间间隔，比如：我要10s获取一次配置，则在微服务的<code>bootstrap.yml</code>里头加上：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">health:</span><br><span class="line">  config:</span><br><span class="line">    time-to-live: 10000</span><br></pre></td></tr></table></figure>
+<p>即可。</p>
+<p>但注意，虽然微服务已经读到了更新后的version，发现了配置已经是被更新了的，但是，此时并不会触发<code>PropertySourceBootstrapConfiguration.initialize()</code>方法，那么，就不会真正地去使用这个已更新的配置。</p>
+<h2 id="其他服务想要的配置，都只能从我这里拿"><a href="#其他服务想要的配置，都只能从我这里拿" class="headerlink" title="其他服务想要的配置，都只能从我这里拿"></a>其他服务想要的配置，都只能从我这里拿</h2><p>我的其他微服务，例如：路由网关服务<code>basic-gateway</code>的一些routing配置，我是不是也可以配在我自己的git仓库当中呢？</p>
+<p>其实可以！</p>
+<ol>
+<li>首选我们将原本在<code>basic-gateway/bootstrap.yml</code>中的配置，放到github 上面的<code>basic-gateway.yml</code>文件上： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  cloud:</span><br><span class="line">    gateway:</span><br><span class="line">      routes:</span><br><span class="line">        - id: micro-financial-manager-route</span><br><span class="line">          uri: http://localhost:9200/</span><br><span class="line">          predicates:</span><br><span class="line">            - Path=/financial/**</span><br></pre></td></tr></table></figure></li>
+<li>然后，将原来code里头的config删除；</li>
+<li>接着，我们引入config相关依赖库； <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compile group: &apos;org.springframework.cloud&apos;, name: &apos;spring-cloud-starter-config&apos;</span><br></pre></td></tr></table></figure></li>
+<li>以及相关配置<code>bootstrap.yml</code>： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: basic-gateway</span><br><span class="line">  cloud:</span><br><span class="line">    config:</span><br><span class="line">      discovery:</span><br><span class="line">        enabled: true</span><br><span class="line">        service-id: basic-config</span><br><span class="line">      label: master</span><br><span class="line">      fail-fast: true</span><br></pre></td></tr></table></figure></li>
+<li>这样一来，就能读取到git上的routing配置了。</li>
+</ol>
+<h2 id="主动推送更新配置给到配置使用方"><a href="#主动推送更新配置给到配置使用方" class="headerlink" title="主动推送更新配置给到配置使用方"></a>主动推送更新配置给到配置使用方</h2><p>我的git中配置更新了，我又不想通过重启微服务的方式去拿这个更新后的值，怎么样才能动态、主动地将更新后的配置告诉给各大微服务爸爸呢？</p>
+<h3 id="方式一：actuator-refresh刷新微服务配置"><a href="#方式一：actuator-refresh刷新微服务配置" class="headerlink" title="方式一：actuator/refresh刷新微服务配置"></a>方式一：actuator/refresh刷新微服务配置</h3><ul>
+<li>原理：通过调用<code>/actuator/refresh</code>POST请求，让微服务主动去找配置中心刷新最新的配置；</li>
+<li>缺点：配置更新了，但也无法主动通知到微服务，需要微服务自己handle；</li>
+<li>优点：不需要重启微服务和配置中心；</li>
+</ul>
+<p>步骤：</p>
+<ol>
+<li>首先，如果没有配<code>actuator</code>相关依赖，需要配上，当然，eureka-client库,config库,甚至admin-client库里头本身依赖着<code>actuator</code>相关库，所以只要你有依赖这几个库的其中一个，都不需要单独引入<code>org.springframework.boot:spring-boot-starter-actuator</code>： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">compile group: &apos;org.springframework.cloud&apos;, name: &apos;spring-cloud-starter-netflix-eureka-client&apos;</span><br><span class="line">compile group: &apos;org.springframework.cloud&apos;, name: &apos;spring-cloud-starter-config&apos;</span><br><span class="line">compile group: &apos;de.codecentric&apos;, name: &apos;spring-boot-admin-starter-client&apos;, version: &apos;2.1.6&apos;</span><br></pre></td></tr></table></figure></li>
+<li>然后，<code>micro-financial-manager</code>的<code>application.yml</code>配置暴露refresh相关接口： <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">management:</span></span><br><span class="line"><span class="attr">  endpoints:</span></span><br><span class="line"><span class="attr">    web:</span></span><br><span class="line"><span class="attr">      exposure:</span></span><br><span class="line"><span class="attr">        include:</span> <span class="string">'*'</span></span><br><span class="line"><span class="attr">  endpoint:</span></span><br><span class="line"><span class="attr">    health:</span></span><br><span class="line"><span class="attr">      show-details:</span> <span class="string">ALWAYS</span></span><br></pre></td></tr></table></figure></li>
+<li>然后，我们给需要上去配置中心读取的配置，所在的类，头上，加上一个注解：<code>@RefreshScope</code>；</li>
+<li>最后，我们主动帮<code>micro-financial-manager</code>调用<code>/actuactor/refresh</code>POST方法，即可刷新配置（因为这个方法会trigger <code>PropertySourceBootstrapConfiguration.initialize</code>方法）；</li>
+<li>当然，我们也可以通过github 的 webhook，来监听每次git配置的push请求，然后自动请求我们这个<code>/actuator/refresh</code>方法。</li>
+</ol>
+<h3 id="方式二：集成event-bus，并调用actuator-bus-refresh刷新微服务配置"><a href="#方式二：集成event-bus，并调用actuator-bus-refresh刷新微服务配置" class="headerlink" title="方式二：集成event-bus，并调用actuator/bus-refresh刷新微服务配置"></a>方式二：集成event-bus，并调用actuator/bus-refresh刷新微服务配置</h3><p>这里应该需要配合 事件总线 来实现。</p>
+<p>流程：<img src="https://i.loli.net/2019/12/10/nFxj32iRBtYgKpX.png" alt="UTOOLS1575938691182.png"></p>
+<ul>
+<li>缺点：比起方式一，更加繁琐，需要依赖<code>event-bus</code>和MQ服务的配合；</li>
+<li>优点：能够通过通配符一键trigger所有的微服务更新配置，比起一个个调用，好一点；</li>
+</ul>
+<p>步骤：</p>
+<ol>
+<li>首先，保证你的MQ服务已经启动，例如这里我们选用rabbitMQ（<code>spring-cloud</code>默认支持RabbitMQ和Kafka两种event-bus集成方式）【详细搭建步骤可看另一篇文章】</li>
+<li>然后，给你的微服务引入依赖： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compile group: &apos;org.springframework.cloud&apos;, name: &apos;spring-cloud-starter-bus-amqp&apos;</span><br></pre></td></tr></table></figure>
+ spring-cloud-starter-bus-amqp 内部依赖：spring-cloud-starter-stream-rabbit 和 spring-cloud-bus</li>
+<li>配置<code>application.yml</code>： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  rabbitmq:</span><br><span class="line">    host: 192.168.204.132</span><br><span class="line">    port: 5672</span><br><span class="line">    username: guest</span><br><span class="line">    password: guest</span><br><span class="line">  cloud:</span><br><span class="line">    bus:</span><br><span class="line">      enabled: true</span><br><span class="line">      trace:</span><br><span class="line">        enabled: true</span><br></pre></td></tr></table></figure></li>
+<li>最后，调用 POST <code>/actuator/bus-refresh?destination=customers:**</code>即刷新服务名为customers的所有服务。<blockquote>
+<p>注意： 这个接口也可能是： <code>/bus/refresh</code></p>
+</blockquote>
+</li>
+</ol>
+<p>打开rabbitmq管理界面，看到它自己建了相关的queue，就是为了发一个更新的数据给到各个微服务：<br><img src="https://i.loli.net/2019/12/09/sfH6k1hyIiqv482.png" alt="UTOOLS1575899420222.png"></p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>具体看这篇文章：<a href="https://vitzhou.top/2018-02-spring-cloud-refresh-context/" target="_blank" rel="noopener">https://vitzhou.top/2018-02-spring-cloud-refresh-context/</a></p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/gradle/" rel="tag"># gradle</a>
+              <a href="/tags/spring-cloud/" rel="tag"># spring cloud</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/%E7%94%A8Gradle%E4%BB%8E%E9%9B%B6%E6%90%AD%E5%BB%BA%20Spring%20Cloud%20Greenwich.SR4%20%20%E5%BE%AE%E6%9C%8D%E5%8A%A1%E9%A1%B9%E7%9B%AE%EF%BC%88%E4%B8%80%EF%BC%89--%20%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8/" rel="next" title="用Gradle从零搭建 Spring Cloud Greenwich.SR4  微服务项目（一）-- 基础入门">
+                  <i class="fa fa-chevron-left"></i> 用Gradle从零搭建 Spring Cloud Greenwich.SR4  微服务项目（一）-- 基础入门
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/Java%E4%B8%AD%E7%9A%84boolean%E5%8D%A0%E5%A4%9A%E5%B0%91%E5%AD%97%E8%8A%82/" rel="prev" title="Java中的boolean占多少字节">
+                  Java中的boolean占多少字节 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#原理"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#相关配置参数"><span class="nav-number">1.1.</span> <span class="nav-text">相关配置参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义PropertySourceLocator接口"><span class="nav-number">1.2.</span> <span class="nav-text">自定义PropertySourceLocator接口</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#应用"><span class="nav-number">2.</span> <span class="nav-text">应用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#直接读取本地配置"><span class="nav-number">2.1.</span> <span class="nav-text">直接读取本地配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置放在git仓库"><span class="nav-number">2.2.</span> <span class="nav-text">配置放在git仓库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他服务想要的配置，都只能从我这里拿"><span class="nav-number">2.3.</span> <span class="nav-text">其他服务想要的配置，都只能从我这里拿</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主动推送更新配置给到配置使用方"><span class="nav-number">2.4.</span> <span class="nav-text">主动推送更新配置给到配置使用方</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#方式一：actuator-refresh刷新微服务配置"><span class="nav-number">2.4.1.</span> <span class="nav-text">方式一：actuator/refresh刷新微服务配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方式二：集成event-bus，并调用actuator-bus-refresh刷新微服务配置"><span class="nav-number">2.4.2.</span> <span class="nav-text">方式二：集成event-bus，并调用actuator/bus-refresh刷新微服务配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">2.5.</span> <span class="nav-text">源码分析</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

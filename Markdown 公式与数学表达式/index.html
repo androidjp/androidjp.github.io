@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="教你如何用Markdown写公式！！">
+<meta name="keywords" content="Markdown">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Markdown 公式与数学表达式">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Markdown%20%E5%85%AC%E5%BC%8F%E4%B8%8E%E6%95%B0%E5%AD%A6%E8%A1%A8%E8%BE%BE%E5%BC%8F&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="教你如何用Markdown写公式！！">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-09-27T03:15:04.263Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://jpuneng.cn/Markdown%20%E5%85%AC%E5%BC%8F%E4%B8%8E%E6%95%B0%E5%AD%A6%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Markdown 公式与数学表达式 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Markdown%20%E5%85%AC%E5%BC%8F%E4%B8%8E%E6%95%B0%E5%AD%A6%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Markdown 公式与数学表达式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-09-27 16:56:49" itemprop="dateCreated datePublished" datetime="2019-09-27T16:56:49+08:00">2019-09-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>教你如何用Markdown写公式！！</p>
+<a id="more"></a>
+
+<blockquote>
+<p><a href="https://www.codecogs.com/latex/eqneditor.php" target="_blank" rel="noopener">在线MD公式生成器</a></p>
+<p>如果是遇到一些MD编辑器是不支持公式的，不妨可以借助MathJax引擎:</p>
+<ol>
+<li>在markdown写作首部添加如下代码：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot; src=&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default&quot;&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure></li>
+<li>之后就可以像在Latex或者Overleaf里面一样写公式喽</li>
+</ol>
+</blockquote>
+<p>更复杂的公式写法，请参考：<a href="https://www.zybuluo.com/codeep/note/163962" target="_blank" rel="noopener">这里</a>，如果这个link出问题了，请看印象笔记，已剪辑。</p>
+<h1 id="数学表达式的写法"><a href="#数学表达式的写法" class="headerlink" title="数学表达式的写法"></a>数学表达式的写法</h1><p>写一个累加表达式：$f(x)=\sum_{i=1}^n{k_i}$</p>
+<p>常见公式汇总：</p>
+<table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>说明</th>
+<th>案例</th>
+<th>写法实现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>\times</code></td>
+<td>乘</td>
+<td>$x\times{y}$</td>
+<td><code>$x\times{y}$</code></td>
+</tr>
+<tr>
+<td><code>\cdot</code></td>
+<td>乘</td>
+<td>$x\cdot{y}$</td>
+<td><code>$x\cdot{y}$</code></td>
+</tr>
+<tr>
+<td><code>\ast</code></td>
+<td>乘</td>
+<td>$x\ast{y}$</td>
+<td><code>$x\ast{y}$</code></td>
+</tr>
+<tr>
+<td><code>\div</code></td>
+<td>除</td>
+<td>$x\div{y}$</td>
+<td><code>$x\div{y}$</code></td>
+</tr>
+<tr>
+<td><code>\frac</code></td>
+<td>分数</td>
+<td>$\frac{x}{y}$</td>
+<td><code>$\frac{x}{y}$</code></td>
+</tr>
+<tr>
+<td><code>^</code></td>
+<td>上标</td>
+<td>$x^y$</td>
+<td><code>$x^y$</code></td>
+</tr>
+<tr>
+<td><code>_</code></td>
+<td>下标</td>
+<td>$x_y$</td>
+<td><code>$x_y$</code></td>
+</tr>
+<tr>
+<td><code>\sqrt</code></td>
+<td>开二次方</td>
+<td>$\sqrt{x}$</td>
+<td><code>$\sqrt{x}$</code></td>
+</tr>
+<tr>
+<td><code>\sqrt</code></td>
+<td>开方</td>
+<td>$\sqrt[x]{y^4+3y-1}$</td>
+<td><code>$\sqrt[x]{y^4+3y-1}$</code></td>
+</tr>
+<tr>
+<td><code>\pm</code></td>
+<td>加减</td>
+<td>$x\pm{y}$</td>
+<td><code>$x\pm{y}$</code></td>
+</tr>
+<tr>
+<td><code>\mp</code></td>
+<td>减加</td>
+<td>$x\mp{y}$</td>
+<td><code>$x\mp{y}$</code></td>
+</tr>
+<tr>
+<td><code>\leq</code></td>
+<td>小于等于</td>
+<td>$x\leq{y}$</td>
+<td><code>$x\leq{y}$</code></td>
+</tr>
+<tr>
+<td><code>\geq</code></td>
+<td>大于等于</td>
+<td>$x\geq{y}$</td>
+<td><code>$x\geq{y}$</code></td>
+</tr>
+<tr>
+<td><code>\ngeq</code></td>
+<td>不大于等于</td>
+<td>$x\ngeq{y}$</td>
+<td><code>$x\ngeq{y}$</code></td>
+</tr>
+<tr>
+<td><code>\not\geq</code></td>
+<td>不大于等于</td>
+<td>$x\not\geq{y}$</td>
+<td><code>$x\not\geq{y}$</code></td>
+</tr>
+<tr>
+<td><code>\neq</code></td>
+<td>不等于</td>
+<td>$x\neq{y}$</td>
+<td><code>$x\neq{y}$</code></td>
+</tr>
+<tr>
+<td><code>\approx</code></td>
+<td>约等于</td>
+<td>$x\approx{y}$</td>
+<td><code>$x\approx{y}$</code></td>
+</tr>
+<tr>
+<td><code>\equiv</code></td>
+<td>恒等于</td>
+<td>$x\equiv{y}$</td>
+<td><code>$x\equiv{y}$</code></td>
+</tr>
+<tr>
+<td><code>\bigodot</code></td>
+<td>定义运算符</td>
+<td>$x\bigodot{y}=x+y^2$</td>
+<td><code>$x\bigodot{y}=x+y^2$</code></td>
+</tr>
+<tr>
+<td><code>\bigotimes</code></td>
+<td>定义运算符</td>
+<td>$x\bigotimes{y}=x+y^2$</td>
+<td><code>$x\bigotimes{y}=x+y^2$</code></td>
+</tr>
+<tr>
+<td><code>\in</code></td>
+<td>属于</td>
+<td>$x\in{y}$</td>
+<td><code>$x\in{y}$</code></td>
+</tr>
+<tr>
+<td><code>\notin</code></td>
+<td>不属于</td>
+<td>$x\notin{y}$</td>
+<td><code>$x\notin{y}$</code></td>
+</tr>
+<tr>
+<td><code>\subset</code></td>
+<td>子集</td>
+<td>$x\subset{y}$</td>
+<td><code>$x\subset{y}$</code></td>
+</tr>
+<tr>
+<td><code>\not\subset</code></td>
+<td>非子集</td>
+<td>$x\not\subset{y}$</td>
+<td><code>$x\not\subset{y}$</code></td>
+</tr>
+<tr>
+<td><code>\subseteq</code></td>
+<td>子集</td>
+<td>$x\subseteq{y}$</td>
+<td><code>$x\subseteq{y}$</code></td>
+</tr>
+<tr>
+<td><code>\supset</code></td>
+<td>超集</td>
+<td>$x\supset{y}$</td>
+<td><code>$x\supset{y}$</code></td>
+</tr>
+<tr>
+<td><code>\supseteq</code></td>
+<td>超集</td>
+<td>$x\supseteq{y}$</td>
+<td><code>$x\supseteq{y}$</code></td>
+</tr>
+<tr>
+<td><code>\cup</code></td>
+<td>并</td>
+<td>$x\cup{y}$</td>
+<td><code>$x\cup{y}$</code></td>
+</tr>
+<tr>
+<td><code>\cap</code></td>
+<td>交</td>
+<td>$x\cap{y}$</td>
+<td><code>$x\cap{y}$</code></td>
+</tr>
+<tr>
+<td><code>\log</code></td>
+<td>对数</td>
+<td>$\log(x)$</td>
+<td><code>$\log(x)$</code></td>
+</tr>
+<tr>
+<td><code>\overline</code></td>
+<td>平均数</td>
+<td>$\overline{x}$</td>
+<td><code>$\overline{x}$</code></td>
+</tr>
+<tr>
+<td><code>\overline</code></td>
+<td>连线符号</td>
+<td>$\overline{a+b+c+d}$</td>
+<td><code>$\overline{a+b+c+d}$</code></td>
+</tr>
+<tr>
+<td><code>\underline</code></td>
+<td>下划线</td>
+<td>$\underline{a+b+c+d}$</td>
+<td><code>$\underline{a+b+c+d}$</code></td>
+</tr>
+<tr>
+<td><code>\overbrace</code></td>
+<td>上大括号</td>
+<td>$\overbrace{a+\underbrace{b+c}_{1.0}+d}^{2.0}$</td>
+<td><code>$\overbrace{a+\underbrace{b+c}_{1.0}+d}^{2.0}$</code></td>
+</tr>
+<tr>
+<td><code>\underbrace</code></td>
+<td>下大括号</td>
+<td>$\underbrace{a+d}_3$</td>
+<td><code>$\underbrace{a+d}_3$</code></td>
+</tr>
+<tr>
+<td><code>\partial</code></td>
+<td>部分</td>
+<td>$\frac{\partial x}{\partial y}$</td>
+<td><code>$\frac{\partial x}{\partial y}$</code></td>
+</tr>
+<tr>
+<td><code>\lim</code></td>
+<td>极限</td>
+<td>$\lim_{x\to\infty}$</td>
+<td><code>$\lim_{x\to\infty}$</code></td>
+</tr>
+<tr>
+<td><code>\displaystyle</code></td>
+<td>块公式格式</td>
+<td>$\displaystyle\lim_{x\to\infty}$</td>
+<td><code>$\displaystyle\lim_{x\to\infty}$</code></td>
+</tr>
+<tr>
+<td><code>\sum</code></td>
+<td>求和</td>
+<td>$\sum_1^n$</td>
+<td><code>$\sum_1^n$</code></td>
+</tr>
+<tr>
+<td><code>\infty</code></td>
+<td>极限</td>
+<td>$\sum_{i=0}^\infty{i^2}$</td>
+<td><code>$\sum_{i=0}^\infty{i^2}$</code></td>
+</tr>
+<tr>
+<td><code>\int</code></td>
+<td>积分</td>
+<td>$\int_0^1{x^2}{dx}$</td>
+<td><code>$\int_0^1{x^2}{dx}$</code></td>
+</tr>
+<tr>
+<td><code>\ldots</code></td>
+<td>底端对齐的省略号</td>
+<td>$1,2,\ldots,n$</td>
+<td><code>$1,2,\ldots,n$</code></td>
+</tr>
+<tr>
+<td><code>\cdots</code></td>
+<td>中线对齐的省略号</td>
+<td>$x_1^2 + x_2^2 + \cdots + x_n^2$</td>
+<td><code>$x_1^2 + x_2^2 + \cdots + x_n^2$</code></td>
+</tr>
+<tr>
+<td><code>\uparrow</code></td>
+<td>上箭头</td>
+<td>$\uparrow$</td>
+<td><code>$\uparrow$</code></td>
+</tr>
+<tr>
+<td><code>\Uparrow</code></td>
+<td>上箭头</td>
+<td>$\Uparrow$</td>
+<td><code>$\Uparrow$</code></td>
+</tr>
+</tbody></table>
+<h1 id="数学符号输出"><a href="#数学符号输出" class="headerlink" title="数学符号输出"></a>数学符号输出</h1><table>
+<thead>
+<tr>
+<th>数学符号</th>
+<th>写法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$\alpha$</td>
+<td><code>$\alpha$</code></td>
+</tr>
+<tr>
+<td>$\beta$</td>
+<td><code>$\beta$</code></td>
+</tr>
+<tr>
+<td>$\gamma$</td>
+<td><code>$\gamma$</code></td>
+</tr>
+<tr>
+<td>$\delta$</td>
+<td><code>$\delta$</code></td>
+</tr>
+<tr>
+<td>$\epsilon$</td>
+<td><code>$\epsilon$</code></td>
+</tr>
+<tr>
+<td>$\zeta$</td>
+<td><code>$\zeta$</code></td>
+</tr>
+<tr>
+<td>$\eta$</td>
+<td><code>$\eta$</code></td>
+</tr>
+<tr>
+<td>$\theta$</td>
+<td><code>$\theta$</code></td>
+</tr>
+<tr>
+<td>$\iota$</td>
+<td><code>$\iota$</code></td>
+</tr>
+<tr>
+<td>$\kappa$</td>
+<td><code>$\kappa$</code></td>
+</tr>
+<tr>
+<td>$\lambda$</td>
+<td><code>$\lambda$</code></td>
+</tr>
+<tr>
+<td>$\mu$</td>
+<td><code>$\mu$</code></td>
+</tr>
+<tr>
+<td>$\Xi$</td>
+<td><code>$\Xi$</code></td>
+</tr>
+<tr>
+<td>$\omicron$</td>
+<td><code>$\omicron$</code></td>
+</tr>
+<tr>
+<td>$\pi$</td>
+<td><code>$\pi$</code></td>
+</tr>
+<tr>
+<td>$\rho$</td>
+<td><code>$\rho$</code></td>
+</tr>
+<tr>
+<td>$\sigma$</td>
+<td><code>$\sigma$</code></td>
+</tr>
+<tr>
+<td>$\chi$</td>
+<td><code>$\chi$</code></td>
+</tr>
+<tr>
+<td>$\upsilon$</td>
+<td><code>$\upsilon$</code></td>
+</tr>
+<tr>
+<td>$\phi$</td>
+<td><code>$\phi$</code></td>
+</tr>
+<tr>
+<td>$\psi$</td>
+<td><code>$\psi$</code></td>
+</tr>
+<tr>
+<td>$\omega$</td>
+<td><code>$\omega$</code></td>
+</tr>
+</tbody></table>
+<h2 id="相关快捷键"><a href="#相关快捷键" class="headerlink" title="相关快捷键"></a>相关快捷键</h2><ol>
+<li>喊出命令提示：<code>ctrl+shift+P / ctrl+ shift+ A</code></li>
+<li>format 内容：<code>Format Document</code></li>
+<li>加粗：<code>Ctrl + B</code></li>
+<li>倾斜：<code>Ctrl + I</code></li>
+<li>导出 PDF：<code>Convert Markdown to PDF</code></li>
+<li>导出 Html：<code>Markdown: Print current document to HTML</code></li>
+<li>导出支持公式显示的 Html：<code>Markdown: Clip Markdown+Math to HTML</code></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Markdown/" rel="tag"># Markdown</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/git%E6%8C%87%E5%8D%97/" rel="next" title="git指南">
+                  <i class="fa fa-chevron-left"></i> git指南
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/%E5%A6%82%E4%BD%95%E8%AE%A9%E7%BA%BF%E7%A8%8B%E9%A1%BA%E5%BA%8F%E6%89%A7%E8%A1%8C/" rel="prev" title="如何让线程顺序执行">
+                  如何让线程顺序执行 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数学表达式的写法"><span class="nav-number">1.</span> <span class="nav-text">数学表达式的写法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数学符号输出"><span class="nav-number">2.</span> <span class="nav-text">数学符号输出</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#相关快捷键"><span class="nav-number">2.1.</span> <span class="nav-text">相关快捷键</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script>
+
+    
+
+  
+
+  
+
+</body>
+</html>
