@@ -7,7 +7,6 @@ categories:
 - Java
 ---
 > 这个问题，平时没想过，谁没事干往一个String头上放几个G的data嘛，但是一旦遇到，就问你怎么解决~！
-
 <!-- more -->
 
 # Java String有最大长度吗？
