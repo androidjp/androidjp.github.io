@@ -50,21 +50,18 @@
   };
 </script>
 
-  <meta name="description" content="下面是本人对 MVP 架构 的一些理解。">
-<meta name="keywords" content="Android,MVP架构">
+  <meta name="description" content="我们通过几个小例子快速重温Golang变量初始化过程。">
+<meta name="keywords" content="Go">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MVP架构的理解">
-<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;MVP%E6%9E%B6%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3&#x2F;index.html">
+<meta property="og:title" content="再看Go变量初始化">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;%E5%86%8D%E7%9C%8BGo%E5%8F%98%E9%87%8F%E5%88%9D%E5%A7%8B%E5%8C%96&#x2F;index.html">
 <meta property="og:site_name" content="jpuneng技术栈">
-<meta property="og:description" content="下面是本人对 MVP 架构 的一些理解。">
+<meta property="og:description" content="我们通过几个小例子快速重温Golang变量初始化过程。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-b24fbbb7c5735801.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
-<meta property="og:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-7919a1f8e616a804.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
-<meta property="og:updated_time" content="2020-09-27T03:15:04.263Z">
+<meta property="og:updated_time" content="2020-10-12T08:13:04.067Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http:&#x2F;&#x2F;upload-images.jianshu.io&#x2F;upload_images&#x2F;2369895-b24fbbb7c5735801.png?imageMogr2&#x2F;auto-orient&#x2F;strip%7CimageView2&#x2F;2&#x2F;w&#x2F;1240">
 
-<link rel="canonical" href="http://jpuneng.cn/MVP%E6%9E%B6%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/">
+<link rel="canonical" href="http://jpuneng.cn/%E5%86%8D%E7%9C%8BGo%E5%8F%98%E9%87%8F%E5%88%9D%E5%A7%8B%E5%8C%96/">
 
 
 <script id="page-configurations">
@@ -78,7 +75,7 @@
   };
 </script>
 
-  <title>MVP架构的理解 | jpuneng技术栈</title>
+  <title>再看Go变量初始化 | jpuneng技术栈</title>
   
 
 
@@ -210,7 +207,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/MVP%E6%9E%B6%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3/">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/%E5%86%8D%E7%9C%8BGo%E5%8F%98%E9%87%8F%E5%88%9D%E5%A7%8B%E5%8C%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -223,7 +220,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          MVP架构的理解
+          再看Go变量初始化
         </h1>
 
         <div class="post-meta">
@@ -232,30 +229,18 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2016-08-11 15:08:00" itemprop="dateCreated datePublished" datetime="2016-08-11T15:08:00+08:00">2016-08-11</time>
+              <time title="创建时间：2020-10-12 16:12:41 / 修改时间：16:13:04" itemprop="dateCreated datePublished" datetime="2020-10-12T16:12:41+08:00">2020-10-12</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-09-27 11:15:04" itemprop="dateModified" datetime="2020-09-27T11:15:04+08:00">2020-09-27</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index">
-                    <span itemprop="name">Android</span>
-                  </a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index">
-                    <span itemprop="name">架构</span>
+                  <a href="/categories/Go/" itemprop="url" rel="index">
+                    <span itemprop="name">Go</span>
                   </a>
                 </span>
             </span>
@@ -279,28 +264,51 @@
 
       
         <blockquote>
-<p>下面是本人对 MVP 架构 的一些理解。 </p>
+<p>我们通过几个小例子快速重温Golang变量初始化过程。</p>
 </blockquote>
 <a id="more"></a>
 
-<p>首先，放两个网上关于MVP架构的图解，对比一下：</p>
-<blockquote>
-<p>图解一：<br><img src="http://upload-images.jianshu.io/upload_images/2369895-b24fbbb7c5735801.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""><br>图解二：<br><img src="http://upload-images.jianshu.io/upload_images/2369895-7919a1f8e616a804.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-</blockquote>
-<p>这里，本人会更加倾向与图解一。</p>
-<h2 id="一、M、V、P的分析"><a href="#一、M、V、P的分析" class="headerlink" title="一、M、V、P的分析"></a>一、M、V、P的分析</h2><p>&emsp;M层，也就是Model层（也可以理解成：数据源层、持久层、Data层），是专门给外界提供数据的一层，这里<br>的‘外界’一般是指本应用的其他层（逻辑处理层和展示层）。<br>&emsp;V层，指的是View层（界面展示层、与用户交互的界面），是专门用于展示数据、与用户交互的层。<br>&emsp;P层，指的是Presenter层（逻辑处理层、主持层），是不同与MVC模式的一层，因为它分出来是为了将界面中所有较为复杂的逻辑操作工程分出来，减轻V层的负担，同时，让原本V层与M层的直接关系断开，达到解耦的效果。<br>&emsp;从M、V、P三者的分析，结合上面的图解可以看到，其实图解一比图解二更好的地方在于：Presenter与Model之间的交互，是可以双向的。而这一点，由于很多开源库或者框架已经实现了关于数据的一个异步获取或处理的过程，所以，在设计MVP架构的时候，很多MVP架构辅助库，并没有着重P和M之间通信的问题，而着重与P和V之间的通信问题，这本来没有错，因为MVP架构出来的初衷本来就是为了减轻View层的逻辑负担。然而这里，我们在遇到一些网络操作、异步处理过程时，可能需要对Presenter和Model间的监听和交互想一想怎么设计了。</p>
-<h2 id="二、MVP架构优劣分析"><a href="#二、MVP架构优劣分析" class="headerlink" title="二、MVP架构优劣分析"></a>二、MVP架构优劣分析</h2><ul>
-<li>优点：很容易看出来，就是：<ul>
-<li>逻辑和展示的分离，Presenter减轻View的负担。【相当于：主持人负责主持好每一个表演的出场和开场白，表演者听命令直接做动作就好】</li>
-<li>View层与Model层解耦，模块化，易于后期维护。</li>
-</ul>
+<h2 id="看一个例子"><a href="#看一个例子" class="headerlink" title="看一个例子"></a>看一个例子</h2><p>让我们先看看这两个例子，对比一下：</p>
+<p>case 1:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">    a <span class="keyword">int</span> = b + <span class="number">1</span></span><br><span class="line">    b <span class="keyword">int</span> = <span class="number">1</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fmt.Println(a)</span><br><span class="line">    fmt.Println(b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>case 2：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> (</span><br><span class="line">        a <span class="keyword">int</span> = b + <span class="number">1</span></span><br><span class="line">        b <span class="keyword">int</span> = <span class="number">1</span></span><br><span class="line">    )</span><br><span class="line">    fmt.Println(a)</span><br><span class="line">    fmt.Println(b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>哈哈， 两个case一对比，仅仅是变量从包内可见，变成局部变量，但输出结果却是不同：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">case 1 -----正常</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line"></span><br><span class="line">case 2 -----报错</span><br><span class="line">xxx.go:7: undefined: b</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>原因</strong>：不同作用域类型的变量初始化顺序不同。</p>
+<ul>
+<li><p>case 2中的a,b 是局部变量（作用域：方法），初始化顺序：从左到右、从上到下；</p>
 </li>
-<li>缺点<ul>
-<li>View负担小了，Presenter负担就大的。目前的MVP架构辅助库，大多考虑的是一个Activity/Fragment配一个Presenter，那么，意味着，一个界面，需要做的逻辑操作，全部交给一个Presenter去做，这样一来，Presenter的代码量就很大了。【这里，只能尽量保证每一个界面的功能相对单一，以减少Presenter代码量，但是功能一旦减少，代码本来就少了，还需要Presenter吗？这就存在一个矛盾了】</li>
-<li>Presenter 与 Model层的交互，需要同样的一个异步处理过程，而这个过程，如果不借助第三方库，自己动手，则同样需要一个回调接口的设计。</li>
-</ul>
+<li><p>case 1中package级别的变量，初始化顺序与<strong>初始化依赖</strong>有关；</p>
 </li>
 </ul>
+<p>看看这个例子：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">  a = c - <span class="number">2</span></span><br><span class="line">  b = <span class="number">2</span></span><br><span class="line">  c = f()</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">  fmt.Printf(<span class="string">"inside f and b = %d\n"</span>, b)</span><br><span class="line">  <span class="keyword">return</span> b + <span class="number">1</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  fmt.Println(a)</span><br><span class="line">  fmt.Println(b)</span><br><span class="line">  fmt.Println(c)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">inside f and b = 2</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<p>a依赖c，c依赖b，于是，初始化顺序：</p>
+<ol>
+<li><p>b = 2</p>
+</li>
+<li><p>c = f() = 3</p>
+</li>
+<li><p>a = c - 2 = 1</p>
+</li>
+</ol>
+<h2 id="变量循环依赖"><a href="#变量循环依赖" class="headerlink" title="变量循环依赖"></a>变量循环依赖</h2><p>基于这个变量依赖的规则，就可能存在这个变量循环依赖的问题：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">    a = b</span><br><span class="line">    b = c</span><br><span class="line">    c = f()</span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span> <span class="title">int</span></span> &#123;    </span><br><span class="line">    <span class="keyword">return</span> a</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fmt.Println(a, b, c)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">错误：“initialization loop”</span><br></pre></td></tr></table></figure>
+
 
     </div>
 
@@ -315,24 +323,23 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Android/" rel="tag"># Android</a>
-              <a href="/tags/MVP%E6%9E%B6%E6%9E%84/" rel="tag"># MVP架构</a>
+              <a href="/tags/Go/" rel="tag"># Go</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-next post-nav-item">
-                <a href="/Android%E5%BC%80%E5%8F%91%E7%BB%86%E8%8A%82--%E6%9F%A5%E6%BC%8F%E8%A1%A5%E7%BC%BA%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9A%E6%98%93%E5%BF%98%E9%9A%BE%E6%87%82/" rel="next" title="Android开发细节--查漏补缺（二）：易忘难懂">
-                  <i class="fa fa-chevron-left"></i> Android开发细节--查漏补缺（二）：易忘难懂
+                <a href="/Go%E7%9A%84init%E5%87%BD%E6%95%B0%E6%B5%85%E6%9E%90/" rel="next" title="Go的init函数浅析">
+                  <i class="fa fa-chevron-left"></i> Go的init函数浅析
                 </a>
             </div>
 
             <span class="post-nav-divider"></span>
 
             <div class="post-nav-prev post-nav-item">
-                <a href="/git%E6%8C%87%E5%8D%97/" rel="prev" title="git指南">
-                  git指南 <i class="fa fa-chevron-right"></i>
+                <a href="/Go%E9%94%99%E8%AF%AF%E4%B8%8E%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/" rel="prev" title="Go错误与异常处理实践总结">
+                  Go错误与异常处理实践总结 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
@@ -372,7 +379,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、M、V、P的分析"><span class="nav-number">1.</span> <span class="nav-text">一、M、V、P的分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、MVP架构优劣分析"><span class="nav-number">2.</span> <span class="nav-text">二、MVP架构优劣分析</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#看一个例子"><span class="nav-number">1.</span> <span class="nav-text">看一个例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#变量循环依赖"><span class="nav-number">2.</span> <span class="nav-text">变量循环依赖</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

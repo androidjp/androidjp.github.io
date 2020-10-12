@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-smile.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-smile.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.4.2',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: true,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="我们认识的errorerror看着是一个关键字，但本身就是一个接口，位于buildin.go中，12345&#x2F;&#x2F; The error built-in interface type is the conventional interface for&#x2F;&#x2F; representing an error condition, with the nil value representing no error.">
+<meta name="keywords" content="Go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go错误与异常处理实践总结">
+<meta property="og:url" content="http:&#x2F;&#x2F;jpuneng.cn&#x2F;Go%E9%94%99%E8%AF%AF%E4%B8%8E%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93&#x2F;index.html">
+<meta property="og:site_name" content="jpuneng技术栈">
+<meta property="og:description" content="我们认识的errorerror看着是一个关键字，但本身就是一个接口，位于buildin.go中，12345&#x2F;&#x2F; The error built-in interface type is the conventional interface for&#x2F;&#x2F; representing an error condition, with the nil value representing no error.">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-10-12T08:18:51.028Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://jpuneng.cn/Go%E9%94%99%E8%AF%AF%E4%B8%8E%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Go错误与异常处理实践总结 | jpuneng技术栈</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">jpuneng技术栈</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">技术时代，舍我其谁</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://jpuneng.cn/Go%E9%94%99%E8%AF%AF%E4%B8%8E%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Jasper Wu">
+      <meta itemprop="description" content="醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="jpuneng技术栈">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go错误与异常处理实践总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-10-12 16:22:41 / 修改时间：16:18:51" itemprop="dateCreated datePublished" datetime="2020-10-12T16:22:41+08:00">2020-10-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Go/" itemprop="url" rel="index">
+                    <span itemprop="name">Go</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <a id="more"></a><h1 id="我们认识的error"><a href="#我们认识的error" class="headerlink" title="我们认识的error"></a>我们认识的error</h1><p><code>error</code>看着是一个关键字，但本身就是一个接口，位于<code>buildin.go</code>中，</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// The error built-in interface type is the conventional interface for</span></span><br><span class="line"><span class="comment">// representing an error condition, with the nil value representing no error.</span></span><br><span class="line"><span class="keyword">type</span> error <span class="keyword">interface</span> &#123;</span><br><span class="line">  Error() <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><a id="more"></a>
+
+
+
+
+<p>而<code>errors.New(string)</code>位于<code>errors/errors.go</code>中，背后返回的是error的最简单实现：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// errors.New() 方法</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(text <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> &amp;errorString&#123;text&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 最简单实现：里头就一个错误信息字符串</span></span><br><span class="line"><span class="keyword">type</span> errorString <span class="keyword">struct</span> &#123;</span><br><span class="line">  s <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 返回错误信息字符串</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *errorString)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> e.s</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="一般的场景用法"><a href="#一般的场景用法" class="headerlink" title="一般的场景用法"></a>一般的场景用法</h1><p>平常我们写方法的异常处理，一般是这样子：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Method01</span><span class="params">(url <span class="keyword">string</span>)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> err:= ConnectDB(url); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// .....</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">"xxx"</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>或者这样：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Method01</span><span class="params">(url <span class="keyword">string</span>)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> err:= ConnectDB(url); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, errors.New(<span class="string">"Connect DB failed!!"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// .....</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">"xxx"</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好一点就把相关的检索用的关键参数一并记录：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Method01</span><span class="params">(url <span class="keyword">string</span>)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> err:= ConnectDB(url); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">"Connect DB failed!! url=[%s], %v"</span>, url, err.Error())</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// .....</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">"xxx"</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们不妨多理解一下Go中的错误和异常 两者的异同，在实现业务逻辑时，才不会疑惑为何方法要这么写异常处理逻辑，要怎么返回error对象。</p>
+<h1 id="再次理解错误与异常"><a href="#再次理解错误与异常" class="headerlink" title="再次理解错误与异常"></a>再次理解错误与异常</h1><p>我们抛开语言特性，如Java中的Error和Exception的角度，而用更为直白的方式去看错误和异常：</p>
+<ul>
+<li><p>错误【意料之中】：可能出现问题的地方出现了问题，如打开文件失败，连接数据库失败等。</p>
+</li>
+<li><p>异常【意料之外】：不应该出现问题的地方出现了问题，如引用了空指针。</p>
+</li>
+</ul>
+<p><strong>错误是业务过程的一部分，而异常不是。</strong></p>
+<h2 id="Go世界里的错误"><a href="#Go世界里的错误" class="headerlink" title="Go世界里的错误"></a>Go世界里的错误</h2><p>回到Golang的世界，Golang中的<code>error</code>以及以上的几个例子，都是在<strong>错误</strong>这一范畴。Go想要引入error接口作为错误处理的标准模式，如果函数要返回错误，则返回值类型列表中肯定包含error。error的处理过程类似C语言中的错误码，可逐层返回，直到被处理。</p>
+<h2 id="Go世界里的异常"><a href="#Go世界里的异常" class="headerlink" title="Go世界里的异常"></a>Go世界里的异常</h2><p>Golang引入两个内置函数：</p>
+<ul>
+<li><p><code>panic</code>：触发异常处理流程</p>
+</li>
+<li><p><code>recover</code>：终止异常处理流程</p>
+</li>
+</ul>
+<p>同时引入关键字<code>defer</code>，来延迟执行<code>defer</code>后面的函数，一直等到包含<code>defer</code>语句所在的函数执行完毕，延迟函数（<code>defer</code>后面跟着的函数）才会被执行，而不管包含<code>defer</code>语句的函数时通过return语句正常结束，还是由于<code>panic</code>导致的异常结束。</p>
+<p>当发生以下等等情况时：</p>
+<ul>
+<li><p>引用空指针</p>
+</li>
+<li><p>下标越界</p>
+</li>
+<li><p>显示调用<code>panic</code></p>
+</li>
+<li><p>….</p>
+</li>
+</ul>
+<p>，会先触发<code>panic</code>函数，然后调用延迟函数。调用者继续传递<code>panic</code>，因此该过程一直在调用栈中重复发生：函数停止执行，调用延迟执行函数等。如果一路在延迟函数中没有<code>recover</code>函数的调用，则会到达该协程的起点，该协程结束，然后终止其他所有协程，包括主协程（类似于C语言中的主线程，该协程ID为1）。</p>
+<h2 id="错误与异常，之于Go"><a href="#错误与异常，之于Go" class="headerlink" title="错误与异常，之于Go"></a>错误与异常，之于Go</h2><p>错误和异常从Golang机制上讲，就是error和panic的区别。</p>
+<p>很多其他语言也一样，比如C++/Java，没有error但有errno，没有panic但有throw。</p>
+<h2 id="Go错误和异常可以相互转换"><a href="#Go错误和异常可以相互转换" class="headerlink" title="Go错误和异常可以相互转换"></a>Go错误和异常可以相互转换</h2><ul>
+<li><p>错误转异常：</p>
+</li>
+<li><p>比如程序逻辑上尝试请求某个URL，最多尝试三次，前两次请求失败时错误，第三次失败，错误就会被提升为异常；</p>
+</li>
+<li><p>异常转错误：</p>
+</li>
+<li><p>比如<code>panic</code>触发的异常被<code>recover</code>恢复后，将返回值中error类型的变量进行赋值，以便上层函数继续走错误处理流程；</p>
+</li>
+</ul>
+<h1 id="看源码，得启发"><a href="#看源码，得启发" class="headerlink" title="看源码，得启发"></a>看源码，得启发</h1><p>重新认识完Golang世界里的错误和异常，让我们一起看个身边源码例子：</p>
+<p><code>regexp.go</code>中的两个函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 编译</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Compile</span><span class="params">(expr <span class="keyword">string</span>)</span> <span class="params">(*Regexp, error)</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> compile(expr, syntax.Perl, <span class="literal">false</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 必须编译</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MustCompile</span><span class="params">(str <span class="keyword">string</span>)</span> *<span class="title">Regexp</span></span> &#123;</span><br><span class="line">  regexp, err := Compile(str)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="built_in">panic</span>(<span class="string">`regexp: Compile(`</span> + quote(str) + <span class="string">`): `</span> + err.Error())</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> regexp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>虽然背后都是调用compile()函数，做的都是“编译”，但设计不同：</p>
+<ul>
+<li><p>Compile函数<strong>基于错误处理设计</strong>，将正则表达式编译成有效的可匹配格式，适用于用户输入场景。当用户输入的正则表达式不合法时，该函数会返回一个错误。</p>
+</li>
+<li><p>MustCompile函数<strong>基于异常处理设计</strong>，适用于硬编码场景。当调用者明确知道输入不会引起函数错误时，要求调用者检查这个错误是不必要和累赘的。我们应该假设函数的输入一直合法，当调用者输入了不应该出现的输入时，就触发panic异常。</p>
+</li>
+</ul>
+<p>于是，我们得到了一个启示：<strong>什么情况下用错误表达，什么情况下用异常表达，就得有一套规则，否则很容易出现一切皆错误或一切皆异常的情况</strong>。</p>
+<h2 id="启发：适用于异常处理的场景"><a href="#启发：适用于异常处理的场景" class="headerlink" title="启发：适用于异常处理的场景"></a>启发：适用于异常处理的场景</h2><p>想一想，我们是否可以归纳出常见得一些场景，这些场景，是需要做异常处理得：</p>
+<ol>
+<li><p>空指针</p>
+</li>
+<li><p>下标越界</p>
+</li>
+<li><p>除数为0</p>
+</li>
+<li><p>不应该出现得分支，如：default</p>
+</li>
+<li><p>输入不应该引起函数错误</p>
+</li>
+</ol>
+<p>那么，其他场景，就使用错误处理。</p>
+<p>这样，就使得我们在设计接口时更加清晰。</p>
+<p>另外，对于异常，我们可以选择在一个合适的上游去recover，并打印堆栈信息，使得部署后的程序不会终止。</p>
+<h1 id="实践起来，让代码变漂亮"><a href="#实践起来，让代码变漂亮" class="headerlink" title="实践起来，让代码变漂亮"></a>实践起来，让代码变漂亮</h1><p>看到上面的例子，就知道，我们程序代码中一般处理错误的方式，就是<code>if err != nil {...}</code> 这种方式对实际业务逻辑代码的入侵是很大的，让人看着难受~！</p>
+<h2 id="错误处理的正确姿势"><a href="#错误处理的正确姿势" class="headerlink" title="错误处理的正确姿势"></a>错误处理的正确姿势</h2><h3 id="一、失败原因只有一个时，不使用error"><a href="#一、失败原因只有一个时，不使用error" class="headerlink" title="一、失败原因只有一个时，不使用error"></a>一、失败原因只有一个时，不使用error</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(self *AgentContext)</span> <span class="title">CheckHostType</span><span class="params">(host_type <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> host_type &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">"virtual_machine"</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    <span class="keyword">case</span> <span class="string">"bare_metal"</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> errors.New(<span class="string">"CheckHostType ERROR:"</span> + host_type)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述函数的作用其实就是：判断输入是否是某几个值的其中一个，不是就报错。</p>
+<p>分析一下：</p>
+<ul>
+<li><p>方法没有意料之外的事情会发送，最多是属于错误处理场景；</p>
+</li>
+<li><p>报错只有一种情况，错误没有再分不同情况；</p>
+</li>
+</ul>
+<p>那我用一个bool值不更简单更好被理解？于是变成这样：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(self *AgentContext)</span> <span class="title">CheckHostType</span><span class="params">(host_type <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> host_type == <span class="string">"virtual_machine"</span> || host_type == <span class="string">"bare_metal"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="二、没有失败时，不使用error"><a href="#二、没有失败时，不使用error" class="headerlink" title="二、没有失败时，不使用error"></a>二、没有失败时，不使用error</h3><p>例子：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span> <span class="title">setTargetId</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    self.TargetId = self.Id</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// .....</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用方</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span> <span class="title">TryConnect</span><span class="params">()</span> <span class="title">error</span></span> &#123; </span><br><span class="line">    <span class="comment">// .........</span></span><br><span class="line">    err := c.setTargetId()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="comment">// log</span></span><br><span class="line">        <span class="comment">// free resource</span></span><br><span class="line">        <span class="keyword">return</span> errors.New(....)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析：</p>
+<ul>
+<li><p>不存在报错问题，方法setTargetId不需要返回error；</p>
+</li>
+<li><p>由于setTargetId返回的error，调用方需要做error的处理；</p>
+</li>
+</ul>
+<p>重构一下，得到：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span> <span class="title">setTargetId</span><span class="params">()</span></span> &#123;</span><br><span class="line">    self.TargetId = self.Id</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// .....</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用方</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span> <span class="title">TryConnect</span><span class="params">()</span> <span class="title">error</span></span> &#123; </span><br><span class="line">    <span class="comment">// .........</span></span><br><span class="line">    c.setTargetId()</span><br><span class="line">    <span class="comment">// .........</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="三、error应放在返回值类型列表的最后"><a href="#三、error应放在返回值类型列表的最后" class="headerlink" title="三、error应放在返回值类型列表的最后"></a>三、error应放在返回值类型列表的最后</h3><p>这个应该是一大基本规范了：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">resp, err := http.Get(url)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> nill, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然，bool作为返回值类型时，也一样，放在返回列表最后：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">value, ok := cache.Lookup(key) </span><br><span class="line"><span class="keyword">if</span> !ok &#123;</span><br><span class="line">    <span class="comment">// ...cache[key] does not exist… </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="四、错误值统一定义，而不是跟着感觉走"><a href="#四、错误值统一定义，而不是跟着感觉走" class="headerlink" title="四、错误值统一定义，而不是跟着感觉走"></a>四、错误值统一定义，而不是跟着感觉走</h3><p>项目中，到处都是 return errors.New(value)，已经让人有些烦躁了，错误内容还要花样多多且意思雷同，过分了！：</p>
+<ol>
+<li><p>“record is not existed.”</p>
+</li>
+<li><p>“record is not exist!”</p>
+</li>
+<li><p>“###record is not existed！！！”</p>
+</li>
+<li><p>…</p>
+</li>
+</ol>
+<p>不良影响：</p>
+<ol>
+<li><p>调用方无法统一标准来handle这些error；</p>
+</li>
+<li><p>万一又新增了一个奇奇怪怪的error，调用方handle不了，又得上代码；</p>
+</li>
+</ol>
+<p>所以，我们可以定义错误码文件，将错误对象定义在一个相对公共的文件中：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> ERR_EOF = errors.New(<span class="string">"EOF"</span>)</span><br><span class="line"><span class="keyword">var</span> ERR_CLOSED_PIPE = errors.New(<span class="string">"io: read/write on closed pipe"</span>)</span><br><span class="line"><span class="keyword">var</span> ERR_NO_PROGRESS = errors.New(<span class="string">"multiple Read calls return no data or error"</span>)</span><br><span class="line"><span class="keyword">var</span> ERR_SHORT_BUFFER = errors.New(<span class="string">"short buffer"</span>)</span><br><span class="line"><span class="keyword">var</span> ERR_SHORT_WRITE = errors.New(<span class="string">"short write"</span>)</span><br><span class="line"><span class="keyword">var</span> ERR_UNEXPECTED_EOF = errors.New(<span class="string">"unexpected EOF"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>当然，命名方式可以跟随团队规范。</p>
+<h3 id="五、错误逐层传递时，层层都加日志"><a href="#五、错误逐层传递时，层层都加日志" class="headerlink" title="五、错误逐层传递时，层层都加日志"></a>五、错误逐层传递时，层层都加日志</h3><p>目的：方便故障定位</p>
+<h3 id="六、错误处理使用defer"><a href="#六、错误处理使用defer" class="headerlink" title="六、错误处理使用defer"></a>六、错误处理使用defer</h3><p>例子：我想要创建4个资源，任何一个资源创建失败，就得回滚并销毁先前创建的资源。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">deferDemo</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    err := createResource1()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ERR_CREATE_RESOURCE1_FAILED</span><br><span class="line">    &#125;</span><br><span class="line">    err = createResource2()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        destroyResource1()</span><br><span class="line">        <span class="keyword">return</span> ERR_CREATE_RESOURCE2_FAILED</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    err = createResource3()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        destroyResource1()</span><br><span class="line">        destroyResource2()</span><br><span class="line">        <span class="keyword">return</span> ERR_CREATE_RESOURCE3_FAILED</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    err = createResource4()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        destroyResource1()</span><br><span class="line">        destroyResource2()</span><br><span class="line">        destroyResource3()</span><br><span class="line">        <span class="keyword">return</span> ERR_CREATE_RESOURCE4_FAILED</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析：</p>
+<ul>
+<li><p>上述方法的异常处理很容易写错；</p>
+</li>
+<li><p>完全可以利用defer“先进后出”的特性，配合闭包，就做到回滚的效果；</p>
+</li>
+<li><p>对闭包来说，参数是值传递，对于外部变量却是引用传递，所以闭包中的外部变量err的值就变成外部函数返回时最新的err值；</p>
+</li>
+</ul>
+<p>于是，重构后，得到：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">deferDemo</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    err := createResource1()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ERR_CREATE_RESOURCE1_FAILED</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            destroyResource1()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line">    err = createResource2()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ERR_CREATE_RESOURCE2_FAILED</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            destroyResource2()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    err = createResource3()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ERR_CREATE_RESOURCE3_FAILED</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            destroyResource3()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    err = createResource4()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ERR_CREATE_RESOURCE4_FAILED</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="七、尝试几次可以避免失败时，不要立即返回错误"><a href="#七、尝试几次可以避免失败时，不要立即返回错误" class="headerlink" title="七、尝试几次可以避免失败时，不要立即返回错误"></a>七、尝试几次可以避免失败时，不要立即返回错误</h3><p>像请求URL、连接或访问DB等场景，都适用。</p>
+<h3 id="八、当上层函数不关心错误时，建议不返回error"><a href="#八、当上层函数不关心错误时，建议不返回error" class="headerlink" title="八、当上层函数不关心错误时，建议不返回error"></a>八、当上层函数不关心错误时，建议不返回error</h3><p>对于一些资源清理相关的函数（destroy/delete/clear），如果子函数出错，打印日志即可，而无需将错误进一步反馈到上层函数，因为一般情况下，上层函数是不关心执行结果的，或者即使关心也无能为力，于是我们建议将相关函数设计为不返回error。</p>
+<h3 id="九、当发生错误时，不忽略有用的返回值"><a href="#九、当发生错误时，不忽略有用的返回值" class="headerlink" title="九、当发生错误时，不忽略有用的返回值"></a>九、当发生错误时，不忽略有用的返回值</h3><p>像 <code>func Exec() (int64, error)</code> 这样的DB命令执行函数，返回值是：</p>
+<ul>
+<li><p>修改成功数量：int64</p>
+</li>
+<li><p>执行报错：error</p>
+</li>
+</ul>
+<p>这样一来，我们就得关注一下返回值中的这些有用参数，而非只关注error。</p>
+<h2 id="异常处理的正确姿势"><a href="#异常处理的正确姿势" class="headerlink" title="异常处理的正确姿势"></a>异常处理的正确姿势</h2><h3 id="一、程序开发阶段，坚持速错"><a href="#一、程序开发阶段，坚持速错" class="headerlink" title="一、程序开发阶段，坚持速错"></a>一、程序开发阶段，坚持速错</h3><h3 id="二、程序部署后，应恢复异常避免程序终止"><a href="#二、程序部署后，应恢复异常避免程序终止" class="headerlink" title="二、程序部署后，应恢复异常避免程序终止"></a>二、程序部署后，应恢复异常避免程序终止</h3><p>要想想，如果不恢复，那么最终异常会终止包括主协程在内的所有协程，最终终止整个进程。</p>
+<p>所以，一旦Golang程序部署后，在任何情况下发生的异常都不应该导致程序异常退出，我们在上层函数中加一个延迟执行的recover调用来达到这个目的，并且是否进行recover需要根据环境变量或配置文件来定，默认需要recover。</p>
+<p>我们在调用recover的延迟函数中以最合理的方式响应该异常：</p>
+<ol>
+<li><p>打印堆栈的异常调用信息和关键的业务信息，以便这些问题保留可见；</p>
+</li>
+<li><p>将异常转换为错误，以便调用者让程序恢复到健康状态并继续安全运行。</p>
+</li>
+</ol>
+<p>看个简单例子：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">funcA</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> p := <span class="built_in">recover</span>(); p != <span class="literal">nil</span> &#123;</span><br><span class="line">            fmt.Printf(<span class="string">"panic recover! p: %v"</span>, p)</span><br><span class="line">            debug.PrintStack()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line">    <span class="keyword">return</span> funcB()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">funcB</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// simulation</span></span><br><span class="line">    <span class="built_in">panic</span>(<span class="string">"foo"</span>)</span><br><span class="line">    <span class="keyword">return</span> errors.New(<span class="string">"success"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</span><br><span class="line">    err := funcA()</span><br><span class="line">    <span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">        fmt.Printf(<span class="string">"err is nil\\n"</span>)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        fmt.Printf(<span class="string">"err is %v\\n"</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们期望输出：<code>err is foo</code></p>
+<p>但是实际输出：<code>err is nil</code></p>
+<p>原因：panic异常处理机制不会自动将错误信息传递给error，所以要在funcA函数中进行显式地传递：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">funcA</span><span class="params">()</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> p := <span class="built_in">recover</span>(); p != <span class="literal">nil</span> &#123;</span><br><span class="line">            fmt.Println(<span class="string">"panic recover! p:"</span>, p)</span><br><span class="line">            str, ok := p.(<span class="keyword">string</span>)</span><br><span class="line">            <span class="keyword">if</span> ok &#123;</span><br><span class="line">                err = errors.New(str)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                err = errors.New(<span class="string">"panic"</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            debug.PrintStack()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line">    <span class="keyword">return</span> funcB()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="三、对于不应该出现的分支，使用异常处理"><a href="#三、对于不应该出现的分支，使用异常处理" class="headerlink" title="三、对于不应该出现的分支，使用异常处理"></a>三、对于不应该出现的分支，使用异常处理</h3><p>如，程序到达了某条逻辑上不可能到达的路径：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> s := suit(drawCard()); s &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">"Spades"</span>:</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">case</span> <span class="string">"Hearts"</span>:</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">case</span> <span class="string">"Diamonds"</span>:</span><br><span class="line">    <span class="comment">// ... </span></span><br><span class="line">    <span class="keyword">case</span> <span class="string">"Clubs"</span>:</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="built_in">panic</span>(fmt.Sprintf(<span class="string">"invalid suit %v"</span>, s))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="四、针对入参不应该有问题的函数，使用异常"><a href="#四、针对入参不应该有问题的函数，使用异常" class="headerlink" title="四、针对入参不应该有问题的函数，使用异常"></a>四、针对入参不应该有问题的函数，使用异常</h3><p>入参不应该有问题一般指的是硬编码，而非用户输入。（换句话说，程序员自己写下的配置或者代码，不应该有错）</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol>
+<li>在Golang看来，错误是业务过程的一部分，而异常不是；</li>
+<li>Golang中，错误处理看<code>error</code>，异常处理看<code>panic</code>、<code>recover</code>；</li>
+<li>划分好错误处理和异常处理的使用场景，很关键；</li>
+</ol>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://www.jianshu.com/p/f30da01eea97" target="_blank" rel="noopener">https://www.jianshu.com/p/f30da01eea97</a></p>
+
+    </div>
+
+    
+    
+    
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center;">
+  <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode.png" alt="Jasper Wu wechat" style="width: 200px; max-width: 100%;">
+  <div>喜欢的朋友可以关注 "JP技术栈" 微信公众号，每周更新笔者最新分享技术文章~</div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go/" rel="tag"># Go</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/%E5%86%8D%E7%9C%8BGo%E5%8F%98%E9%87%8F%E5%88%9D%E5%A7%8B%E5%8C%96/" rel="next" title="再看Go变量初始化">
+                  <i class="fa fa-chevron-left"></i> 再看Go变量初始化
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#我们认识的error"><span class="nav-number">1.</span> <span class="nav-text">我们认识的error</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一般的场景用法"><span class="nav-number">2.</span> <span class="nav-text">一般的场景用法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#再次理解错误与异常"><span class="nav-number">3.</span> <span class="nav-text">再次理解错误与异常</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Go世界里的错误"><span class="nav-number">3.1.</span> <span class="nav-text">Go世界里的错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go世界里的异常"><span class="nav-number">3.2.</span> <span class="nav-text">Go世界里的异常</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#错误与异常，之于Go"><span class="nav-number">3.3.</span> <span class="nav-text">错误与异常，之于Go</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go错误和异常可以相互转换"><span class="nav-number">3.4.</span> <span class="nav-text">Go错误和异常可以相互转换</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#看源码，得启发"><span class="nav-number">4.</span> <span class="nav-text">看源码，得启发</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#启发：适用于异常处理的场景"><span class="nav-number">4.1.</span> <span class="nav-text">启发：适用于异常处理的场景</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实践起来，让代码变漂亮"><span class="nav-number">5.</span> <span class="nav-text">实践起来，让代码变漂亮</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#错误处理的正确姿势"><span class="nav-number">5.1.</span> <span class="nav-text">错误处理的正确姿势</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、失败原因只有一个时，不使用error"><span class="nav-number">5.1.1.</span> <span class="nav-text">一、失败原因只有一个时，不使用error</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、没有失败时，不使用error"><span class="nav-number">5.1.2.</span> <span class="nav-text">二、没有失败时，不使用error</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、error应放在返回值类型列表的最后"><span class="nav-number">5.1.3.</span> <span class="nav-text">三、error应放在返回值类型列表的最后</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四、错误值统一定义，而不是跟着感觉走"><span class="nav-number">5.1.4.</span> <span class="nav-text">四、错误值统一定义，而不是跟着感觉走</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五、错误逐层传递时，层层都加日志"><span class="nav-number">5.1.5.</span> <span class="nav-text">五、错误逐层传递时，层层都加日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#六、错误处理使用defer"><span class="nav-number">5.1.6.</span> <span class="nav-text">六、错误处理使用defer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#七、尝试几次可以避免失败时，不要立即返回错误"><span class="nav-number">5.1.7.</span> <span class="nav-text">七、尝试几次可以避免失败时，不要立即返回错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#八、当上层函数不关心错误时，建议不返回error"><span class="nav-number">5.1.8.</span> <span class="nav-text">八、当上层函数不关心错误时，建议不返回error</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#九、当发生错误时，不忽略有用的返回值"><span class="nav-number">5.1.9.</span> <span class="nav-text">九、当发生错误时，不忽略有用的返回值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异常处理的正确姿势"><span class="nav-number">5.2.</span> <span class="nav-text">异常处理的正确姿势</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、程序开发阶段，坚持速错"><span class="nav-number">5.2.1.</span> <span class="nav-text">一、程序开发阶段，坚持速错</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、程序部署后，应恢复异常避免程序终止"><span class="nav-number">5.2.2.</span> <span class="nav-text">二、程序部署后，应恢复异常避免程序终止</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、对于不应该出现的分支，使用异常处理"><span class="nav-number">5.2.3.</span> <span class="nav-text">三、对于不应该出现的分支，使用异常处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四、针对入参不应该有问题的函数，使用异常"><span class="nav-number">5.2.4.</span> <span class="nav-text">四、针对入参不应该有问题的函数，使用异常</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Jasper Wu"
+    src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Jasper Wu</p>
+  <div class="site-description" itemprop="description">醒目点、自觉点、速度点，努力奋斗下去，走好自己的路！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/androidjp" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;androidjp" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:1049578026@qq.com" title="E-Mail &amp;rarr; mailto:1049578026@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jasper Wu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme: 'default',
+      logLevel: 3,
+      flowchart: { curve: 'linear' },
+      gantt: { axisFormat: '%m/%d/%Y' },
+      sequence: { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
