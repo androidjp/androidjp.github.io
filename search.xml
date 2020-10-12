@@ -173,7 +173,11 @@
 </li>
 </ul>
 <p>这样一来，我们就得关注一下返回值中的这些有用参数，而非只关注error。</p>
-<h2 id="异常处理的正确姿势"><a href="#异常处理的正确姿势" class="headerlink" title="异常处理的正确姿势"></a>异常处理的正确姿势</h2><h3 id="一、程序开发阶段，坚持速错"><a href="#一、程序开发阶段，坚持速错" class="headerlink" title="一、程序开发阶段，坚持速错"></a>一、程序开发阶段，坚持速错</h3><h3 id="二、程序部署后，应恢复异常避免程序终止"><a href="#二、程序部署后，应恢复异常避免程序终止" class="headerlink" title="二、程序部署后，应恢复异常避免程序终止"></a>二、程序部署后，应恢复异常避免程序终止</h3><p>要想想，如果不恢复，那么最终异常会终止包括主协程在内的所有协程，最终终止整个进程。</p>
+<h2 id="异常处理的正确姿势"><a href="#异常处理的正确姿势" class="headerlink" title="异常处理的正确姿势"></a>异常处理的正确姿势</h2><h3 id="一、程序开发阶段，坚持速错"><a href="#一、程序开发阶段，坚持速错" class="headerlink" title="一、程序开发阶段，坚持速错"></a>一、程序开发阶段，坚持速错</h3><p>在早期开发以及任何发布阶段之前，最简单的同时也可能是最好的方法是调用panic函数来中断程序的执行以强制发生错误，使得该错误不会被忽略，因而能够被尽快修复。</p>
+<p>这下知道为何我们IDE帮忙实现interface函数，都长这样了吧~</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Client)</span> <span class="title">DoSthA</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="built_in">panic</span>(<span class="string">"implement me"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="二、程序部署后，应恢复异常避免程序终止"><a href="#二、程序部署后，应恢复异常避免程序终止" class="headerlink" title="二、程序部署后，应恢复异常避免程序终止"></a>二、程序部署后，应恢复异常避免程序终止</h3><p>要想想，如果不恢复，那么最终异常会终止包括主协程在内的所有协程，最终终止整个进程。</p>
 <p>所以，一旦Golang程序部署后，在任何情况下发生的异常都不应该导致程序异常退出，我们在上层函数中加一个延迟执行的recover调用来达到这个目的，并且是否进行recover需要根据环境变量或配置文件来定，默认需要recover。</p>
 <p>我们在调用recover的延迟函数中以最合理的方式响应该异常：</p>
 <ol>
