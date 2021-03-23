@@ -351,7 +351,7 @@
     <title>Go测试系列一：单元测试</title>
     <url>/Go%E6%B5%8B%E8%AF%95%E7%B3%BB%E5%88%97%E4%B8%80%EF%BC%9A%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/</url>
     <content><![CDATA[<blockquote>
-<p>本篇文章将带大家入门Golang单元测试，笔者参考不同资料及手动demo，和大家一同看看Golang</p>
+<p>本篇文章将带大家入门Golang单元测试，笔者参考不同资料及手动demo，和大家一同看看Golang世界怎么写测试，为Golang TDD做热身。</p>
 </blockquote>
 <a id="more"></a>
 
