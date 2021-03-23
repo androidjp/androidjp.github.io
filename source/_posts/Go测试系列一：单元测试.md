@@ -8,7 +8,7 @@ categories:
 - Go
 ---
 
-> 本篇文章将带大家入门Golang单元测试，笔者参考不同资料及手动demo，和大家一同看看Golang
+> 本篇文章将带大家入门Golang单元测试，笔者参考不同资料及手动demo，和大家一同看看Golang世界怎么写测试，为Golang TDD做热身。
 
 <!--more-->
 
@@ -27,8 +27,6 @@ go get github.com/stretchr/testify // 断言库
 
 
 # 简单例子
-
----
 
 Go 语言推荐测试文件和源代码文件放在一块，测试文件以 _test.go 结尾。比如，当前 package 有 calc.go 一个文件，我们想测试 calc.go 中的 Add 和 Mul 函数，那么应该新建 calc_test.go 作为测试文件。
 
@@ -116,8 +114,6 @@ go test ./... -v -cover // 运行当前目录以及子目录的所有的测试�
 
 # subtest 子测试
 
----
-
 cal_test.go
 
 ```Go
@@ -146,8 +142,6 @@ t.Run
 
 
 # table-driven tests 测试
-
----
 
 我们更加推崇这种写法：
 
@@ -199,8 +193,6 @@ func TestMergeString(t *testing.T) {
 
 
 # 帮助函数Helper
-
----
 
 demo3_test.go
 
@@ -258,8 +250,6 @@ to.Helper() // 用于在 运行  go test 时能够打印出报错对应的行号
 
 # setup 和 teardown
 
----
-
 其实就是 一些test 的生命周期相关函数
 
 setup可以做一些初始化操作，teardown可以做一些资源回收工作。
@@ -313,8 +303,6 @@ ok      example 0.006s
 ```
 
 # 网络测试(Network)
-
----
 
 ## TCP/HTTP
 
@@ -403,8 +391,6 @@ func TestConn(t *testing.T) {
 使用 httptest 模拟请求对象(req)和响应对象(w)，达到了相同的目的。
 
 # Benchmark 基准测试
-
----
 
 基准测试用例的定义如下：
 
