@@ -360,8 +360,7 @@
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">go</span> get github.com/stretchr/testify <span class="comment">// 断言库</span></span><br></pre></td></tr></table></figure>
 <p><code>testify</code>库让你写出可读性更好的测试断言：</p>
 <p><img src="/images/20210323/1.png" alt=""></p>
-<h1 id="简单例子"><a href="#简单例子" class="headerlink" title="简单例子"></a>简单例子</h1><hr>
-<p>Go 语言推荐测试文件和源代码文件放在一块，测试文件以 _test.go 结尾。比如，当前 package 有 calc.go 一个文件，我们想测试 calc.go 中的 Add 和 Mul 函数，那么应该新建 calc_test.go 作为测试文件。</p>
+<h1 id="简单例子"><a href="#简单例子" class="headerlink" title="简单例子"></a>简单例子</h1><p>Go 语言推荐测试文件和源代码文件放在一块，测试文件以 _test.go 结尾。比如，当前 package 有 calc.go 一个文件，我们想测试 calc.go 中的 Add 和 Mul 函数，那么应该新建 calc_test.go 作为测试文件。</p>
 <figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">|--calc.go  </span><br><span class="line">|--calc_test.go</span><br></pre></td></tr></table></figure>
 
 <p>calc.go</p>
@@ -381,8 +380,7 @@
 <p>详细命令看这里：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">go test  // 查找当前目录下的用例文件</span><br><span class="line">go test pkg // pkg包里的所有示例</span><br><span class="line">go test helloworld_test.go //指定用例文件</span><br><span class="line">go test -v -run TestA select_test.go //指定文件的单个单元用例运行。&apos;-v&apos; 打印详细信息</span><br><span class="line">go test -v -bench=. benchmark_test.go // 指定文件的某个性能用例运行。&apos;.&apos; 表示所有性能用例</span><br><span class="line">go test -v -bench=. -benchtime=5s benchmark_test.go // &apos;-benchtime=5s&apos; 指定测试时长，默认1s</span><br><span class="line">go test -v -bench=Alloc -benchmem benchmark_test.go // 指定单个性能用例</span><br><span class="line">go test -cover  //覆盖率</span><br><span class="line">go test ./... -v -cover // 运行当前目录以及子目录的所有的测试文件，并展示详细信息、展示覆盖率</span><br></pre></td></tr></table></figure>
 
-<h1 id="subtest-子测试"><a href="#subtest-子测试" class="headerlink" title="subtest 子测试"></a>subtest 子测试</h1><hr>
-<p>cal_test.go</p>
+<h1 id="subtest-子测试"><a href="#subtest-子测试" class="headerlink" title="subtest 子测试"></a>subtest 子测试</h1><p>cal_test.go</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line">.....</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestMul_SubTests</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">  t.Run(<span class="string">"should_return_6_when_Mul_given_2_and_3"</span>, <span class="function"><span class="keyword">func</span><span class="params">(t * testing.T)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> ans := Mul(<span class="number">2</span>, <span class="number">3</span>); ans != <span class="number">6</span> &#123;</span><br><span class="line">      t.Fatal(<span class="string">"fail"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  t.Run(<span class="string">"should_return_negative_6_when_Mul_given_2_and_negative_3"</span>, <span class="function"><span class="keyword">func</span><span class="params">(t * testing.T)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> ans := Mul(<span class="number">2</span>, <span class="number">-3</span>); ans != <span class="number">-6</span> &#123;</span><br><span class="line">      t.Fatal(<span class="string">"fail"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>关键语句：</p>
@@ -390,8 +388,7 @@
 
 
 
-<h1 id="table-driven-tests-测试"><a href="#table-driven-tests-测试" class="headerlink" title="table-driven tests 测试"></a>table-driven tests 测试</h1><hr>
-<p>我们更加推崇这种写法：</p>
+<h1 id="table-driven-tests-测试"><a href="#table-driven-tests-测试" class="headerlink" title="table-driven tests 测试"></a>table-driven tests 测试</h1><p>我们更加推崇这种写法：</p>
 <p>demo2.go</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MergeString</span><span class="params">(x, y <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> x + y</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -408,8 +405,7 @@
 </li>
 </ul>
 <p>如果数据量较大，或是一些二进制数据，推荐使用相对路径从文件中读取</p>
-<h1 id="帮助函数Helper"><a href="#帮助函数Helper" class="headerlink" title="帮助函数Helper"></a>帮助函数Helper</h1><hr>
-<p>demo3_test.go</p>
+<h1 id="帮助函数Helper"><a href="#帮助函数Helper" class="headerlink" title="帮助函数Helper"></a>帮助函数Helper</h1><p>demo3_test.go</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"testing"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> myCase <span class="keyword">struct</span> &#123;</span><br><span class="line">  Str <span class="keyword">string</span></span><br><span class="line">  Expected <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 帮助函数：用于将某些 common 的 code，重构出来</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">createFirstLetterToUpperCase</span><span class="params">(t *testing.T, c *myCase)</span></span> &#123;</span><br><span class="line">  <span class="comment">// to.Helper() 用于在 运行  go test 时能够打印出报错对应的行号</span></span><br><span class="line">  t.Helper()</span><br><span class="line">  <span class="keyword">if</span> ans := FirstLetterToUpperCase(c.Str); ans != c.Expected &#123;</span><br><span class="line">    t.Errorf(<span class="string">"input is `%s`, expect output is `%s`, but actually output `%s`"</span>, c.Str, c.Expected, ans)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestFirstLetterToUpperCase</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">  createFirstLetterToUpperCase(t, &amp;myCase&#123;<span class="string">"hello"</span>, <span class="string">"Hello"</span>&#125;)</span><br><span class="line">  createFirstLetterToUpperCase(t, &amp;myCase&#123;<span class="string">"ok"</span>, <span class="string">"Ok"</span>&#125;)</span><br><span class="line">  createFirstLetterToUpperCase(t, &amp;myCase&#123;<span class="string">"Good"</span>, <span class="string">"Good"</span>&#125;)</span><br><span class="line">  createFirstLetterToUpperCase(t, &amp;myCase&#123;<span class="string">"GOOD"</span>, <span class="string">"Good"</span>&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>demo3.go</p>
@@ -425,8 +421,7 @@
 <li><p>调用 <code>t.Helper()</code> 让报错信息更准确，有助于定位。</p>
 </li>
 </ul>
-<h1 id="setup-和-teardown"><a href="#setup-和-teardown" class="headerlink" title="setup 和 teardown"></a>setup 和 teardown</h1><hr>
-<p>其实就是 一些test 的生命周期相关函数</p>
+<h1 id="setup-和-teardown"><a href="#setup-和-teardown" class="headerlink" title="setup 和 teardown"></a>setup 和 teardown</h1><p>其实就是 一些test 的生命周期相关函数</p>
 <p>setup可以做一些初始化操作，teardown可以做一些资源回收工作。</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">setup</span><span class="params">()</span></span> &#123;</span><br><span class="line">  fmt.Println(<span class="string">"Before all tests"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">teardown</span><span class="params">()</span></span> &#123;</span><br><span class="line">  fmt.Println(<span class="string">"After all tests"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Test1</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">  fmt.Println(<span class="string">"I'm test1"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Test2</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">  fmt.Println(<span class="string">"I'm test2"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestMain</span><span class="params">(m *testing.M)</span></span> &#123;</span><br><span class="line">  setup()</span><br><span class="line">  code := m.Run()</span><br><span class="line">  teardown()</span><br><span class="line">  os.Exit(code)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -444,8 +439,7 @@
 <p>执行 <code>go test</code>，将会输出：</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line">$ <span class="keyword">go</span> test</span><br><span class="line">Before all tests</span><br><span class="line">I<span class="string">'m test1</span></span><br><span class="line"><span class="string">I'</span>m test2</span><br><span class="line">PASS</span><br><span class="line">After all tests</span><br><span class="line">ok      example <span class="number">0.006</span>s</span><br></pre></td></tr></table></figure>
 
-<h1 id="网络测试-Network"><a href="#网络测试-Network" class="headerlink" title="网络测试(Network)"></a>网络测试(Network)</h1><hr>
-<h2 id="TCP-HTTP"><a href="#TCP-HTTP" class="headerlink" title="TCP/HTTP"></a>TCP/HTTP</h2><p>假设需要测试某个 API 接口的 handler 能够正常工作，例如 helloHandler</p>
+<h1 id="网络测试-Network"><a href="#网络测试-Network" class="headerlink" title="网络测试(Network)"></a>网络测试(Network)</h1><h2 id="TCP-HTTP"><a href="#TCP-HTTP" class="headerlink" title="TCP/HTTP"></a>TCP/HTTP</h2><p>假设需要测试某个 API 接口的 handler 能够正常工作，例如 helloHandler</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">helloHandler</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">  w.Write([]<span class="keyword">byte</span>(<span class="string">"hello world"</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>那我们可以创建真实的网络连接进行测试：</p>
@@ -466,8 +460,7 @@
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// test code</span></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">"io/ioutil"</span></span><br><span class="line">  <span class="string">"net/http"</span></span><br><span class="line">  <span class="string">"net/http/httptest"</span></span><br><span class="line">  <span class="string">"testing"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestConn</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">  req := httptest.NewRequest(<span class="string">"GET"</span>, <span class="string">"http://example.com/foo"</span>, <span class="literal">nil</span>)</span><br><span class="line">  w := httptest.NewRecorder()</span><br><span class="line">  helloHandler(w, req)</span><br><span class="line">  bytes, _ := ioutil.ReadAll(w.Result().Body)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> <span class="keyword">string</span>(bytes) != <span class="string">"hello world"</span> &#123;</span><br><span class="line">    t.Fatal(<span class="string">"expected hello world, but got"</span>, <span class="keyword">string</span>(bytes))</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>使用 httptest 模拟请求对象(req)和响应对象(w)，达到了相同的目的。</p>
-<h1 id="Benchmark-基准测试"><a href="#Benchmark-基准测试" class="headerlink" title="Benchmark 基准测试"></a>Benchmark 基准测试</h1><hr>
-<p>基准测试用例的定义如下：</p>
+<h1 id="Benchmark-基准测试"><a href="#Benchmark-基准测试" class="headerlink" title="Benchmark 基准测试"></a>Benchmark 基准测试</h1><p>基准测试用例的定义如下：</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkName</span><span class="params">(b *testing.B)</span></span>&#123;</span><br><span class="line">    <span class="comment">// ...  </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <ul>
