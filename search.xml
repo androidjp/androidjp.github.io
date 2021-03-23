@@ -10,8 +10,7 @@
 
 <p>以下就不说太多Golang和Java等其他语言的Mock测试环境的对比等等，我们直接上干货（附上Demo，每个分支都有对应的Mock案例）。</p>
 <p>Demo Github 地址：<a href="https://github.com/androidjp/go-mock-best-practice" target="_blank" rel="noopener">https://github.com/androidjp/go-mock-best-practice</a></p>
-<h1 id="gomock-mockgen"><a href="#gomock-mockgen" class="headerlink" title="gomock + mockgen"></a>gomock + mockgen</h1><hr>
-<h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><ul>
+<h1 id="gomock-mockgen"><a href="#gomock-mockgen" class="headerlink" title="gomock + mockgen"></a>gomock + mockgen</h1><h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><ul>
 <li>接口打桩。对某个可赋值的依赖成员对象进行mock（比如 <code>ServiceA</code> 依赖 <code>RepositoryA</code>，那么，在测试 <code>ServiceA.MethodA</code>方法时，可以mock了<code>RepositoryA</code>）</li>
 </ul>
 <h2 id="安装与配置"><a href="#安装与配置" class="headerlink" title="安装与配置"></a>安装与配置</h2><ol>
@@ -63,8 +62,7 @@
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line">gomock.InOrder(</span><br><span class="line">    <span class="comment">// retrieve 先执行</span></span><br><span class="line">    mockRepo.EXPECT().Retrieve(<span class="string">"name"</span>).Return([]<span class="keyword">byte</span>(<span class="string">"jasper"</span>), <span class="literal">nil</span>),</span><br><span class="line">    <span class="comment">// update 在 retrieve 之后</span></span><br><span class="line">    mockRepo.EXPECT().Update(<span class="string">"name"</span>, []<span class="keyword">byte</span>(<span class="string">"mike"</span>)).Return(<span class="literal">nil</span>),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
 
 <h2 id="Demo示例"><a href="#Demo示例" class="headerlink" title="Demo示例"></a>Demo示例</h2><p><a href="https://github.com/androidjp/go-mock-best-practice/tree/1_gomock_1_basic" target="_blank" rel="noopener">https://github.com/androidjp/go-mock-best-practice/tree/1_gomock_1_basic</a></p>
-<h1 id="gostub打桩"><a href="#gostub打桩" class="headerlink" title="gostub打桩"></a>gostub打桩</h1><hr>
-<h2 id="需求-1"><a href="#需求-1" class="headerlink" title="需求"></a>需求</h2><ul>
+<h1 id="gostub打桩"><a href="#gostub打桩" class="headerlink" title="gostub打桩"></a>gostub打桩</h1><h2 id="需求-1"><a href="#需求-1" class="headerlink" title="需求"></a>需求</h2><ul>
 <li><p>全局变量打桩</p>
 </li>
 <li><p>函数打桩</p>
@@ -117,8 +115,7 @@
 </li>
 </ol>
 <h2 id="Demo示例-1"><a href="#Demo示例-1" class="headerlink" title="Demo示例"></a>Demo示例</h2><p><a href="https://github.com/androidjp/go-mock-best-practice/tree/1_gomock_2_gostub" target="_blank" rel="noopener">https://github.com/androidjp/go-mock-best-practice/tree/1_gomock_2_gostub</a></p>
-<h1 id="goconvey更优化的断言"><a href="#goconvey更优化的断言" class="headerlink" title="goconvey更优化的断言"></a>goconvey更优化的断言</h1><hr>
-<h2 id="需求-2"><a href="#需求-2" class="headerlink" title="需求"></a>需求</h2><ul>
+<h1 id="goconvey更优化的断言"><a href="#goconvey更优化的断言" class="headerlink" title="goconvey更优化的断言"></a>goconvey更优化的断言</h1><h2 id="需求-2"><a href="#需求-2" class="headerlink" title="需求"></a>需求</h2><ul>
 <li><p>更优雅地写测试用例</p>
 </li>
 <li><p>更好地可视化界面，实时更新当前所有测试情况和覆盖率</p>
@@ -155,8 +152,7 @@
 <p>注意：测试代码当然需要引入convey库：<code>import . &quot;github.com/smartystreets/goconvey/convey&quot;</code></p>
 </blockquote>
 <h2 id="Demo示例-2"><a href="#Demo示例-2" class="headerlink" title="Demo示例"></a>Demo示例</h2><p><a href="https://github.com/androidjp/go-mock-best-practice/tree/1_gomock_3_gostub_gocovey" target="_blank" rel="noopener">androidjp/go-mock-best-practice</a></p>
-<h1 id="GoMonkey"><a href="#GoMonkey" class="headerlink" title="GoMonkey"></a>GoMonkey</h1><hr>
-<h2 id="需求-3"><a href="#需求-3" class="headerlink" title="需求"></a>需求</h2><ul>
+<h1 id="GoMonkey"><a href="#GoMonkey" class="headerlink" title="GoMonkey"></a>GoMonkey</h1><h2 id="需求-3"><a href="#需求-3" class="headerlink" title="需求"></a>需求</h2><ul>
 <li><p>为一个函数打桩</p>
 </li>
 <li><p>为一个过程打桩</p>
@@ -250,8 +246,7 @@
 </li>
 </ol>
 <h2 id="Demo示例-4"><a href="#Demo示例-4" class="headerlink" title="Demo示例"></a>Demo示例</h2><p><a href="https://github.com/androidjp/go-mock-best-practice/tree/2_web_2_raw_http_httptest" target="_blank" rel="noopener">androidjp/go-mock-best-practice</a></p>
-<h1 id="Gin接口测试"><a href="#Gin接口测试" class="headerlink" title="Gin接口测试"></a>Gin接口测试</h1><hr>
-<p>gin官方文档：<a href="https://github.com/gin-gonic/gin#quick-start" target="_blank" rel="noopener">https://github.com/gin-gonic/gin#quick-start</a></p>
+<h1 id="Gin接口测试"><a href="#Gin接口测试" class="headerlink" title="Gin接口测试"></a>Gin接口测试</h1><p>gin官方文档：<a href="https://github.com/gin-gonic/gin#quick-start" target="_blank" rel="noopener">https://github.com/gin-gonic/gin#quick-start</a></p>
 <h2 id="需求-5"><a href="#需求-5" class="headerlink" title="需求"></a>需求</h2><ul>
 <li>测试基于Gin框架写的API接口。</li>
 </ul>
@@ -268,8 +263,7 @@
 </li>
 </ol>
 <h2 id="Demo示例-5"><a href="#Demo示例-5" class="headerlink" title="Demo示例"></a>Demo示例</h2><p><a href="https://github.com/androidjp/go-mock-best-practice/tree/2_web_3_gin_httptest" target="_blank" rel="noopener">androidjp/go-mock-best-practice</a></p>
-<h1 id="apitest"><a href="#apitest" class="headerlink" title="apitest"></a>apitest</h1><hr>
-<h2 id="需求-6"><a href="#需求-6" class="headerlink" title="需求"></a>需求</h2><ul>
+<h1 id="apitest"><a href="#apitest" class="headerlink" title="apitest"></a>apitest</h1><h2 id="需求-6"><a href="#需求-6" class="headerlink" title="需求"></a>需求</h2><ul>
 <li>对golang原生http或者Gin等框架下的RESTFul API接口进行更简洁的测试</li>
 </ul>
 <h2 id="安装-2"><a href="#安装-2" class="headerlink" title="安装"></a>安装</h2><p>官网：<a href="https://apitest.dev/" target="_blank" rel="noopener">https://apitest.dev/</a></p>
@@ -279,10 +273,8 @@
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">//---------------------------------------</span></span><br><span class="line"><span class="comment">// given</span></span><br><span class="line"><span class="comment">//---------------------------------------</span></span><br><span class="line">gin.SetMode(gin.TestMode)</span><br><span class="line">router := gin.New()</span><br><span class="line">demoCtrl := &amp;controller.DemoController&#123;&#125;</span><br><span class="line"><span class="comment">//待测试的接口</span></span><br><span class="line">router.GET(<span class="string">"/message"</span>, demoCtrl.GetMessage)</span><br><span class="line"></span><br><span class="line"><span class="comment">//---------------------------------------</span></span><br><span class="line"><span class="comment">// when then</span></span><br><span class="line"><span class="comment">//---------------------------------------</span></span><br><span class="line">apitest.New().</span><br><span class="line">  Handler(router).</span><br><span class="line">  Getf(<span class="string">"/message?keyA=%s&amp;url_long=1%s"</span>, <span class="string">"valA"</span>, <span class="string">"123456"</span>).</span><br><span class="line">  Header(<span class="string">"Client-Type"</span>, <span class="string">"pc"</span>).</span><br><span class="line">  Cookie(<span class="string">"sid"</span>, <span class="string">"id001"</span>).</span><br><span class="line">  JSON(<span class="literal">nil</span>).</span><br><span class="line">  Expect(t).</span><br><span class="line">  Status(http.StatusOK).</span><br><span class="line">  Assert(jsonPath.Equal(<span class="string">`$.code`</span>, <span class="keyword">float64</span>(<span class="number">2000</span>))).</span><br><span class="line">  Assert(jsonPath.Equal(<span class="string">`$.msg`</span>, <span class="string">"Hello Mike!"</span>)).</span><br><span class="line">  Body(<span class="string">`&#123;"code":2000,"msg":"Hello Mike!"&#125;`</span>).</span><br><span class="line">  End()</span><br></pre></td></tr></table></figure>
 
 <h2 id="Demo示例-6"><a href="#Demo示例-6" class="headerlink" title="Demo示例"></a>Demo示例</h2><p><a href="https://github.com/androidjp/go-mock-best-practice/tree/2_web_4_gin_apitest" target="_blank" rel="noopener">androidjp/go-mock-best-practice</a></p>
-<h1 id="Beego-接口测试"><a href="#Beego-接口测试" class="headerlink" title="Beego 接口测试"></a>Beego 接口测试</h1><hr>
-<p>参考文章：<a href="https://blog.csdn.net/qq_38959696/article/details/106567212" target="_blank" rel="noopener">https://blog.csdn.net/qq_38959696/article/details/106567212</a></p>
-<h1 id="SqlMock使用"><a href="#SqlMock使用" class="headerlink" title="SqlMock使用"></a>SqlMock使用</h1><hr>
-<p>github：<a href="https://github.com/DATA-DOG/go-sqlmock" target="_blank" rel="noopener">https://github.com/DATA-DOG/go-sqlmock</a></p>
+<h1 id="Beego-接口测试"><a href="#Beego-接口测试" class="headerlink" title="Beego 接口测试"></a>Beego 接口测试</h1><p>参考文章：<a href="https://blog.csdn.net/qq_38959696/article/details/106567212" target="_blank" rel="noopener">https://blog.csdn.net/qq_38959696/article/details/106567212</a></p>
+<h1 id="SqlMock使用"><a href="#SqlMock使用" class="headerlink" title="SqlMock使用"></a>SqlMock使用</h1><p>github：<a href="https://github.com/DATA-DOG/go-sqlmock" target="_blank" rel="noopener">https://github.com/DATA-DOG/go-sqlmock</a></p>
 <h2 id="需求-7"><a href="#需求-7" class="headerlink" title="需求"></a>需求</h2><ul>
 <li>测试自己写的sql脚本等与DB存取息息相关的细节逻辑有没有问题</li>
 </ul>
@@ -332,8 +324,7 @@
 <li><p>MySQL xorm ORM框架mock：<a href="https://github.com/androidjp/go-mock-best-practice/tree/4_db_3_sqlmock_xorm" target="_blank" rel="noopener">https://github.com/androidjp/go-mock-best-practice/tree/4_db_3_sqlmock_xorm</a></p>
 </li>
 </ul>
-<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><hr>
-<h2 id="一、Gin的-gin-Context-怎么mock？"><a href="#一、Gin的-gin-Context-怎么mock？" class="headerlink" title="一、Gin的*gin.Context 怎么mock？"></a>一、Gin的<code>*gin.Context</code> 怎么mock？</h2><ol>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><h2 id="一、Gin的-gin-Context-怎么mock？"><a href="#一、Gin的-gin-Context-怎么mock？" class="headerlink" title="一、Gin的*gin.Context 怎么mock？"></a>一、Gin的<code>*gin.Context</code> 怎么mock？</h2><ol>
 <li><p>首先，在测试文件中定义一个MockResponseWriter结构体：</p>
  <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> MockResponseWriter <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *MockResponseWriter)</span> <span class="title">Header</span><span class="params">()</span> <span class="title">http</span>.<span class="title">Header</span></span> &#123;</span><br><span class="line">  h := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>][]<span class="keyword">string</span>)</span><br><span class="line">  h[<span class="string">"Client-Type"</span>] = []<span class="keyword">string</span>&#123;<span class="string">"wps-pc"</span>&#125;</span><br><span class="line">  <span class="keyword">return</span> h</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *MockResponseWriter)</span> <span class="title">Write</span><span class="params">([]<span class="keyword">byte</span>)</span> <span class="params">(<span class="keyword">int</span>, error)</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *MockResponseWriter)</span> <span class="title">WriteHeader</span><span class="params">(statusCode <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
